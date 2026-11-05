@@ -2,7 +2,8 @@ import { delay, http, HttpResponse, type HttpResponseResolver, type JsonBodyType
 import { API_URL } from '@/lib/api';
 import { can, type Ability } from '@/lib/permissions';
 import type { AuthUser } from '@/types/api';
-import { db, getSessionUserId } from './db';
+import type { Customer, CustomerAccount } from '@/types/entities';
+import { db, getCustomerSessionAccountId, getSessionUserId } from './db';
 import { toAuthUser } from './queries';
 
 const isTest = import.meta.env.MODE === 'test';
@@ -40,6 +41,19 @@ export interface Ctx {
 }
 
 type Method = 'get' | 'post' | 'put';
+
+/** The signed-in customer: an active account and its profile. Staff sessions never count. */
+export function currentCustomer(): { account: CustomerAccount; customer: Customer } | null {
+  const id = getCustomerSessionAccountId();
+  const account = id ? db().customer_accounts.find((a) => a.id === id && a.is_active) : undefined;
+  const customer = account && db().customers.find((c) => c.id === account.customer_id);
+  return account && customer ? { account, customer } : null;
+}
+
+export interface CustomerCtx extends Omit<Ctx, 'user'> {
+  account: CustomerAccount;
+  customer: Customer;
+}
 type Handler = (ctx: Ctx) => Response | Promise<Response>;
 
 async function readBody(request: Request): Promise<Record<string, unknown>> {
@@ -79,7 +93,38 @@ export function route(
   return http[method](path(url), resolver);
 }
 
-/** A route with no session: only the auth and public tracking endpoints use this. */
+/**
+ * A route behind the customer guard. A staff session is not enough: it answers 401 here, just as a
+ * customer session answers 401 on every staff route. Until a temporary password is changed, only
+ * the routes marked `whilePasswordPending` answer.
+ */
+export function customerRoute(
+  method: Method,
+  url: string,
+  handler: (ctx: CustomerCtx) => Response | Promise<Response>,
+  { whilePasswordPending = false }: { whilePasswordPending?: boolean } = {},
+) {
+  const resolver: HttpResponseResolver = async ({ request, params }) => {
+    await latency();
+    const signedIn = currentCustomer();
+    if (!signedIn) return fail(401, 'Unauthenticated.');
+    if (signedIn.account.must_change_password && !whilePasswordPending) {
+      return fail(403, 'Change your temporary password first.');
+    }
+    return handler({
+      ...signedIn,
+      params: params as Record<string, string>,
+      query: new URL(request.url).searchParams,
+      body: await readBody(request),
+    });
+  };
+  return http[method](path(url), resolver);
+}
+
+/** Any API path no handler claims, such as the removed receipt and public tracking endpoints. */
+export const notFoundHandler = http.all(path('/*'), () => fail(404, 'Not found.'));
+
+/** A route with no session: only the sign-in and registration endpoints use this. */
 export function publicRoute(
   method: Method,
   url: string,

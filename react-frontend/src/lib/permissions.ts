@@ -6,7 +6,8 @@ export type Ability =
   | 'customers.manage'
   | 'orders.manage'
   | 'orders.revert'
-  | 'qr.scan'
+  | 'baskets.scan'
+  | 'baskets.manage'
   | 'payments.view'
   | 'payments.record'
   | 'payments.void'
@@ -22,7 +23,7 @@ const STAFF_BASE: readonly Ability[] = [
   'dashboard.view',
   'customers.manage',
   'orders.manage',
-  'qr.scan',
+  'baskets.scan',
   'inventory.view',
 ];
 
@@ -34,7 +35,7 @@ const STAFF_TOGGLES: Record<PermissionCode, readonly Ability[]> = {
 };
 
 export const PERMISSION_LABELS: Record<PermissionCode, string> = {
-  'payments.record': 'Record payments and issue receipts',
+  'payments.record': 'Record payments',
   'inventory.stock_out': 'Record stock-out of supplies',
   'payments.void': 'Void or edit a saved payment',
 };

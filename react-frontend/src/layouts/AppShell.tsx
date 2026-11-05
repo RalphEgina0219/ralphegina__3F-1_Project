@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui/Logo';
 import { WaveDivider } from '@/components/ui/WaveDivider';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { cn } from '@/lib/cn';
+import { tabClass } from './nav';
 import { SidebarContent } from './Sidebar';
 
 interface UiState {
@@ -64,12 +65,6 @@ function TopBar({ hideOnPhone }: { hideOnPhone: boolean }) {
     </header>
   );
 }
-
-const tabClass = ({ isActive }: { isActive: boolean }) =>
-  cn(
-    'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold',
-    isActive ? 'text-flow' : 'text-muted',
-  );
 
 function BottomTabs() {
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen);

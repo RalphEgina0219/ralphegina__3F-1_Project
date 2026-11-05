@@ -16,7 +16,7 @@ export function AuthLayout() {
             <div>
               <p className="text-xl font-extrabold tracking-[-0.02em]">LaundryFlow</p>
               <p className="text-xs text-on-ink-muted">
-                Laundry shop management · QR order tracking
+                Laundry shop management · basket QR tracking
               </p>
             </div>
           </div>
@@ -24,8 +24,8 @@ export function AuthLayout() {
             Every load, tracked from drop-off to pickup.
           </p>
           <p className="mt-4 max-w-md text-base text-on-ink-muted">
-            Record orders, compute charges automatically, and let customers check their laundry with
-            a scan of the QR on their receipt.
+            Record orders, compute charges automatically, tag every load with a basket, and let
+            customers follow their laundry in their own account.
           </p>
           <ol className="mt-8 space-y-3">
             {STATUS_ORDER.map((status, index) => (

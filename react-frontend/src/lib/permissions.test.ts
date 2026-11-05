@@ -14,11 +14,14 @@ describe('can', () => {
     expect(can(admin, 'settings.manage')).toBe(true);
     expect(can(admin, 'reports.view')).toBe(true);
     expect(can(admin, 'payments.void')).toBe(true);
+    expect(can(admin, 'baskets.manage')).toBe(true);
+    expect(can(admin, 'baskets.scan')).toBe(true);
   });
 
   it('gives staff the operational base only', () => {
     expect(can(staff, 'orders.manage')).toBe(true);
-    expect(can(staff, 'qr.scan')).toBe(true);
+    expect(can(staff, 'baskets.scan')).toBe(true);
+    expect(can(staff, 'baskets.manage')).toBe(false);
     expect(can(staff, 'inventory.view')).toBe(true);
     expect(can(staff, 'reports.view')).toBe(false);
     expect(can(staff, 'settings.manage')).toBe(false);

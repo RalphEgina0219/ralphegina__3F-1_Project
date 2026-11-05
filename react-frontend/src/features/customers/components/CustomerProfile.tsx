@@ -1,19 +1,32 @@
 import { format, parseISO } from 'date-fns';
-import { History, Plus, Users } from 'lucide-react';
+import { History, KeyRound, Plus, UserPlus, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
-import { StatusChip } from '@/components/ui/Badge';
+import { toast } from 'sonner';
+import { Badge, StatusChip } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Money } from '@/components/ui/Money';
 import { OrderLink } from '@/components/ui/Mono';
 import { EmptyState, ErrorState, Skeleton, SkeletonRows } from '@/components/ui/States';
-import { errorStatus } from '@/lib/api';
-import { formatDate } from '@/lib/dates';
+import {
+  TemporaryPasswordDialog,
+  type TemporaryPassword,
+} from '@/components/ui/TemporaryPasswordDialog';
+import { useCan } from '@/features/auth/store';
+import { errorMessage, errorStatus } from '@/lib/api';
+import { formatDate, formatRelativeDay } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
 import { formatPhone } from '@/lib/format';
-import { useCustomer, useCustomerOrders } from '../api';
-import { CustomerFormDialog } from './CustomerFormDialog';
+import {
+  useCustomer,
+  useCustomerOrders,
+  useResetCustomerPassword,
+  useSetCustomerAccountActive,
+} from '../api';
+import { CreateAccountDialog } from './CreateAccountDialog';
+import { AccountNote, CustomerFormDialog } from './CustomerFormDialog';
 
 function Stat({
   label,
@@ -40,6 +53,12 @@ export function CustomerProfile({ id }: { id: number }) {
   const customer = useCustomer(id);
   const orders = useCustomerOrders(id);
   const [editing, setEditing] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [temporary, setTemporary] = useState<TemporaryPassword | null>(null);
+  const resetPassword = useResetCustomerPassword();
+  const setActive = useSetCustomerAccountActive();
+  const canDisable = useCan('settings.manage');
 
   if (customer.isPending) {
     return (
@@ -84,10 +103,13 @@ export function CustomerProfile({ id }: { id: number }) {
       </div>
 
       <dl className="mt-4 space-y-1 text-sm">
-        <div className="flex gap-1.5">
+        <div className="flex items-center gap-1.5">
           <dt className="text-muted">Contact:</dt>
           <dd>
-            <a href={`tel:${c.contact_number}`} className="underline-offset-2 hover:underline">
+            <a
+              href={`tel:${c.contact_number}`}
+              className="inline-flex min-h-11 items-center underline-offset-2 hover:underline"
+            >
               {formatPhone(c.contact_number)}
             </a>
           </dd>
@@ -103,6 +125,82 @@ export function CustomerProfile({ id }: { id: number }) {
           </div>
         )}
       </dl>
+
+      <section
+        aria-labelledby="account-heading"
+        className="mt-4 rounded-control border border-line p-3"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 id="account-heading" className="text-[15px] font-bold">
+            Account
+          </h3>
+          {c.account ? (
+            <Badge tone={c.account.is_active ? 'ok' : 'danger'}>
+              {c.account.is_active ? 'Active' : 'Disabled'}
+            </Badge>
+          ) : (
+            <Badge tone="warn">No account</Badge>
+          )}
+        </div>
+        {c.account ? (
+          <>
+            <p className="mt-1 text-sm break-all">{c.account.email}</p>
+            <p className="text-[13px] text-muted">
+              {c.account.must_change_password
+                ? 'Waiting for the customer to set their own password'
+                : c.account.last_login_at
+                  ? `Last signed in ${formatRelativeDay(c.account.last_login_at)}`
+                  : 'Has not signed in yet'}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                size="compact"
+                icon={<KeyRound className="size-4" aria-hidden="true" />}
+                onClick={() => setResetting(true)}
+              >
+                Set temporary password
+              </Button>
+              {canDisable && (
+                <Button
+                  variant="ghost"
+                  size="compact"
+                  loading={setActive.isPending}
+                  onClick={() =>
+                    setActive.mutate(
+                      { id: c.id, is_active: !c.account?.is_active },
+                      {
+                        onSuccess: (saved) =>
+                          toast.success(
+                            saved.account?.is_active ? 'Account enabled' : 'Account disabled',
+                          ),
+                        onError: (error) => toast.error(errorMessage(error)),
+                      },
+                    )
+                  }
+                >
+                  {c.account.is_active ? 'Disable sign-in' : 'Enable sign-in'}
+                </Button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="mt-1 text-[13px] text-muted">
+              On file from before accounts. Create one before taking a new order: the account is
+              where the customer follows their laundry.
+            </p>
+            <Button
+              className="mt-2"
+              size="compact"
+              icon={<UserPlus className="size-4" aria-hidden="true" />}
+              onClick={() => setCreatingAccount(true)}
+            >
+              Create account
+            </Button>
+          </>
+        )}
+      </section>
 
       <dl className="mt-4 grid grid-cols-[auto_1fr_1fr] gap-2">
         <Stat label="Orders">{c.orders_count}</Stat>
@@ -127,6 +225,8 @@ export function CustomerProfile({ id }: { id: number }) {
               <OrderLink id={order.id} number={order.order_number} className="text-[13px]" />
               <p className="text-[13px] text-muted">
                 {formatDate(order.received_at)} · {formatMoney(order.total_cents)}
+                {order.baskets.length > 0 &&
+                  ` · ${order.baskets.map((b) => b.basket_number).join(', ')}`}
               </p>
             </div>
             <StatusChip status={order.status} short />
@@ -135,18 +235,53 @@ export function CustomerProfile({ id }: { id: number }) {
       </ul>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <ButtonLink
-          to={`/orders/new?customer_id=${c.id}`}
-          variant="primary"
-          icon={<Plus className="size-4" aria-hidden="true" />}
-        >
-          New order
-        </ButtonLink>
+        {c.has_account ? (
+          <ButtonLink
+            to={`/orders/new?customer_id=${c.id}`}
+            variant="primary"
+            icon={<Plus className="size-4" aria-hidden="true" />}
+          >
+            New order
+          </ButtonLink>
+        ) : (
+          <Button
+            icon={<UserPlus className="size-4" aria-hidden="true" />}
+            onClick={() => setCreatingAccount(true)}
+          >
+            Create account
+          </Button>
+        )}
         <Button variant="secondary" onClick={() => setEditing(true)}>
           Edit
         </Button>
       </div>
       <CustomerFormDialog open={editing} onOpenChange={setEditing} customer={c} />
+      <CreateAccountDialog
+        customer={creatingAccount ? c : null}
+        onClose={() => setCreatingAccount(false)}
+      />
+      <ConfirmDialog
+        open={resetting}
+        onOpenChange={setResetting}
+        title={`Set a temporary password for ${c.full_name}?`}
+        description="Their current password stops working. They must choose a new one when they next sign in."
+        confirmLabel="Set temporary password"
+        loading={resetPassword.isPending}
+        onConfirm={() =>
+          resetPassword.mutate(c.id, {
+            onSuccess: ({ customer: saved, temporary_password }) => {
+              setResetting(false);
+              setTemporary({
+                name: saved.full_name,
+                password: temporary_password,
+                note: <AccountNote email={saved.account?.email} />,
+              });
+            },
+            onError: (error) => toast.error(errorMessage(error)),
+          })
+        }
+      />
+      <TemporaryPasswordDialog value={temporary} onClose={() => setTemporary(null)} />
     </Card>
   );
 }

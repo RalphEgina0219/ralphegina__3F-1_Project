@@ -1,6 +1,6 @@
 import { CreditCard, Search, Wallet } from 'lucide-react';
-import { useId, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useId, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Badge, StatusChip } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -19,7 +19,7 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { daysSince, formatDateTime, presetRange, toDateParam, type DatePreset } from '@/lib/dates';
 import { formatMoney } from '@/lib/money';
-import type { OrderDetailDto, OrderDto, PaymentDto } from '@/types/api';
+import type { OrderDto, PaymentDto } from '@/types/api';
 import { useBalances, usePayments } from '../api';
 import { PaymentForm } from '../components/PaymentForm';
 import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
@@ -162,8 +162,8 @@ function HistoryTab() {
 
   const columns: Column<PaymentDto>[] = [
     {
-      key: 'receipt',
-      header: 'Receipt no.',
+      key: 'reference',
+      header: 'Ref. no.',
       card: 'title',
       cell: (p) => (
         <Mono className={p.voided_at ? 'text-muted line-through' : undefined}>
@@ -226,7 +226,7 @@ function HistoryTab() {
           </span>
         ) : (
           <div className="flex gap-2 max-md:*:flex-1">
-            <ButtonLink to={`/orders/${p.order_id}/receipt`}>Receipt</ButtonLink>
+            <ButtonLink to={`/orders/${p.order_id}`}>Order summary</ButtonLink>
             {canVoid && (
               <Button
                 variant="secondary"
@@ -246,8 +246,8 @@ function HistoryTab() {
       <div className="grid gap-2 px-4 pb-3 sm:grid-cols-[minmax(0,1fr)_150px_150px]">
         <Input
           type="search"
-          aria-label="Search by receipt no., order no. or customer"
-          placeholder="Receipt no., order, customer"
+          aria-label="Search by reference no., order no. or customer"
+          placeholder="Ref. no., order, customer"
           icon={<Search className="size-4" aria-hidden="true" />}
           value={search}
           onChange={(event) => {
@@ -306,7 +306,6 @@ function HistoryTab() {
 }
 
 export default function PaymentsPage() {
-  const navigate = useNavigate();
   const canRecord = useCan('payments.record');
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const formId = useId();
@@ -314,24 +313,20 @@ export default function PaymentsPage() {
   const tab = params.get('tab') === 'history' ? 'history' : 'balances';
   const [selected, setSelected] = useState<OrderDto | null>(null);
   const [saving, setSaving] = useState(false);
-  const printAfterSave = useRef(true);
 
   const todayPayments = usePayments({ from: today, to: today, page: 1 });
   const balances = useBalances({ page: 1 });
   const paid = todayPayments.data?.meta;
   const owed = balances.data?.meta;
 
-  const afterSave = (order: OrderDetailDto) => {
-    setSelected(null);
-    if (printAfterSave.current)
-      navigate(`/orders/${order.id}/receipt`, { state: { autoPrint: true } });
-  };
+  // The payment shows in the order summary, in the shop and in the customer's account.
+  const afterSave = () => setSelected(null);
 
   return (
     <>
       <PageHeader
         title="Billing & Payments"
-        subtitle="Collect balances, record partial payments and reprint receipts."
+        subtitle="Collect balances and record partial payments. Every payment appears in the order summary."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3 md:gap-4">
@@ -409,32 +404,15 @@ export default function PaymentsPage() {
                   onSaved={afterSave}
                   onPendingChange={setSaving}
                 />
-                <div className="mt-3 space-y-2">
-                  <Button
-                    type="submit"
-                    form={formId}
-                    size="lg"
-                    className="w-full"
-                    loading={saving}
-                    onClick={() => {
-                      printAfterSave.current = true;
-                    }}
-                  >
-                    Save payment &amp; print receipt
-                  </Button>
-                  <Button
-                    type="submit"
-                    form={formId}
-                    variant="secondary"
-                    className="w-full"
-                    disabled={saving}
-                    onClick={() => {
-                      printAfterSave.current = false;
-                    }}
-                  >
-                    Save without printing
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  form={formId}
+                  size="lg"
+                  className="mt-3 w-full"
+                  loading={saving}
+                >
+                  Save payment
+                </Button>
               </>
             ) : (
               <EmptyState
@@ -455,11 +433,7 @@ export default function PaymentsPage() {
         onOpenChange={(open) => {
           if (!open) setSelected(null);
         }}
-        submitLabel="Save payment & print receipt"
-        onSaved={(order) => {
-          printAfterSave.current = true;
-          afterSave(order);
-        }}
+        onSaved={afterSave}
       />
     </>
   );

@@ -1,16 +1,17 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { api } from '@/lib/api';
-import type { ScannedCode } from '@/lib/tracking';
-import type { OrderDetailDto } from '@/types/api';
+import { fetchScan } from '@/features/baskets/api';
 import type { RecentScan } from './types';
 
-export function useLookupOrder() {
+/** Resolves a scanned or typed code and primes the order cache, so later moves show at once. */
+export function useScan() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (code: NonNullable<ScannedCode>) => {
-      const { data } = await api.get<OrderDetailDto>('/orders/lookup', { params: code });
-      return data;
+    mutationFn: fetchScan,
+    onSuccess: (result) => {
+      const order = result.type === 'basket' ? result.active_order : result.order;
+      if (order) queryClient.setQueryData(['orders', 'detail', order.id], order);
     },
   });
 }
@@ -27,9 +28,10 @@ export const useRecentScans = create<RecentScansState>()(
       scans: [],
       add: (scan) =>
         set((state) => ({
-          scans: [scan, ...state.scans.filter((s) => s.id !== scan.id)].slice(0, 6),
+          scans: [scan, ...state.scans.filter((s) => s.code !== scan.code)].slice(0, 6),
         })),
     }),
-    { name: 'laundryflow.recent-scans' },
+    // v2: entries now hold basket numbers as well as order numbers.
+    { name: 'laundryflow.recent-scans.v2' },
   ),
 );

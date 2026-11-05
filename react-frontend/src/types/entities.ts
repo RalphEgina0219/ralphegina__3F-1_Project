@@ -12,6 +12,9 @@ export type PaymentMethodCode = 'cash' | 'gcash';
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
 export type InventoryMovementType = 'in' | 'out' | 'adjust';
 export type NotificationType = 'ready_for_pickup' | 'low_stock';
+export type CustomerNotificationType = 'order_received' | 'status_changed' | 'ready_for_pickup';
+/** in_use is kept in sync with the active order_baskets row, inside the same transaction. */
+export type BasketStatus = 'available' | 'in_use' | 'retired';
 
 export interface Role {
   id: number;
@@ -47,10 +50,28 @@ export interface Barangay {
 export interface Customer {
   id: number;
   full_name: string;
+  /** UNIQUE, always stored normalized as 09XXXXXXXXX. */
   contact_number: string;
   barangay_id: number;
   street_address: string | null;
   notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * The customer's sign-in, 1:1 with customers. A customer without a row is a legacy profile and
+ * cannot receive new orders. password_hash deliberately has no frontend type.
+ */
+export interface CustomerAccount {
+  id: number;
+  /** UNIQUE */
+  customer_id: number;
+  /** UNIQUE, stored lower-case. */
+  email: string;
+  is_active: boolean;
+  must_change_password: boolean;
+  last_login_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -79,14 +100,43 @@ export interface Order {
   order_number: string;
   customer_id: number;
   current_status_id: number;
-  qr_token: string;
   received_by: number;
   received_at: string;
+  /** Shown as "Estimated completion". */
   promised_at: string;
+  /** Set when the order reaches the released status, which is labelled "Completed". */
   released_at: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** A reusable physical basket. Its QR token is permanent and never regenerated. */
+export interface Basket {
+  id: number;
+  /** UNIQUE, BSK-0001 sequence, never reused. */
+  basket_number: string;
+  /** UNIQUE, 32 URL-safe random characters. */
+  qr_token: string;
+  label: string | null;
+  status: BasketStatus;
+  notes: string | null;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Assignment history between orders and baskets. A basket has at most one row with
+ * released_at IS NULL, which keeps each transaction independent of the reusable basket.
+ */
+export interface OrderBasket {
+  id: number;
+  order_id: number;
+  basket_id: number;
+  assigned_at: string;
+  assigned_by: number;
+  released_at: string | null;
 }
 
 export interface OrderItem {
@@ -160,6 +210,17 @@ export interface Notification {
   channel: 'in_app';
   message: string;
   status: 'recorded';
+  sent_at: string;
+  read_at: string | null;
+}
+
+/** In-app notices for one customer about their own orders. Separate from staff notifications. */
+export interface CustomerNotification {
+  id: number;
+  customer_id: number;
+  order_id: number;
+  type: CustomerNotificationType;
+  message: string;
   sent_at: string;
   read_at: string | null;
 }

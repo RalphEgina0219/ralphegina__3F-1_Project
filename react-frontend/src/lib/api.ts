@@ -12,16 +12,26 @@ export const api = axios.create({
 });
 
 let onUnauthorized: (() => void) | null = null;
+let onCustomerUnauthorized: (() => void) | null = null;
 
 /** The app registers how to leave for /login; the auth endpoints handle their own 401s. */
 export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler;
 }
 
+/** The customer portal's own session: a 401 there leads to /my/login, never to the staff login. */
+export function setCustomerUnauthorizedHandler(handler: () => void) {
+  onCustomerUnauthorized = handler;
+}
+
 api.interceptors.response.use(undefined, (error: AxiosError) => {
   const url = error.config?.url ?? '';
-  if (error.response?.status === 401 && !url.startsWith('/auth/') && !url.startsWith('/public/')) {
-    onUnauthorized?.();
+  if (error.response?.status === 401) {
+    if (url.startsWith('/customer/')) {
+      if (!url.startsWith('/customer/auth/')) onCustomerUnauthorized?.();
+    } else if (!url.startsWith('/auth/')) {
+      onUnauthorized?.();
+    }
   }
   return Promise.reject(error);
 });
@@ -59,4 +69,9 @@ export function cleanParams<T extends object>(params: T): Partial<T> {
       ([, value]) => value !== undefined && value !== null && value !== '',
     ),
   ) as Partial<T>;
+}
+
+/** Only same-site paths are accepted, so that ?next= can never send anyone off the app. */
+export function safeNext(next: string | null, fallback = '/') {
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : fallback;
 }

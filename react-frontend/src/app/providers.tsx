@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/features/auth/store';
-import { errorStatus, setUnauthorizedHandler } from '@/lib/api';
+import { useCustomerAuth } from '@/features/portal/store';
+import { errorStatus, setCustomerUnauthorizedHandler, setUnauthorizedHandler } from '@/lib/api';
 import { router } from './router';
 
 export const queryClient = new QueryClient({
@@ -25,6 +26,16 @@ setUnauthorizedHandler(() => {
   queryClient.clear();
   const { pathname, search } = window.location;
   void router.navigate(`/login?next=${encodeURIComponent(pathname + search)}`, { replace: true });
+});
+
+// The customer session is separate: losing it only signs the customer out of the portal.
+setCustomerUnauthorizedHandler(() => {
+  useCustomerAuth.getState().setCustomer(null);
+  queryClient.removeQueries({ queryKey: ['portal'] });
+  const { pathname, search } = window.location;
+  void router.navigate(`/my/login?next=${encodeURIComponent(pathname + search)}`, {
+    replace: true,
+  });
 });
 
 export function Providers() {

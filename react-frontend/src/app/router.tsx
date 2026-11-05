@@ -6,6 +6,7 @@ import { PublicLayout } from '@/layouts/PublicLayout';
 import { ForbiddenPage, NotFoundPage, RouteErrorPage } from './ErrorPages';
 import { PageFallback } from './PageFallback';
 import { RequireAuth } from './RequireAuth';
+import { RequireCustomer } from './RequireCustomer';
 import { RequireRole } from './RequireRole';
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
@@ -18,7 +19,6 @@ const OrdersPage = lazy(() => import('@/features/orders/pages/OrdersPage'));
 const OrderBoardPage = lazy(() => import('@/features/orders/pages/OrderBoardPage'));
 const NewOrderPage = lazy(() => import('@/features/orders/pages/NewOrderPage'));
 const OrderDetailPage = lazy(() => import('@/features/orders/pages/OrderDetailPage'));
-const ReceiptPage = lazy(() => import('@/features/orders/pages/ReceiptPage'));
 const ScanPage = lazy(() => import('@/features/qr/pages/ScanPage'));
 const PaymentsPage = lazy(() => import('@/features/payments/pages/PaymentsPage'));
 const InventoryPage = lazy(() => import('@/features/inventory/pages/InventoryPage'));
@@ -28,14 +28,24 @@ const ServicesPage = lazy(() => import('@/features/settings/pages/ServicesPage')
 const UsersPage = lazy(() => import('@/features/settings/pages/UsersPage'));
 const ShopPage = lazy(() => import('@/features/settings/pages/ShopPage'));
 const ActivityPage = lazy(() => import('@/features/settings/pages/ActivityPage'));
-const TrackPage = lazy(() => import('@/features/tracking/pages/TrackPage'));
-const TrackLookupPage = lazy(() => import('@/features/tracking/pages/TrackLookupPage'));
+const BasketsPage = lazy(() => import('@/features/baskets/pages/BasketsPage'));
+const BasketLinkPage = lazy(() => import('@/features/baskets/pages/BasketLinkPage'));
+const CustomerLayout = lazy(() =>
+  import('@/layouts/CustomerLayout').then((module) => ({ default: module.CustomerLayout })),
+);
+const CustomerLoginPage = lazy(() => import('@/features/portal/pages/CustomerLoginPage'));
+const RegisterPage = lazy(() => import('@/features/portal/pages/RegisterPage'));
+const ForcePasswordPage = lazy(() => import('@/features/portal/pages/ForcePasswordPage'));
+const PortalHomePage = lazy(() => import('@/features/portal/pages/PortalHomePage'));
+const PortalOrdersPage = lazy(() => import('@/features/portal/pages/PortalOrdersPage'));
+const PortalOrderPage = lazy(() => import('@/features/portal/pages/PortalOrderPage'));
+const PortalAccountPage = lazy(() => import('@/features/portal/pages/PortalAccountPage'));
 const DevUiPage = lazy(() => import('./DevUiPage'));
 
 const page = (Page: LazyExoticComponent<ComponentType>) => <Page />;
 const fullscreenOnPhone: RouteHandle = { fullscreenOnPhone: true };
 
-const routes: RouteObject[] = [
+export const routes: RouteObject[] = [
   {
     errorElement: <RouteErrorPage />,
     children: [
@@ -46,8 +56,30 @@ const routes: RouteObject[] = [
       {
         element: <PublicLayout />,
         children: [
-          { path: '/track', element: page(TrackLookupPage) },
-          { path: '/track/:token', element: page(TrackPage) },
+          // The URL on every basket label. Staff see the scan result, anyone else a neutral notice.
+          { path: '/b/:token', element: page(BasketLinkPage) },
+          // The customer portal: its own pages, layout and session, apart from the staff app.
+          { path: '/my/login', element: page(CustomerLoginPage) },
+          { path: '/register', element: page(RegisterPage) },
+          {
+            element: <RequireCustomer />,
+            children: [
+              { path: '/my/password', element: page(ForcePasswordPage) },
+              {
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <CustomerLayout />
+                  </Suspense>
+                ),
+                children: [
+                  { path: '/my', element: page(PortalHomePage) },
+                  { path: '/my/orders', element: page(PortalOrdersPage) },
+                  { path: '/my/orders/:orderNumber', element: page(PortalOrderPage) },
+                  { path: '/my/account', element: page(PortalAccountPage) },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
@@ -80,15 +112,10 @@ const routes: RouteObject[] = [
                     element: page(OrderDetailPage),
                     handle: fullscreenOnPhone,
                   },
-                  {
-                    path: '/orders/:id/receipt',
-                    element: page(ReceiptPage),
-                    handle: fullscreenOnPhone,
-                  },
                 ],
               },
               {
-                element: <RequireRole ability="qr.scan" />,
+                element: <RequireRole ability="baskets.scan" />,
                 children: [{ path: '/scan', element: page(ScanPage), handle: fullscreenOnPhone }],
               },
               {
@@ -113,6 +140,10 @@ const routes: RouteObject[] = [
                       { index: true, element: <Navigate to="services" replace /> },
                       { path: 'services', element: page(ServicesPage) },
                       { path: 'users', element: page(UsersPage) },
+                      {
+                        element: <RequireRole ability="baskets.manage" />,
+                        children: [{ path: 'baskets', element: page(BasketsPage) }],
+                      },
                       { path: 'shop', element: page(ShopPage) },
                       { path: 'activity', element: page(ActivityPage) },
                     ],

@@ -7,6 +7,7 @@ import type {
   CustomersMeta,
   OrderDto,
   Paginated,
+  TemporaryPasswordResponse,
 } from '@/types/api';
 
 export function useCustomers(params: { search?: string; page?: number; per_page?: number }) {
@@ -55,18 +56,71 @@ export function useBarangays() {
   });
 }
 
-export function useSaveCustomer() {
+function useInvalidateCustomers() {
   const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['customers'] });
+    void queryClient.invalidateQueries({ queryKey: ['orders'] });
+  };
+}
+
+/**
+ * Creating registers the customer at the counter: profile and account in one step, answered with
+ * a temporary password that is shown once. Editing changes the profile only.
+ */
+export function useSaveCustomer() {
+  const invalidate = useInvalidateCustomers();
   return useMutation({
-    mutationFn: async ({ id, ...input }: CustomerInput & { id?: number }) => {
-      const { data } = id
-        ? await api.put<CustomerDto>(`/customers/${id}`, input)
-        : await api.post<CustomerDto>('/customers', input);
+    mutationFn: async ({
+      id,
+      ...input
+    }: CustomerInput & { id?: number }): Promise<{
+      customer: CustomerDto;
+      temporary_password: string | null;
+    }> => {
+      if (id) {
+        const { data } = await api.put<CustomerDto>(`/customers/${id}`, input);
+        return { customer: data, temporary_password: null };
+      }
+      const { data } = await api.post<TemporaryPasswordResponse>('/customers', input);
       return data;
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['customers'] });
-      void queryClient.invalidateQueries({ queryKey: ['orders'] });
+    onSuccess: invalidate,
+  });
+}
+
+/** "Create account" for a legacy profile. */
+export function useCreateCustomerAccount() {
+  const invalidate = useInvalidateCustomers();
+  return useMutation({
+    mutationFn: async ({ id, email }: { id: number; email: string }) => {
+      const { data } = await api.post<TemporaryPasswordResponse>(`/customers/${id}/account`, {
+        email,
+      });
+      return data;
     },
+    onSuccess: invalidate,
+  });
+}
+
+export function useResetCustomerPassword() {
+  const invalidate = useInvalidateCustomers();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await api.post<TemporaryPasswordResponse>(`/customers/${id}/reset-password`);
+      return data;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useSetCustomerAccountActive() {
+  const invalidate = useInvalidateCustomers();
+  return useMutation({
+    mutationFn: async ({ id, is_active }: { id: number; is_active: boolean }) => {
+      const { data } = await api.put<CustomerDto>(`/customers/${id}/account`, { is_active });
+      return data;
+    },
+    onSuccess: invalidate,
   });
 }

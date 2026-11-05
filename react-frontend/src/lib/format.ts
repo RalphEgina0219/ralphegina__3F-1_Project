@@ -1,5 +1,16 @@
 import type { OrderItemDto } from '@/types/api';
 
+/**
+ * Stored form of a PH mobile number: "0917 845 2210", "+63 917 845 2210" and "639178452210"
+ * all become "09178452210". Contact numbers are UNIQUE in this form.
+ */
+export function normalizePhone(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  return /^639\d{9}$/.test(digits) ? `0${digits.slice(2)}` : digits;
+}
+
+export const isValidPhone = (value: string) => /^09\d{9}$/.test(normalizePhone(value));
+
 /** "09178452210" -> "0917 845 2210" */
 export function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, '');
@@ -50,9 +61,4 @@ export function itemQuantityLabel(item: OrderItemDto): string {
 export function itemRateSuffix(item: { pricing_type: OrderItemDto['pricing_type'] }): string {
   if (item.pricing_type === 'per_kg') return ' / kg';
   return item.pricing_type === 'per_piece' ? ' / pc' : '';
-}
-
-/** Shows an order token without revealing it: ••••q9Zx */
-export function maskToken(token: string): string {
-  return `••••${token.slice(-4)}`;
 }

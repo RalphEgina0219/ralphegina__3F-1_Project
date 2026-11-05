@@ -2,21 +2,30 @@ import { format, parseISO } from 'date-fns';
 import { amountPaidCents, balanceCents, paymentStatus } from '@/lib/billing';
 import { onHand, stockLevelPercent, stockStatus } from '@/lib/inventory';
 import { formatMoney } from '@/lib/money';
-import { STATUS_META } from '@/lib/status';
+import { STATUS_META, STATUS_ORDER, statusIndex } from '@/lib/status';
 import type {
   ActivityLogDto,
   AuthUser,
+  BasketAssignmentDto,
+  BasketDto,
+  BasketRefDto,
   CustomerDto,
+  CustomerSelfDto,
   InventoryItemDto,
   InventoryMovementDto,
   OrderDetailDto,
   OrderDto,
   PaymentDto,
+  PortalOrderDetailDto,
+  PortalOrderDto,
+  ShopInfoDto,
+  TimelineStepDto,
   UserDto,
   UserRef,
 } from '@/types/api';
 import type {
   AuditLog,
+  Basket,
   Customer,
   InventoryItem,
   InventoryMovement,
@@ -27,6 +36,7 @@ import type {
   User,
 } from '@/types/entities';
 import { db, nextId, persist } from './db';
+import { customerNotice } from './messages';
 
 export const userRef = (id: number): UserRef => {
   const user = db().users.find((u) => u.id === id);
@@ -83,6 +93,32 @@ export function isOverdue(order: Order, now = new Date()) {
   return parseISO(order.promised_at) < now;
 }
 
+export function accountOf(customerId: number) {
+  return db().customer_accounts.find((a) => a.customer_id === customerId);
+}
+
+export const toBasketRef = (basket: Basket): BasketRefDto => ({
+  id: basket.id,
+  basket_number: basket.basket_number,
+});
+
+/** The baskets an order uses, in basket-number order. */
+export function orderBaskets(orderId: number): BasketRefDto[] {
+  const { order_baskets, baskets } = db();
+  const ids = new Set(
+    order_baskets.filter((ob) => ob.order_id === orderId).map((ob) => ob.basket_id),
+  );
+  return baskets
+    .filter((b) => ids.has(b.id))
+    .sort((a, b) => a.basket_number.localeCompare(b.basket_number))
+    .map(toBasketRef);
+}
+
+export function shopInfo(): ShopInfoDto {
+  const { name, address, contact_number, receipt_footer } = db().shop_settings;
+  return { name, address, contact_number, receipt_footer };
+}
+
 export function toOrderDto(order: Order): OrderDto {
   const { customers, barangays, orders, services, order_items, order_status_history } = db();
   const customer = customers.find((c) => c.id === order.customer_id) as Customer;
@@ -95,7 +131,6 @@ export function toOrderDto(order: Order): OrderDto {
   return {
     id: order.id,
     order_number: order.order_number,
-    qr_token: order.qr_token,
     customer: {
       id: customer.id,
       full_name: customer.full_name,
@@ -104,6 +139,7 @@ export function toOrderDto(order: Order): OrderDto {
       street_address: customer.street_address,
       orders_count: orders.filter((o) => o.customer_id === customer.id).length,
     },
+    baskets: orderBaskets(order.id),
     status: code,
     status_label: STATUS_META[code].label,
     status_since: lastChange,
@@ -154,10 +190,26 @@ export function toPaymentDto(payment: Payment): PaymentDto {
   };
 }
 
+export function basketHistory(orderId: number): BasketAssignmentDto[] {
+  const { order_baskets, baskets } = db();
+  return order_baskets
+    .filter((ob) => ob.order_id === orderId)
+    .sort((a, b) => a.assigned_at.localeCompare(b.assigned_at) || a.id - b.id)
+    .map((ob) => ({
+      id: ob.id,
+      basket: toBasketRef(baskets.find((b) => b.id === ob.basket_id) as Basket),
+      assigned_at: ob.assigned_at,
+      assigned_by: userRef(ob.assigned_by),
+      released_at: ob.released_at,
+    }));
+}
+
 export function toOrderDetailDto(order: Order): OrderDetailDto {
   const { payments, order_status_history } = db();
   return {
     ...toOrderDto(order),
+    basket_history: basketHistory(order.id),
+    shop: shopInfo(),
     payments: payments
       .filter((p) => p.order_id === order.id)
       .sort((a, b) => b.paid_at.localeCompare(a.paid_at))
@@ -184,9 +236,20 @@ export function toCustomerDto(customer: Customer): CustomerDto {
     (latest, o) => (!latest || o.received_at > latest ? o.received_at : latest),
     null,
   );
+  const account = accountOf(customer.id);
   return {
     ...customer,
     barangay_name: barangays.find((b) => b.id === customer.barangay_id)?.name ?? '',
+    has_account: Boolean(account),
+    account: account
+      ? {
+          email: account.email,
+          is_active: account.is_active,
+          must_change_password: account.must_change_password,
+          last_login_at: account.last_login_at,
+          created_at: account.created_at,
+        }
+      : null,
     orders_count: own.length,
     last_visit_at: lastVisit,
     total_spent_cents: money.reduce((sum, m) => sum + m.paid, 0),
@@ -231,6 +294,119 @@ export function toMovementDto(movement: InventoryMovement): InventoryMovementDto
     remarks: movement.remarks,
     user: userRef(movement.user_id),
     moved_at: movement.moved_at,
+  };
+}
+
+/** The active assignment of a basket: its row with released_at IS NULL, if any. */
+export function activeAssignment(basketId: number) {
+  return db().order_baskets.find((ob) => ob.basket_id === basketId && ob.released_at === null);
+}
+
+export function toBasketDto(basket: Basket): BasketDto {
+  const { order_baskets, orders } = db();
+  const uses = order_baskets.filter((ob) => ob.basket_id === basket.id);
+  const active = activeAssignment(basket.id);
+  const activeOrder = active ? orders.find((o) => o.id === active.order_id) : undefined;
+  return {
+    ...basket,
+    current_order: activeOrder
+      ? { id: activeOrder.id, order_number: activeOrder.order_number }
+      : null,
+    times_used: uses.length,
+    last_used_at: uses.reduce<string | null>(
+      (latest, ob) => (!latest || ob.assigned_at > latest ? ob.assigned_at : latest),
+      null,
+    ),
+  };
+}
+
+/** Writes the customer's own in-app notice about their order, in the same transaction. */
+export function notifyCustomer(order: Order, status: StatusCode) {
+  const rows = db().customer_notifications;
+  const notice = customerNotice(order.order_number, status);
+  rows.push({
+    id: nextId(rows),
+    customer_id: order.customer_id,
+    order_id: order.id,
+    type: notice.type,
+    message: notice.message,
+    sent_at: new Date().toISOString(),
+    read_at: null,
+  });
+}
+
+export function toCustomerSelfDto(customer: Customer): CustomerSelfDto {
+  const account = accountOf(customer.id);
+  return {
+    id: customer.id,
+    full_name: customer.full_name,
+    email: account?.email ?? '',
+    contact_number: customer.contact_number,
+    barangay_id: customer.barangay_id,
+    barangay_name: db().barangays.find((b) => b.id === customer.barangay_id)?.name ?? '',
+    street_address: customer.street_address,
+    must_change_password: account?.must_change_password ?? false,
+  };
+}
+
+/** Built field by field from the staff DTO, so nothing internal reaches a customer. */
+export function toPortalOrderDto(order: Order): PortalOrderDto {
+  const dto = toOrderDto(order);
+  return {
+    order_number: dto.order_number,
+    received_at: dto.received_at,
+    promised_at: dto.promised_at,
+    released_at: dto.released_at,
+    status: dto.status,
+    status_label: dto.status_label,
+    baskets: dto.baskets,
+    items: dto.items,
+    total_cents: dto.total_cents,
+    paid_cents: dto.paid_cents,
+    balance_cents: dto.balance_cents,
+    payment_status: dto.payment_status,
+  };
+}
+
+/** The six stages with when the order last entered each. Stages after the current one are null. */
+export function orderTimeline(order: Order): TimelineStepDto[] {
+  const history = db().order_status_history.filter((h) => h.order_id === order.id);
+  const currentIndex = statusIndex(statusCode(order.current_status_id));
+  return STATUS_ORDER.map((status, index) => ({
+    status,
+    label: STATUS_META[status].label,
+    // After an admin moves an order back, later stages show as not reached yet.
+    at:
+      index > currentIndex
+        ? null
+        : (history
+            .filter((h) => statusCode(h.to_status_id) === status)
+            .map((h) => h.changed_at)
+            .sort()
+            .pop() ?? null),
+  }));
+}
+
+export function toPortalOrderDetailDto(order: Order): PortalOrderDetailDto {
+  const customer = db().customers.find((c) => c.id === order.customer_id) as Customer;
+  return {
+    ...toPortalOrderDto(order),
+    customer: { full_name: customer.full_name, contact_number: customer.contact_number },
+    // No staff names and no voided payments: the customer sees what they actually paid.
+    payments: db()
+      .payments.filter((p) => p.order_id === order.id && !p.voided_at)
+      .sort((a, b) => a.paid_at.localeCompare(b.paid_at))
+      .map(toPaymentDto)
+      .map((p) => ({
+        id: p.id,
+        paid_at: p.paid_at,
+        method_label: p.method_label,
+        amount_cents: p.amount_cents,
+        reference_number: p.reference_number,
+        receipt_number: p.receipt_number,
+      })),
+    timeline: orderTimeline(order),
+    shop: shopInfo(),
   };
 }
 
@@ -313,6 +489,20 @@ function summarize(log: AuditLog): string {
       return `added customer ${v.full_name}`;
     case 'customer.updated':
       return `updated customer ${v.full_name}`;
+    case 'customer.registered':
+      return `${v.full_name} registered an account online`;
+    case 'customer.account_created':
+      return `created the account of ${v.full_name}`;
+    case 'customer.password_reset':
+      return `reset the account password of ${v.full_name}`;
+    case 'customer.account_updated':
+      return `${v.is_active ? 'enabled' : 'disabled'} the account of ${v.full_name}`;
+    case 'basket.created':
+      return v.count === 1 ? `added basket ${v.basket_number}` : `added ${v.count} baskets`;
+    case 'basket.updated':
+      return `updated basket ${v.basket_number}`;
+    case 'basket.retired':
+      return `retired basket ${v.basket_number}`;
     case 'service.created':
       return `added service ${v.name}`;
     case 'service.updated':
@@ -352,12 +542,4 @@ export function toActivityDto(log: AuditLog): ActivityLogDto {
     new_values: log.new_values,
     created_at: log.created_at,
   };
-}
-
-/** "Maria Santos" -> "Maria S.": the only form of a customer's name on public pages. */
-export function publicDisplayName(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/);
-  const first = parts[0] ?? 'Customer';
-  const last = parts.length > 1 ? parts[parts.length - 1] : undefined;
-  return last ? `${first} ${last[0]?.toUpperCase()}.` : first;
 }

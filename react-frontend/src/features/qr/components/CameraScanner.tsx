@@ -50,10 +50,17 @@ interface CameraScannerProps {
   onDetected: (text: string) => void;
   paused: boolean;
   /** Reports the torch controls so that the phone header can show them. */
-  onTorchChange: (torch: { supported: boolean; on: boolean; toggle: () => void }) => void;
+  onTorchChange?: (torch: { supported: boolean; on: boolean; toggle: () => void }) => void;
+  /** Start the camera without the extra "Turn on camera" tap, for when the user already asked to scan. */
+  autoStart?: boolean;
 }
 
-export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScannerProps) {
+export function CameraScanner({
+  onDetected,
+  paused,
+  onTorchChange,
+  autoStart = false,
+}: CameraScannerProps) {
   const [state, setState] = useState<CameraState>('idle');
   const handle = useRef<IScannerHandle>(null);
   const torchOn = useRef(false);
@@ -61,7 +68,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
   const reportTorch = useCallback(() => {
     const track = handle.current?.getStream()?.getVideoTracks()[0] as TorchTrack | undefined;
     const supported = Boolean(track?.getCapabilities?.().torch);
-    onTorchChange({
+    onTorchChange?.({
       supported,
       on: torchOn.current,
       toggle: () => {
@@ -86,6 +93,11 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
       setState('no-camera');
       return;
     }
+    // A blocked camera still ends in the "denied" message, through the scanner's error callback.
+    if (autoStart) {
+      setState('starting');
+      return;
+    }
     let cancelled = false;
     navigator.permissions
       ?.query({ name: 'camera' as PermissionName })
@@ -100,7 +112,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [autoStart]);
 
   // The library has no "started" callback, so watch for the stream to appear.
   useEffect(() => {
@@ -124,7 +136,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
   const live = state === 'starting' || state === 'on';
 
   return (
-    <div className="relative aspect-square overflow-hidden rounded-card bg-ink md:aspect-[4/3]">
+    <div className="relative aspect-square overflow-hidden rounded-card bg-ink md:aspect-4/3">
       {live && (
         <Scanner
           ref={handle}
@@ -132,6 +144,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
             const text = codes[0]?.rawValue;
             if (text) onDetected(text);
           }}
+
           onError={onError}
           paused={paused}
           formats={['qr_code']}
@@ -146,7 +159,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
       {state === 'idle' && (
         <Message
           icon={<Camera className="size-9" aria-hidden="true" />}
-          title="Scan the QR on a receipt or tag"
+          title="Scan the QR on a basket label"
           action={
             <Button size="lg" onClick={() => setState('starting')}>
               Turn on camera
@@ -210,7 +223,7 @@ export function CameraScanner({ onDetected, paused, onTorchChange }: CameraScann
             )}
           </div>
           <p className="absolute inset-x-0 bottom-2.5 text-center text-[13px] text-on-ink">
-            Point the camera at the QR on the receipt
+            Point the camera at the QR on the basket label
           </p>
         </div>
       )}

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addDays, setHours, setMinutes } from 'date-fns';
-import { AlertTriangle, Plus, QrCode, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -20,7 +20,9 @@ import { ErrorState, Skeleton } from '@/components/ui/States';
 import { StickyActions } from '@/components/ui/StickyActions';
 import { useCan } from '@/features/auth/store';
 import { useCustomer } from '@/features/customers/api';
+import { CreateAccountDialog } from '@/features/customers/components/CreateAccountDialog';
 import { CustomerFormDialog } from '@/features/customers/components/CustomerFormDialog';
+import { useAvailableBaskets } from '@/features/baskets/api';
 import { useServices } from '@/features/settings/api';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { errorMessage } from '@/lib/api';
@@ -30,11 +32,13 @@ import { toDateTimeLocal } from '@/lib/dates';
 import { formatKg, formatPhone, itemRateSuffix } from '@/lib/format';
 import { centsToInput, formatMoney, formatRate, parseMoney } from '@/lib/money';
 import { newOrderSchema, type NewOrderForm } from '@/schemas/order';
-import type { CustomerDto, NewOrderInput, Service } from '@/types/api';
+import type { BasketRefDto, CustomerDto, NewOrderInput, Service } from '@/types/api';
 import { useCreateOrder } from '../api';
+import { BasketPicker } from '../components/BasketPicker';
 import { CustomerCombobox } from '../components/CustomerCombobox';
 
-const STEP_TITLES = ['Customer', 'Services', 'Pickup & payment'];
+const STEP_TITLES = ['Customer', 'Baskets', 'Services', 'Completion & payment'];
+const STEPS = STEP_TITLES.length;
 
 function Section({
   number,
@@ -68,7 +72,7 @@ function Section({
 }
 
 function defaultPromisedAt() {
-  // Tomorrow at 5:00 PM: the regular 24-hour turnaround, inside shop hours.
+  // Estimated completion: tomorrow at 5:00 PM, the regular 24-hour turnaround, inside shop hours.
   return toDateTimeLocal(setMinutes(setHours(addDays(new Date(), 1), 17), 0));
 }
 
@@ -120,6 +124,9 @@ export default function NewOrderPage() {
   const [step, setStep] = useState(1);
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
   const [addingCustomer, setAddingCustomer] = useState(false);
+  const [needsAccount, setNeedsAccount] = useState<CustomerDto | null>(null);
+  const [baskets, setBaskets] = useState<BasketRefDto[]>([]);
+  const available = useAvailableBaskets();
 
   const {
     control,
@@ -133,6 +140,7 @@ export default function NewOrderPage() {
     resolver: zodResolver(newOrderSchema),
     defaultValues: {
       customer_id: 0,
+      basket_ids: [],
       items: [],
       addons: [],
       promised_at: defaultPromisedAt(),
@@ -173,16 +181,37 @@ export default function NewOrderPage() {
   const preset = useCustomer(presetId);
   useEffect(() => {
     if (preset.data && !customer) {
-      setCustomer(preset.data);
-      setValue('customer_id', preset.data.id);
+      if (preset.data.has_account) {
+        setCustomer(preset.data);
+        setValue('customer_id', preset.data.id);
+      } else {
+        setNeedsAccount(preset.data);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preset.data]);
+
+  // Arriving from the scanner ("Start new order with this basket") preselects that basket.
+  const presetBasket = Number(params.get('basket_id')) || undefined;
+  useEffect(() => {
+    const found = available.data?.find((b) => b.id === presetBasket);
+    if (found && baskets.length === 0) changeBaskets([found]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [available.data, presetBasket]);
 
   const selectCustomer = (next: CustomerDto | null) => {
     setCustomer(next);
     setValue('customer_id', next?.id ?? 0, { shouldValidate: Boolean(next) });
   };
+
+  function changeBaskets(next: BasketRefDto[]) {
+    setBaskets(next);
+    setValue(
+      'basket_ids',
+      next.map((b) => b.id),
+      { shouldValidate: next.length > 0 },
+    );
+  }
 
   const lines = useMemo(() => {
     const rows = (watchedItems ?? []).flatMap((item) => {
@@ -224,8 +253,10 @@ export default function NewOrderPage() {
   };
 
   const goNext = async () => {
-    const valid = await trigger(step === 1 ? ['customer_id'] : ['items']);
-    if (valid && step === 2 && lines.length === 0) {
+    const valid = await trigger(
+      step === 1 ? ['customer_id'] : step === 2 ? ['basket_ids'] : ['items'],
+    );
+    if (valid && step === 3 && lines.length === 0) {
       setError('items', { message: 'Add at least one service.' });
       return;
     }
@@ -245,6 +276,7 @@ export default function NewOrderPage() {
       }
       const input: NewOrderInput = {
         customer_id: form.customer_id,
+        basket_ids: form.basket_ids,
         items: [
           ...form.items.map((item) => {
             const service = catalog.find((s) => String(s.id) === item.service_id);
@@ -268,14 +300,12 @@ export default function NewOrderPage() {
       };
       createOrder.mutate(input, {
         onSuccess: (order) => {
-          navigate(`/orders/${order.id}`, { replace: true });
-          toast.success(`${order.order_number} saved. The QR code is ready.`, {
-            action: {
-              label: 'Print receipt',
-              onClick: () => navigate(`/orders/${order.id}/receipt`),
-            },
-            duration: 8000,
-          });
+          // The order page shows which baskets to tag. There is nothing to print.
+          navigate(`/orders/${order.id}`, { replace: true, state: { created: true } });
+          toast.success(
+            `Order ${order.order_number} saved. The customer can now see it in their account.`,
+            { duration: 8000 },
+          );
         },
         onError: (error) => toast.error(errorMessage(error)),
       });
@@ -283,7 +313,8 @@ export default function NewOrderPage() {
     (formErrors) => {
       // On phones the invalid field can sit on an earlier step of the wizard.
       if (formErrors.customer_id) setStep(1);
-      else if (formErrors.items) setStep(2);
+      else if (formErrors.basket_ids) setStep(2);
+      else if (formErrors.items) setStep(3);
     },
   );
 
@@ -395,8 +426,8 @@ export default function NewOrderPage() {
 
   const saveLabel = (
     <>
-      <QrCode className="size-4" aria-hidden="true" />
-      Save &amp; generate QR
+      <Check className="size-4" aria-hidden="true" />
+      Save order
     </>
   );
 
@@ -423,18 +454,19 @@ export default function NewOrderPage() {
           subtitle={
             <>
               <span className="md:hidden">
-                Step {step} of 3 · {STEP_TITLES[step - 1]}
+                Step {step} of {STEPS} · {STEP_TITLES[step - 1]}
               </span>
               <span className="max-md:hidden">
-                Charges compute from the rates set in Settings. A QR code is created when you save.
+                Charges compute from the rates set in Settings. The customer sees the order in their
+                account as soon as you save.
               </span>
             </>
           }
           className="mb-3 md:mb-5"
         />
         <ProgressBar
-          label={`Step ${step} of 3`}
-          percent={(step / 3) * 100}
+          label={`Step ${step} of ${STEPS}`}
+          percent={(step / STEPS) * 100}
           className="mb-4 md:hidden"
         />
 
@@ -446,7 +478,13 @@ export default function NewOrderPage() {
               ) : (
                 <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                   <Field label="Find existing customer" error={errors.customer_id?.message}>
-                    {(field) => <CustomerCombobox {...field} onSelect={selectCustomer} />}
+                    {(field) => (
+                      <CustomerCombobox
+                        {...field}
+                        onSelect={selectCustomer}
+                        onNeedsAccount={setNeedsAccount}
+                      />
+                    )}
                   </Field>
                   <Button
                     variant="secondary"
@@ -460,10 +498,18 @@ export default function NewOrderPage() {
               )}
             </Section>
 
+            <Section number={2} title="Baskets" hiddenOnPhone={step !== 2}>
+              <BasketPicker
+                value={baskets}
+                onChange={changeBaskets}
+                error={errors.basket_ids?.message}
+              />
+            </Section>
+
             <Section
-              number={2}
+              number={3}
               title="Services & load"
-              hiddenOnPhone={step !== 2}
+              hiddenOnPhone={step !== 3}
               action={
                 <Button
                   variant="secondary"
@@ -644,9 +690,14 @@ export default function NewOrderPage() {
               )}
             </Section>
 
-            <Section number={3} title="Pickup & notes" hiddenOnPhone={step !== 3}>
+            <Section number={4} title="Estimated completion & notes" hiddenOnPhone={step !== 4}>
               <div className="grid gap-4 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
-                <Field label="Promised pickup" required error={errors.promised_at?.message}>
+                <Field
+                  label="Estimated completion"
+                  required
+                  error={errors.promised_at?.message}
+                  hint="Shown to the customer in their account."
+                >
                   {(field) => (
                     <Input {...field} {...register('promised_at')} type="datetime-local" />
                   )}
@@ -666,9 +717,9 @@ export default function NewOrderPage() {
           </div>
 
           <Section
-            number={4}
+            number={5}
             title="Bill & payment"
-            hiddenOnPhone={step !== 3}
+            hiddenOnPhone={step !== 4}
             className="lg:sticky lg:top-6"
           >
             {billPanel}
@@ -685,7 +736,7 @@ export default function NewOrderPage() {
         </div>
 
         <StickyActions>
-          {(!isPhone || step === 2) && lines.length > 0 && (
+          {(!isPhone || step === 3) && lines.length > 0 && (
             <dl className="space-y-0.5 text-[13px] text-muted">
               {lines.slice(0, 3).map((line, index) => (
                 <div key={`${line.service.id}-${index}`} className="flex justify-between gap-3">
@@ -700,7 +751,7 @@ export default function NewOrderPage() {
             Total
             <Money cents={totalCents} />
           </p>
-          {isPhone && step < 3 ? (
+          {isPhone && step < STEPS ? (
             <div className="flex gap-2">
               {step > 1 && (
                 <Button variant="secondary" size="lg" onClick={() => setStep(step - 1)}>
@@ -739,6 +790,11 @@ export default function NewOrderPage() {
         open={addingCustomer}
         onOpenChange={setAddingCustomer}
         onSaved={selectCustomer}
+      />
+      <CreateAccountDialog
+        customer={needsAccount}
+        onClose={() => setNeedsAccount(null)}
+        onCreated={selectCustomer}
       />
     </>
   );

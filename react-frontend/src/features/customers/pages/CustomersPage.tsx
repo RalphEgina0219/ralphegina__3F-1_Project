@@ -2,6 +2,7 @@ import { Plus, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
@@ -39,6 +40,18 @@ const COLUMNS: Column<CustomerDto>[] = [
     header: 'Contact no.',
     card: 'subtitle',
     cell: (c) => <span className="whitespace-nowrap">{formatPhone(c.contact_number)}</span>,
+  },
+  {
+    key: 'account',
+    header: 'Account',
+    cell: (c) =>
+      c.account ? (
+        <span className="block max-w-48 truncate text-[13px]" title={c.account.email}>
+          {c.account.email}
+        </span>
+      ) : (
+        <Badge tone="warn">No account</Badge>
+      ),
   },
   { key: 'barangay', header: 'Barangay', cell: (c) => c.barangay_name },
   { key: 'orders', header: 'Orders', cell: (c) => c.orders_count },
@@ -99,8 +112,8 @@ export default function CustomersPage() {
           >
             <Input
               type="search"
-              aria-label="Search customers by name or contact number"
-              placeholder="Name or contact number"
+              aria-label="Search customers by name, email or contact number"
+              placeholder="Name, email or contact number"
               icon={<Search className="size-4" aria-hidden="true" />}
               wrapperClassName="min-w-0 flex-1 sm:w-64 sm:flex-none"
               value={search}
@@ -110,7 +123,7 @@ export default function CustomersPage() {
               icon={<Plus className="size-4" aria-hidden="true" />}
               onClick={() => setAdding(true)}
             >
-              Add customer
+              New customer
             </Button>
           </div>
         }
@@ -131,7 +144,7 @@ export default function CustomersPage() {
               }
               action={
                 <Button variant="secondary" onClick={() => setAdding(true)}>
-                  Add customer
+                  New customer
                 </Button>
               }
             />
@@ -144,7 +157,7 @@ export default function CustomersPage() {
                 rowKey={(c) => c.id}
                 caption="Customers"
                 isSelected={(c) => c.id === selectedId}
-                minWidth="590px"
+                minWidth="760px"
                 dense
               />
               <Pagination

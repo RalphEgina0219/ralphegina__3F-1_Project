@@ -48,7 +48,7 @@ function BoardCard({ order }: { order: OrderDto }) {
         <div className="mt-2.5">
           {isReady && order.balance_cents > 0 ? (
             <ButtonLink to={`/orders/${order.id}`} size="compact" className="w-full">
-              Collect to release
+              Collect to complete
             </ButtonLink>
           ) : (
             <MoveStatusButton

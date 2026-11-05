@@ -7,13 +7,15 @@ import type { PaymentStatus, StatusCode } from '@/types/entities';
 const chipBase =
   'inline-flex max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap';
 
+export type BadgeTone = 'neutral' | 'ok' | 'warn' | 'danger' | 'flow' | 'ink';
+
 interface BadgeProps {
   children: ReactNode;
   className?: string;
-  tone?: 'neutral' | 'ok' | 'warn' | 'danger' | 'flow' | 'ink';
+  tone?: BadgeTone;
 }
 
-const TONES: Record<NonNullable<BadgeProps['tone']>, string> = {
+const TONES: Record<BadgeTone, string> = {
   neutral: 'bg-foam-2 text-text',
   ok: 'bg-ok-bg text-ok',
   warn: 'border border-warn-line bg-warn-bg text-warn',

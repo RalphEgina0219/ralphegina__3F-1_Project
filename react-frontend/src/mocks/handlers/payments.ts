@@ -89,7 +89,7 @@ export const paymentHandlers = [
 
     const order = db().orders.find((o) => o.id === payment.order_id) as Order;
     if (statusCode(order.current_status_id) === 'released') {
-      return fail(422, 'This order was already released. Move it back a stage before voiding.');
+      return fail(409, 'This transaction is completed. Its payments can no longer be voided.');
     }
     payment.voided_at = new Date().toISOString();
     payment.voided_by = user.id;

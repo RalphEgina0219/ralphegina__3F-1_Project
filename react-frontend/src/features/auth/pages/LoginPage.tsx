@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Info, QrCode } from 'lucide-react';
+import { Info, WashingMachine } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,15 +9,10 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Field } from '@/components/ui/Field';
 import { Input } from '@/components/ui/Input';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
-import { applyFieldErrors, errorMessage } from '@/lib/api';
+import { applyFieldErrors, errorMessage, safeNext } from '@/lib/api';
 import { loginSchema, type LoginInput } from '@/schemas/auth';
 import { useLogin } from '../api';
 import { useAuthStore } from '../store';
-
-/** Only same-site paths are accepted, so that ?next= can never send anyone off the app. */
-function safeNext(next: string | null) {
-  return next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
-}
 
 export default function LoginPage() {
   useDocumentTitle('Sign in');
@@ -140,27 +135,28 @@ export default function LoginPage() {
           <span className="h-px flex-1 bg-line" />
         </div>
         <ButtonLink
-          to="/track"
+          to="/my/login"
           className="mt-3 w-full"
-          icon={<QrCode className="size-4" aria-hidden="true" />}
+          icon={<WashingMachine className="size-4" aria-hidden="true" />}
         >
-          Track my laundry
+          Customer sign in
         </ButtonLink>
         <p className="mt-3 text-center text-xs text-muted">
-          No account needed. Scan the QR on your receipt or enter your order number.
+          Follow your laundry in your own account. New here?{' '}
+          <Link to="/register" className="font-semibold text-flow underline">
+            Create an account
+          </Link>
         </p>
       </div>
       <div className="mt-auto pt-6 lg:hidden">
         <div className="flex items-center gap-3 rounded-card border border-line bg-surface p-4">
-          <QrCode className="size-7 shrink-0 text-flow" aria-hidden="true" />
+          <WashingMachine className="size-7 shrink-0 text-flow" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="font-bold">Customer?</p>
-            <p className="text-[13px] text-muted">
-              Scan the QR on your receipt. No sign-in needed.
-            </p>
+            <p className="text-[13px] text-muted">Follow your laundry in your own account.</p>
           </div>
-          <Link to="/track" className={`${linkClass} px-1`}>
-            Track
+          <Link to="/my/login" className={`${linkClass} px-1`}>
+            Sign in
           </Link>
         </div>
       </div>

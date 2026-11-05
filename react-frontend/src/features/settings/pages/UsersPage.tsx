@@ -1,4 +1,4 @@
-import { Copy, Plus, Users } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/Badge';
@@ -6,11 +6,14 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Dialog } from '@/components/ui/Dialog';
 import { Mono } from '@/components/ui/Mono';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
 import { EmptyState, ErrorState, SkeletonRows } from '@/components/ui/States';
 import { Table, type Column } from '@/components/ui/Table';
+import {
+  TemporaryPasswordDialog,
+  type TemporaryPassword,
+} from '@/components/ui/TemporaryPasswordDialog';
 import { useCurrentUser } from '@/features/auth/store';
 import { errorMessage } from '@/lib/api';
 import { formatRelativeDay } from '@/lib/dates';
@@ -76,7 +79,7 @@ export default function UsersPage() {
   const [dialog, setDialog] = useState<{ open: boolean; user?: UserDto }>({ open: false });
   const [disabling, setDisabling] = useState<UserDto | null>(null);
   const [resetting, setResetting] = useState<UserDto | null>(null);
-  const [temporary, setTemporary] = useState<{ name: string; password: string } | null>(null);
+  const [temporary, setTemporary] = useState<TemporaryPassword | null>(null);
 
   const columns: Column<UserDto>[] = [
     {
@@ -251,32 +254,7 @@ export default function UsersPage() {
           });
         }}
       />
-      <Dialog
-        open={Boolean(temporary)}
-        onOpenChange={(open) => {
-          if (!open) setTemporary(null);
-        }}
-        title="Temporary password"
-        description={`Give this to ${temporary?.name}. It is shown only once.`}
-        footer={<Button onClick={() => setTemporary(null)}>Done</Button>}
-      >
-        <div className="flex items-center justify-between gap-3 rounded-control bg-foam p-3">
-          <Mono className="text-lg break-all">{temporary?.password}</Mono>
-          <Button
-            variant="secondary"
-            size="icon"
-            aria-label="Copy password"
-            onClick={() => {
-              void navigator.clipboard
-                .writeText(temporary?.password ?? '')
-                .then(() => toast.success('Copied'))
-                .catch(() => toast.error('Could not copy on this browser'));
-            }}
-          >
-            <Copy className="size-4" aria-hidden="true" />
-          </Button>
-        </div>
-      </Dialog>
+      <TemporaryPasswordDialog value={temporary} onClose={() => setTemporary(null)} />
     </div>
   );
 }

@@ -130,7 +130,7 @@ export default function OrdersPage() {
     if (done > 0)
       toast.success(`${done} ${done === 1 ? 'order' : 'orders'} moved to the next stage`);
     if (skipped > 0) {
-      toast.warning(`${skipped} skipped: already released, or a balance is still due.`);
+      toast.warning(`${skipped} skipped: already completed, or a balance is still due.`);
     }
     if (failed[0]) toast.error(errorMessage(failed[0].reason));
     setSelected(new Set());
@@ -222,11 +222,11 @@ export default function OrdersPage() {
     },
     {
       key: 'pickup',
-      header: 'Pickup',
+      header: 'Est. completion',
       cell: (order) =>
         order.released_at ? (
           <span className="whitespace-nowrap text-muted">
-            Released {formatDate(order.released_at)}
+            Completed {formatDate(order.released_at)}
           </span>
         ) : (
           <span
@@ -388,7 +388,7 @@ export default function OrdersPage() {
         open={confirming}
         onOpenChange={setConfirming}
         title={`Move ${chosen.length} ${chosen.length === 1 ? 'order' : 'orders'} to the next stage?`}
-        description="Each order moves forward one stage. Ready orders are released only if fully paid, so confirm that they have been claimed. Released orders are skipped."
+        description="Each order moves forward one stage. Ready orders are completed only if fully paid, so confirm that they have been claimed. Completed orders are skipped."
         confirmLabel="Move orders"
         loading={moving}
         onConfirm={() => void moveSelected()}

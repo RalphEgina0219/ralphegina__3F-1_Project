@@ -4,5 +4,4 @@ export type {
   OrderDto,
   OrderFilters,
   OrdersMeta,
-  ReceiptDto,
 } from '@/types/api';

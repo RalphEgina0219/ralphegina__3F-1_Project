@@ -4,7 +4,10 @@
  */
 import type {
   Barangay,
+  Basket,
+  BasketStatus,
   Customer,
+  CustomerNotification,
   InventoryItem,
   InventoryMovementType,
   Notification,
@@ -47,8 +50,19 @@ export interface AuthUser {
 
 export type { Barangay, Notification, Service, ShopSettings };
 
+/** The staff view of a customer's sign-in. Never includes the password hash. */
+export interface CustomerAccountDto {
+  email: string;
+  is_active: boolean;
+  must_change_password: boolean;
+  last_login_at: string | null;
+  created_at: string;
+}
+
 export interface CustomerDto extends Customer {
   barangay_name: string;
+  has_account: boolean;
+  account: CustomerAccountDto | null;
   orders_count: number;
   last_visit_at: string | null;
   total_spent_cents: number;
@@ -65,6 +79,15 @@ export interface CustomerInput {
   barangay_id: number;
   street_address?: string | null;
   notes?: string | null;
+  /** Required when creating: the counter registration creates the account in the same step. */
+  email?: string;
+}
+
+/** POST /customers, POST /customers/:id/account and POST /customers/:id/reset-password. */
+export interface TemporaryPasswordResponse {
+  customer: CustomerDto;
+  /** Shown once to staff, who pass it on. Only its hash is stored. */
+  temporary_password: string;
 }
 
 export type ServiceInput = Pick<
@@ -91,11 +114,24 @@ export interface UserRef {
   name: string;
 }
 
+export interface BasketRefDto {
+  id: number;
+  basket_number: string;
+}
+
+/** receipt_footer is shown as the closing note of every order summary. */
+export type ShopInfoDto = Pick<
+  ShopSettings,
+  'name' | 'address' | 'contact_number' | 'receipt_footer'
+>;
+
 export interface OrderDto {
   id: number;
+  /** The transaction ID. */
   order_number: string;
-  qr_token: string;
   customer: OrderCustomerDto;
+  /** Baskets that hold (or held) this order's laundry. */
+  baskets: BasketRefDto[];
   status: StatusCode;
   status_label: string;
   status_since: string;
@@ -140,9 +176,46 @@ export interface StatusHistoryDto {
   changed_at: string;
 }
 
+export interface BasketAssignmentDto {
+  id: number;
+  basket: BasketRefDto;
+  assigned_at: string;
+  assigned_by: UserRef;
+  released_at: string | null;
+}
+
 export interface OrderDetailDto extends OrderDto {
   payments: PaymentDto[];
   status_history: StatusHistoryDto[];
+  basket_history: BasketAssignmentDto[];
+  shop: ShopInfoDto;
+}
+
+/** A payment as the order summary lists it. Staff and customer payment rows both fit this. */
+export interface SummaryPaymentDto {
+  id: number;
+  paid_at: string;
+  method_label: string;
+  amount_cents: number;
+  reference_number: string | null;
+  receipt_number: string;
+  voided_at?: string | null;
+}
+
+/** Everything the shared, read-only OrderSummary shows. The digital replacement for a receipt. */
+export interface OrderSummaryData {
+  shop: ShopInfoDto;
+  order_number: string;
+  received_at: string;
+  promised_at: string;
+  status: StatusCode;
+  customer: { full_name: string; contact_number: string };
+  baskets: BasketRefDto[];
+  items: OrderItemDto[];
+  total_cents: number;
+  paid_cents: number;
+  balance_cents: number;
+  payments: SummaryPaymentDto[];
 }
 
 export interface OrdersMeta {
@@ -176,27 +249,12 @@ export interface NewOrderItemInput {
 
 export interface NewOrderInput {
   customer_id: number;
+  /** At least one available basket. */
+  basket_ids: number[];
   items: NewOrderItemInput[];
   promised_at: string;
   notes?: string | null;
   payment?: NewPaymentInput;
-}
-
-export interface ReceiptDto {
-  shop: ShopSettings;
-  order_id: number;
-  order_number: string;
-  qr_token: string;
-  receipt_number: string | null;
-  issued_at: string;
-  customer_name: string;
-  staff_name: string;
-  promised_at: string;
-  items: OrderItemDto[];
-  total_cents: number;
-  paid_cents: number;
-  paid_methods: string[];
-  balance_cents: number;
 }
 
 export interface PaymentsMeta {
@@ -403,13 +461,92 @@ export interface NotificationsMeta {
   unread: number;
 }
 
-/** Public tracking DTO. Deliberately separate from OrderDto: no phone, address, full name or money. */
-export interface PublicTrackingDto {
+// Baskets
+
+export interface BasketDto extends Basket {
+  current_order: { id: number; order_number: string } | null;
+  times_used: number;
+  last_used_at: string | null;
+}
+
+export interface BasketsMeta {
+  counts: Record<BasketStatus, number>;
+}
+
+export interface BasketHistoryDto {
+  id: number;
+  order_id: number;
   order_number: string;
-  customer_display_name: string;
+  customer_name: string;
+  assigned_at: string;
+  assigned_by: UserRef;
+  released_at: string | null;
+}
+
+/** GET /scan/:code. A basket token or number answers type basket, an order number type order. */
+export type ScanResultDto =
+  | { type: 'basket'; basket: BasketDto; active_order: OrderDetailDto | null }
+  | { type: 'order'; order: OrderDetailDto };
+
+// Customer portal. Everything here is scoped to the signed-in customer.
+
+export interface CustomerSelfDto {
+  id: number;
+  full_name: string;
+  email: string;
+  contact_number: string;
+  barangay_id: number;
+  barangay_name: string;
+  street_address: string | null;
+  must_change_password: boolean;
+}
+
+export interface CustomerRegisterInput {
+  full_name: string;
+  contact_number: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  barangay_id?: number | null;
+  street_address?: string | null;
+}
+
+export interface PortalOrderDto {
+  order_number: string;
+  received_at: string;
+  promised_at: string;
+  released_at: string | null;
   status: StatusCode;
   status_label: string;
-  timeline: { status: StatusCode; label: string; at: string | null }[];
-  estimated_ready_at: string;
-  shop: { name: string; address: string; hours: string };
+  baskets: BasketRefDto[];
+  items: OrderItemDto[];
+  total_cents: number;
+  paid_cents: number;
+  balance_cents: number;
+  payment_status: PaymentStatus;
+}
+
+export interface TimelineStepDto {
+  status: StatusCode;
+  label: string;
+  /** When the order last entered this stage. Null for stages not reached yet. */
+  at: string | null;
+}
+
+/** No staff names, no internal notes, no voided payments. */
+export interface PortalOrderDetailDto extends PortalOrderDto {
+  customer: { full_name: string; contact_number: string };
+  payments: SummaryPaymentDto[];
+  timeline: TimelineStepDto[];
+  shop: ShopInfoDto;
+}
+
+export interface PortalOrdersMeta {
+  active: number;
+  completed: number;
+}
+
+/** The customer links straight to the order by its number, never by an internal id. */
+export interface CustomerNotificationDto extends CustomerNotification {
+  order_number: string;
 }

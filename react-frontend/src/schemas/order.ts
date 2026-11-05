@@ -11,6 +11,7 @@ const amountOrEmpty = z
 export const newOrderSchema = z
   .object({
     customer_id: z.number({ error: 'Choose a customer.' }).int().positive('Choose a customer.'),
+    basket_ids: z.array(z.number().int().positive()).min(1, 'Add at least one basket.'),
     items: z
       .array(
         z.object({
@@ -22,10 +23,10 @@ export const newOrderSchema = z
     addons: z.array(z.number()),
     promised_at: z
       .string()
-      .min(1, 'Choose the pickup date and time.')
+      .min(1, 'Choose the estimated completion date and time.')
       .refine(
         (value) => new Date(value).getTime() >= Date.now() - 60_000,
-        'Pickup cannot be in the past.',
+        'Estimated completion cannot be in the past.',
       ),
     notes: z.string().trim(),
     payment_method: z.enum(['cash', 'gcash', 'later']),
@@ -53,7 +54,7 @@ export const newOrderSchema = z
 export type NewOrderForm = z.infer<typeof newOrderSchema>;
 
 export const editOrderSchema = z.object({
-  promised_at: z.string().min(1, 'Choose the pickup date and time.'),
+  promised_at: z.string().min(1, 'Choose the estimated completion date and time.'),
   notes: z.string().trim(),
 });
 

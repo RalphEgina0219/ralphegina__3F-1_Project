@@ -11,8 +11,14 @@ describe('status order', () => {
       'Drying',
       'Folding',
       'Ready for Pickup',
-      'Released',
+      'Completed',
     ]);
+  });
+
+  it('shows Completed for the internal released code everywhere', () => {
+    expect(STATUS_META.released.label).toBe('Completed');
+    expect(STATUS_META.released.shortLabel).toBe('Completed');
+    expect(STATUS_ORDER.at(-1)).toBe('released');
   });
 
   it('steps forward and back', () => {
@@ -47,6 +53,15 @@ describe('checkTransition', () => {
     ).toMatchObject({ ok: false, code: 'balance_due' });
     expect(checkTransition({ ...base, from: 'ready_for_pickup', to: 'released' })).toMatchObject({
       ok: true,
+    });
+  });
+
+  it('treats a completed transaction as closed, even for an admin', () => {
+    const admin = { role: 'admin', balanceCents: 0, note: 'Customer came back' } as const;
+    expect(checkTransition({ ...admin, from: 'released', to: 'ready_for_pickup' })).toMatchObject({
+      ok: false,
+      code: 'already_completed',
+      message: 'This transaction is completed.',
     });
   });
 

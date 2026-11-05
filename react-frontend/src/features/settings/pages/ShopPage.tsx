@@ -92,7 +92,7 @@ export default function ShopPage() {
       <Card className="p-4 md:p-5">
         <CardHeader
           title="Shop profile"
-          subtitle="Shown on receipts and the public tracking page."
+          subtitle="Shown on order summaries and basket labels."
           className="mb-4"
         />
         {query.isPending && <SkeletonRows rows={5} className="p-0" />}
@@ -131,7 +131,7 @@ export default function ShopPage() {
               )}
             </Field>
             <Field
-              label="Receipt footer"
+              label="Order summary note"
               error={errors.receipt_footer?.message}
               className="sm:col-span-2"
             >

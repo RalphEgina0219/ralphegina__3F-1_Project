@@ -20,7 +20,7 @@ export interface StatusMeta {
   dot: string;
   /** Solid fill used for "current" state in buttons and timelines. */
   fg: string;
-  /** Sentence on the public tracking page: "Hi Maria S., your laundry is ___". */
+  /** Sentence on the customer dashboard: "Your laundry is ___". */
   sentence: string;
 }
 
@@ -65,13 +65,14 @@ export const STATUS_META: Record<StatusCode, StatusMeta> = {
     fg: 'text-status-ready-fg',
     sentence: 'Ready for pickup',
   },
+  // The internal code stays 'released'; people only ever see 'Completed'.
   released: {
-    label: 'Released',
-    shortLabel: 'Released',
+    label: 'Completed',
+    shortLabel: 'Completed',
     chip: 'bg-status-released-bg text-status-released-fg',
     dot: 'bg-status-released-dot',
     fg: 'text-status-released-fg',
-    sentence: 'Released. Thank you!',
+    sentence: 'Completed. Thank you!',
   },
 };
 
@@ -88,6 +89,7 @@ export function prevStatus(status: StatusCode): StatusCode | null {
 }
 
 export type TransitionErrorCode =
+  | 'already_completed'
   | 'same_status'
   | 'skip_not_allowed'
   | 'revert_not_allowed'
@@ -114,6 +116,11 @@ export function checkTransition({
   balanceCents,
   note,
 }: TransitionInput): TransitionCheck {
+  // A completed transaction is a closed record: its baskets may already hold someone else's laundry.
+  if (from === 'released') {
+    return { ok: false, code: 'already_completed', message: 'This transaction is completed.' };
+  }
+
   const distance = statusIndex(to) - statusIndex(from);
 
   if (distance === 0) {
@@ -129,7 +136,7 @@ export function checkTransition({
       return {
         ok: false,
         code: 'balance_due',
-        message: 'Settle the balance before releasing this order.',
+        message: 'Settle the balance before completing this order.',
       };
     }
     return { ok: true, direction: 'forward' };
@@ -161,3 +168,6 @@ export function checkTransition({
 
   return { ok: true, direction: 'revert' };
 }
+
+/** Orders still in the shop: everything before Completed. */
+export const isActiveStatus = (status: StatusCode) => status !== 'released';

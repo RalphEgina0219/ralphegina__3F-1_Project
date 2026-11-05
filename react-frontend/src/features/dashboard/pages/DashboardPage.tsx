@@ -103,7 +103,7 @@ function FlowStrip({ counts }: { counts: DashboardSummary['flow_counts'] }) {
                 className={cn('block min-h-16 rounded-control p-3 hover:opacity-85', meta.chip)}
               >
                 <span className="block truncate text-[13px] font-semibold">
-                  {isReleased ? 'Released today' : meta.shortLabel}
+                  {isReleased ? 'Completed today' : meta.shortLabel}
                 </span>
                 <span className="block text-[26px] leading-tight font-extrabold tracking-[-0.02em]">
                   {isReleased ? counts.released_today : counts[status]}

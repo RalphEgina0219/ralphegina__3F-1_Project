@@ -1,12 +1,18 @@
-import { Printer, RotateCcw, Wallet, WashingMachine } from 'lucide-react';
+import {
+  CheckCircle2,
+  Lock,
+  RotateCcw,
+  ShoppingBasket,
+  Wallet,
+  WashingMachine,
+} from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Badge, PaymentChip, StatusChip } from '@/components/ui/Badge';
 import { Button, ButtonLink, linkClass } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Money } from '@/components/ui/Money';
 import { Mono } from '@/components/ui/Mono';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
@@ -15,17 +21,17 @@ import { StickyActions } from '@/components/ui/StickyActions';
 import { useCan, useCurrentUser } from '@/features/auth/store';
 import { RecordPaymentDialog } from '@/features/payments/components/RecordPaymentDialog';
 import { VoidPaymentDialog } from '@/features/payments/components/VoidPaymentDialog';
-import { OrderQrCard } from '@/features/qr/components/OrderQrCard';
 import { errorMessage, errorStatus } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatDateTime, formatRelativeDay, formatSmartTime } from '@/lib/dates';
-import { formatKg, formatPhone, itemQuantityLabel, itemRateSuffix } from '@/lib/format';
+import { formatPhone } from '@/lib/format';
 import { formatMoney } from '@/lib/money';
 import { prevStatus, STATUS_META, STATUS_ORDER, statusIndex } from '@/lib/status';
 import type { OrderDetailDto, PaymentDto } from '@/types/api';
 import { useChangeStatus, useOrder } from '../api';
 import { EditOrderDialog } from '../components/EditOrderDialog';
 import { MoveStatusButton } from '../components/MoveStatusButton';
+import { OrderSummary } from '../components/OrderSummary';
 
 function buildSteps(order: OrderDetailDto): StepItem[] {
   const current = statusIndex(order.status);
@@ -49,90 +55,6 @@ function buildSteps(order: OrderDetailDto): StepItem[] {
   });
 }
 
-function ItemsCard({ order }: { order: OrderDetailDto }) {
-  return (
-    <Card className="p-4 md:p-5">
-      <CardHeader title="Items & charges" className="mb-2" />
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="sr-only">Items and charges for {order.order_number}</caption>
-          <thead>
-            <tr className="border-b border-line text-left text-[13px] text-muted">
-              <th scope="col" className="py-2 pr-2 font-semibold">
-                Service
-              </th>
-              <th scope="col" className="px-2 py-2 font-semibold">
-                Qty / weight
-              </th>
-              <th scope="col" className="px-2 py-2 font-semibold max-sm:hidden">
-                Rate
-              </th>
-              <th scope="col" className="py-2 pl-2 text-right font-semibold">
-                Subtotal
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item) => {
-              const billed = item.subtotal_cents / item.unit_price_cents;
-              const usedMinimum = item.pricing_type === 'per_kg' && billed > (item.weight_kg ?? 0);
-              return (
-                <tr key={item.id} className="border-b border-line">
-                  <td className="py-2.5 pr-2 font-semibold">
-                    {item.service_name}
-                    <span className="block text-xs font-normal text-muted sm:hidden">
-                      {formatMoney(item.unit_price_cents)}
-                      {itemRateSuffix(item)}
-                    </span>
-                  </td>
-                  <td className="px-2 py-2.5 whitespace-nowrap">
-                    {itemQuantityLabel(item)}
-                    {usedMinimum && (
-                      <span className="block text-xs text-muted">billed as {formatKg(billed)}</span>
-                    )}
-                  </td>
-                  <td className="px-2 py-2.5 whitespace-nowrap max-sm:hidden">
-                    {formatMoney(item.unit_price_cents)}
-                    {itemRateSuffix(item)}
-                  </td>
-                  <td className="py-2.5 pl-2 text-right">
-                    <Money cents={item.subtotal_cents} />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <dl className="mt-3 ml-auto w-full max-w-64 space-y-1 text-sm">
-        <div className="flex items-center justify-between">
-          <dt className="text-muted">Total</dt>
-          <dd className="text-[17px] font-extrabold">
-            <Money cents={order.total_cents} />
-          </dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-muted">Paid</dt>
-          <dd>
-            <Money cents={order.paid_cents} />
-          </dd>
-        </div>
-        <div
-          className={cn(
-            'flex justify-between font-bold',
-            order.balance_cents > 0 ? 'text-warn' : 'text-ok',
-          )}
-        >
-          <dt>Balance</dt>
-          <dd>
-            <Money cents={order.balance_cents} />
-          </dd>
-        </div>
-      </dl>
-    </Card>
-  );
-}
-
 function PaymentsCard({
   order,
   onVoid,
@@ -145,7 +67,7 @@ function PaymentsCard({
   const earliest = order.payments.filter((p) => !p.voided_at).at(-1);
   return (
     <Card className="p-4 md:p-5">
-      <CardHeader title="Payments" className="mb-2" />
+      <CardHeader title="Payment records" className="mb-2" />
       {order.payments.length === 0 && (
         <p className="py-3 text-sm text-muted">No payment yet. The full amount is due on pickup.</p>
       )}
@@ -193,7 +115,7 @@ function PaymentsCard({
       </ul>
       {order.balance_cents > 0 && order.payments.length > 0 && (
         <p className="mt-2 text-[13px] text-muted">
-          Remaining {formatMoney(order.balance_cents)} is collected on release.
+          Remaining {formatMoney(order.balance_cents)} is collected before completion.
         </p>
       )}
     </Card>
@@ -227,20 +149,56 @@ function HistoryCard({ order }: { order: OrderDetailDto }) {
             </div>
           </li>
         ))}
-        <li className="flex gap-3">
-          <span className="mt-1.5 size-2.5 shrink-0 rounded-full bg-aqua" aria-hidden="true" />
-          <div>
-            <p className="font-semibold">QR code generated</p>
-            <p className="text-[13px] text-muted">{formatDateTime(order.received_at)} · System</p>
-          </div>
-        </li>
       </ol>
+    </Card>
+  );
+}
+
+/** Which baskets hold this order now, and every basket it has used. */
+function BasketsCard({ order }: { order: OrderDetailDto }) {
+  const active = order.basket_history.filter((row) => !row.released_at);
+  return (
+    <Card className="p-5">
+      <h2 className="text-[17px] font-bold">Baskets</h2>
+      {active.length > 0 ? (
+        <ul className="mt-2 flex flex-wrap gap-2" aria-label="Baskets holding this order">
+          {active.map((row) => (
+            <li
+              key={row.id}
+              className="flex min-h-9 items-center gap-1.5 rounded-control bg-flow-soft px-2.5 font-mono text-sm font-semibold"
+            >
+              <ShoppingBasket className="size-4 text-flow" aria-hidden="true" />
+              {row.basket.basket_number}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-1 text-sm text-muted">
+          {order.status === 'released'
+            ? 'Returned on completion. The baskets are free for other orders.'
+            : 'No basket assigned.'}
+        </p>
+      )}
+      <h3 className="mt-4 text-[13px] font-semibold text-muted">Assignment history</h3>
+      <ul className="mt-1 space-y-1.5 text-[13px]">
+        {order.basket_history.map((row) => (
+          <li key={row.id}>
+            <Mono className="font-semibold">{row.basket.basket_number}</Mono> tagged{' '}
+            {formatDateTime(row.assigned_at)} by {row.assigned_by.name}
+            {row.released_at && (
+              <span className="text-muted"> · returned {formatDateTime(row.released_at)}</span>
+            )}
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }
 
 export default function OrderDetailPage() {
   const id = Number(useParams().id);
+  const location = useLocation();
+  const justCreated = (location.state as { created?: boolean } | null)?.created === true;
   const user = useCurrentUser();
   const canPay = useCan('payments.record');
   const canVoid = useCan('payments.void');
@@ -281,19 +239,11 @@ export default function OrderDetailPage() {
   }
 
   const order = query.data;
-  const previous = prevStatus(order.status);
-  const showPay = canPay && order.balance_cents > 0;
+  const completed = order.status === 'released';
+  // A completed transaction is a closed record: no status, payment or edit controls.
+  const previous = completed ? null : prevStatus(order.status);
+  const showPay = canPay && order.balance_cents > 0 && !completed;
   const showRevert = canRevert && previous;
-
-  const receiptLink = (
-    <ButtonLink
-      to={`/orders/${order.id}/receipt`}
-      icon={<Printer className="size-4" aria-hidden="true" />}
-    >
-      <span className="lg:hidden">Receipt</span>
-      <span className="max-lg:hidden">Print receipt</span>
-    </ButtonLink>
-  );
 
   return (
     <div className="max-lg:pb-40 max-md:pt-3">
@@ -325,8 +275,8 @@ export default function OrderDetailPage() {
             {order.customer.full_name} · Received {formatDateTime(order.received_at)} by{' '}
             {order.received_by.name} ·{' '}
             {order.released_at
-              ? `Released ${formatDateTime(order.released_at)}`
-              : `Pickup ${formatRelativeDay(order.promised_at)}`}
+              ? `Completed ${formatDateTime(order.released_at)}`
+              : `Estimated completion ${formatRelativeDay(order.promised_at)}`}
           </>
         }
         actions={
@@ -340,7 +290,6 @@ export default function OrderDetailPage() {
                 Move back
               </Button>
             )}
-            {receiptLink}
             {showPay && (
               <Button
                 variant="secondary"
@@ -357,26 +306,54 @@ export default function OrderDetailPage() {
         }
       />
 
+      {justCreated && (
+        <div role="status">
+          <Card className="mb-5 border-ok-bar bg-ok-bg p-4 md:p-5">
+            <p className="flex items-center gap-2 font-bold text-ok">
+              <CheckCircle2 className="size-5 shrink-0" aria-hidden="true" />
+              Order {order.order_number} saved. The customer can now see it in their account.
+            </p>
+            <p className="mt-1 text-sm">
+              Tag the laundry with {order.baskets.length === 1 ? 'basket' : 'baskets'}{' '}
+              <Mono className="font-bold">
+                {order.baskets.map((b) => b.basket_number).join(', ')}
+              </Mono>
+              .
+            </p>
+          </Card>
+        </div>
+      )}
+
+      {completed && (
+        <p className="mb-5 flex items-center gap-2 rounded-control bg-foam-2 px-4 py-3 text-sm font-semibold">
+          <Lock className="size-4 shrink-0" aria-hidden="true" />
+          This transaction is completed. Its summary and history stay here for good.
+        </p>
+      )}
+
       <Card className="mb-5 p-4 md:px-5 md:py-6">
         <Stepper label={`Progress of ${order.order_number}`} steps={buildSteps(order)} />
       </Card>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
         <div className="min-w-0 space-y-5">
-          <ItemsCard order={order} />
+          <OrderSummary summary={order} />
           <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
-            <PaymentsCard order={order} canVoid={canVoid} onVoid={setVoiding} />
+            <PaymentsCard order={order} canVoid={canVoid && !completed} onVoid={setVoiding} />
             <HistoryCard order={order} />
           </div>
         </div>
 
         <aside className="min-w-0 space-y-5">
-          <OrderQrCard order={order} />
+          <BasketsCard order={order} />
           <Card className="p-5">
             <h2 className="text-[17px] font-bold">Customer</h2>
             <p className="mt-2 font-bold">{order.customer.full_name}</p>
             <p className="text-sm text-muted">
-              <a href={`tel:${order.customer.contact_number}`} className="hover:underline">
+              <a
+                href={`tel:${order.customer.contact_number}`}
+                className="inline-flex min-h-11 items-center hover:underline"
+              >
                 {formatPhone(order.customer.contact_number)}
               </a>
             </p>
@@ -393,15 +370,17 @@ export default function OrderDetailPage() {
           <Card className="p-5">
             <CardHeader
               as="h2"
-              title="Pickup & notes"
+              title="Completion & notes"
               action={
-                <Button variant="secondary" onClick={() => setEditing(true)}>
-                  Edit
-                </Button>
+                completed ? undefined : (
+                  <Button variant="secondary" onClick={() => setEditing(true)}>
+                    Edit
+                  </Button>
+                )
               }
             />
             <p className="mt-2 text-sm">
-              <span className="text-muted">Promised: </span>
+              <span className="text-muted">Estimated completion: </span>
               {formatRelativeDay(order.promised_at)}
             </p>
             <p className="mt-1 text-sm">
@@ -412,22 +391,23 @@ export default function OrderDetailPage() {
         </aside>
       </div>
 
-      <StickyActions>
-        <MoveStatusButton order={order} size="lg" className="w-full" explain />
-        <div className="flex gap-2 *:flex-1">
-          {showRevert && (
-            <Button variant="secondary" onClick={() => setReverting(true)}>
-              Undo
-            </Button>
-          )}
-          {showPay && (
-            <Button variant="secondary" onClick={() => setPaying(true)}>
-              Payment
-            </Button>
-          )}
-          {receiptLink}
-        </div>
-      </StickyActions>
+      {!completed && (
+        <StickyActions>
+          <MoveStatusButton order={order} size="lg" className="w-full" explain />
+          <div className="flex gap-2 *:flex-1">
+            {showRevert && (
+              <Button variant="secondary" onClick={() => setReverting(true)}>
+                Undo
+              </Button>
+            )}
+            {showPay && (
+              <Button variant="secondary" onClick={() => setPaying(true)}>
+                Payment
+              </Button>
+            )}
+          </div>
+        </StickyActions>
+      )}
 
       <RecordPaymentDialog order={order} open={paying} onOpenChange={setPaying} />
       <EditOrderDialog order={order} open={editing} onOpenChange={setEditing} />

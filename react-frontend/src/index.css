@@ -203,7 +203,7 @@
   }
 }
 
-/* Print. The receipt and QR tag each use their own page size, set just before window.print(). */
+/* Print. Basket labels and reports each set their own page size just before window.print(). */
 .print-only {
   display: none;
 }
@@ -213,10 +213,6 @@
   body {
     background: var(--color-white) !important;
     overflow: visible !important;
-  }
-
-  body[data-print='tag'] .print-only {
-    display: block;
   }
 
   [data-sonner-toaster] {
@@ -230,46 +226,31 @@
     height: 100% !important;
   }
 
-  body[data-print='tag'] #root {
+  /* Basket labels: only the sheet prints, never the app around it. */
+  body[data-print='labels'] #root {
     display: none !important;
   }
 
-  body[data-print='receipt-58'] .receipt-sheet {
-    width: 58mm !important;
-    max-width: 58mm !important;
-    padding: 2mm !important;
-    border: 0 !important;
-    border-radius: 0 !important;
+  body[data-print='labels'] .print-only {
+    display: block;
+  }
+
+  .label-page {
+    display: grid;
+    grid-template-columns: repeat(3, 64mm);
+    grid-auto-rows: 34.5mm;
+    column-gap: 1mm;
+    break-after: page;
+  }
+
+  .label-page:last-child {
+    break-after: auto;
+  }
+
+  .basket-label {
+    break-inside: avoid;
     color: #000 !important;
-  }
-
-  /* Thermal printers have one color and little width: one size and pure black throughout. */
-  body[data-print='receipt-58'] .receipt-sheet * {
-    font-size: 10px !important;
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  body[data-print='receipt-58'] .receipt-sheet .receipt-large {
-    font-size: 13px !important;
-    font-weight: 800 !important;
-  }
-
-  body[data-print='receipt-58'] .receipt-sheet .receipt-qr path:last-child {
-    fill: #000 !important;
-  }
-
-  body[data-print='receipt-a4'] .receipt-sheet {
-    width: 120mm !important;
-    max-width: 120mm !important;
-    margin: 0 auto !important;
-    border: 0 !important;
-    font-size: 13px !important;
-  }
-
-  body[data-print='receipt-58'] .receipt-sheet .receipt-qr {
-    width: 22mm !important;
-    height: 22mm !important;
+    border: 0.2mm dashed #999;
   }
 
   .avoid-break {

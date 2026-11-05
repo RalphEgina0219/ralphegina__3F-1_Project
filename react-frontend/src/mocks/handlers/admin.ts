@@ -1,6 +1,6 @@
 import { PERMISSION_LABELS } from '@/lib/permissions';
 import type { PermissionCode, RoleName, User } from '@/types/entities';
-import { db, generateQrToken, nextId } from '../db';
+import { db, generateTemporaryPassword, nextId } from '../db';
 import { asNumber, asString, fail, inRange, invalid, ok, paginate, route } from '../http';
 import { audit, staffPermissions, toActivityDto, toUserDto } from '../queries';
 
@@ -89,7 +89,7 @@ export const adminHandlers = [
   route('post', '/users/:id/reset-password', 'settings.manage', ({ user, params }) => {
     const target = db().users.find((u) => u.id === Number(params.id));
     if (!target) return fail(404, 'User not found.');
-    const temporary_password = generateQrToken().replace(/[-_]/g, '').slice(0, 10);
+    const temporary_password = generateTemporaryPassword();
     db().credentials[target.id] = temporary_password;
     audit(user.id, 'user.password_reset', 'user', target.id, { username: target.username });
     return ok({ temporary_password });

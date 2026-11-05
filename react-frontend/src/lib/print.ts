@@ -1,10 +1,9 @@
-export type PrintMode = 'receipt-58' | 'receipt-a4' | 'tag' | 'report';
+/** The shop prints basket labels and reports only. There are no printed receipts. */
+export type PrintMode = 'labels' | 'report';
 
 const PAGE_RULES: Record<PrintMode, string> = {
-  // Thermal drivers feed continuously and cut after the content; the height only bounds the page.
-  'receipt-58': '@page { size: 58mm 297mm; margin: 0; }',
-  'receipt-a4': '@page { size: A4; margin: 15mm; }',
-  tag: '@page { size: 58mm 58mm; margin: 2mm; }',
+  // A4 sheet of 3 × 8 labels, 64 × 34.5 mm each.
+  labels: '@page { size: A4; margin: 10mm 8mm; }',
   report: '@page { size: A4; margin: 12mm; }',
 };
 

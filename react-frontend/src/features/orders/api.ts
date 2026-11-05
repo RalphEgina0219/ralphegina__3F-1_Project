@@ -14,7 +14,6 @@ import type {
   OrderFilters,
   OrdersMeta,
   Paginated,
-  ReceiptDto,
 } from '@/types/api';
 import type { StatusCode } from '@/types/entities';
 
@@ -28,6 +27,8 @@ export function invalidateOrderData(queryClient: QueryClient) {
     'balances',
     'payments',
     'reports',
+    'baskets',
+    'scan',
   ]) {
     void queryClient.invalidateQueries({ queryKey: [key] });
   }
@@ -68,16 +69,6 @@ export function useOrder(id: number) {
   });
 }
 
-export function useReceipt(id: number) {
-  return useQuery({
-    queryKey: ['orders', 'receipt', id],
-    queryFn: async () => {
-      const { data } = await api.get<ReceiptDto>(`/orders/${id}/receipt`);
-      return data;
-    },
-  });
-}
-
 export function useCreateOrder() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -110,12 +101,19 @@ export function useChangeStatus() {
       id,
       to_status,
       note,
+      basket_id,
     }: {
       id: number;
       to_status: StatusCode;
       note?: string;
+      /** Sent from the scanner, so the server can refuse a stale screen with 409. */
+      basket_id?: number;
     }) => {
-      const { data } = await api.post<OrderDetailDto>(`/orders/${id}/status`, { to_status, note });
+      const { data } = await api.post<OrderDetailDto>(`/orders/${id}/status`, {
+        to_status,
+        note,
+        basket_id,
+      });
       return data;
     },
     onSuccess: (data) => {

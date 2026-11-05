@@ -40,7 +40,7 @@ export function MoveStatusButton({
   });
   const meta = STATUS_META[next];
   const label =
-    next === 'released' ? 'Release order' : `Move to ${short ? meta.shortLabel : meta.label}`;
+    next === 'released' ? 'Mark as completed' : `Move to ${short ? meta.shortLabel : meta.label}`;
 
   const move = () => {
     change.mutate(
@@ -73,16 +73,16 @@ export function MoveStatusButton({
       {explain && !check.ok && (
         <p className="text-[13px] text-warn">
           {check.code === 'balance_due'
-            ? `Release is blocked until the ${formatMoney(order.balance_cents)} balance is paid.`
+            ? `Completing is blocked until the ${formatMoney(order.balance_cents)} balance is paid.`
             : check.message}
         </p>
       )}
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title={`Release ${order.order_number}?`}
-        description="Do this only when the customer has claimed the laundry. Releasing cannot be undone by staff."
-        confirmLabel="Release order"
+        title={`Complete ${order.order_number}?`}
+        description="Do this only when the customer has claimed the laundry. A completed transaction cannot be changed, and its baskets become free for other orders."
+        confirmLabel="Mark as completed"
         loading={change.isPending}
         onConfirm={move}
       />

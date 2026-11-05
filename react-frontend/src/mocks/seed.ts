@@ -1,7 +1,9 @@
 import { addDays, format, setHours, setMinutes, subDays, subMinutes } from 'date-fns';
+import { formatBasketNumber } from '@/lib/basket';
 import { lineSubtotalCents } from '@/lib/billing';
 import type { Order, Payment, PaymentMethodCode, StatusCode } from '@/types/entities';
 import { generateQrToken, type MockDb } from './db';
+import { customerNotice, demoEmail } from './messages';
 
 /** Small seeded generator so that every reset produces the same shop history. */
 function mulberry32(seed: number) {
@@ -95,6 +97,20 @@ const CUSTOMERS: readonly [string, string, string, string?][] = [
   ['Felix Ignacio', '09203318845', 'Pulosahi'],
   ['Sarah Ramos', '09561047726', 'Cawayan'],
 ];
+
+/**
+ * Legacy profiles: on file from before customer accounts existed, with no account and no orders.
+ * They demonstrate "Create account" and cannot receive a new order until they have one.
+ */
+export const LEGACY_CUSTOMERS: readonly string[] = [
+  'Janine Alcantara',
+  'Felix Ignacio',
+  'Sarah Ramos',
+];
+
+const BASKET_COUNT = 30;
+/** Lost or broken baskets: kept for their history, never deleted, numbers never reused. */
+const RETIRED_BASKETS: readonly number[] = [29, 30];
 
 const SERVICE = { WDF: 1, WASH: 2, COMFORTER: 3, IRONING: 4, EXPRESS: 5, DRY_CLEAN: 6 } as const;
 const USER = { LIZA: 1, KEVIN: 2, AIRA: 3, JESSA: 4 } as const;
@@ -390,6 +406,8 @@ export function createSeed(now: Date): MockDb {
     credentials: { 1: 'password123', 2: 'password123', 3: 'password123', 4: 'password123' },
     barangays: BARANGAYS.map((name, index) => ({ id: index + 1, name })),
     customers: [],
+    customer_accounts: [],
+    customer_credentials: {},
     services: [
       {
         id: SERVICE.WDF,
@@ -461,12 +479,14 @@ export function createSeed(now: Date): MockDb {
     order_statuses: STAGES.map((code, index) => ({
       id: index + 1,
       code,
-      label: ['Received', 'Washing', 'Drying', 'Folding', 'Ready for Pickup', 'Released'][
+      label: ['Received', 'Washing', 'Drying', 'Folding', 'Ready for Pickup', 'Completed'][
         index
       ] as string,
       sort_order: index + 1,
     })),
     orders: [],
+    baskets: [],
+    order_baskets: [],
     order_items: [],
     payment_methods: [
       { id: 1, code: 'cash', label: 'Cash' },
@@ -492,6 +512,7 @@ export function createSeed(now: Date): MockDb {
     ],
     inventory_movements: [],
     notifications: [],
+    customer_notifications: [],
     shop_settings: {
       name: 'LaundryFlow',
       address: 'Brgy. Poblacion, Bongabong, Oriental Mindoro',
@@ -538,6 +559,57 @@ export function createSeed(now: Date): MockDb {
       updated_at: since,
     });
   });
+
+  // Every customer except the legacy profiles has an account. Demo password: password123.
+  db.customers
+    .filter((customer) => !LEGACY_CUSTOMERS.includes(customer.full_name))
+    .forEach((customer) => {
+      const id = db.customer_accounts.length + 1;
+      db.customer_accounts.push({
+        id,
+        customer_id: customer.id,
+        email: demoEmail(customer.full_name),
+        is_active: true,
+        must_change_password: false,
+        last_login_at: null,
+        created_at: customer.created_at,
+        updated_at: customer.created_at,
+      });
+      db.customer_credentials[id] = 'password123';
+    });
+
+  // Baskets BSK-0001 to BSK-0030, labelled when the shop opened.
+  const LABELS = ['Blue, large', 'Blue, medium', 'Green, large', 'Yellow, medium', 'Red, small'];
+  for (let n = 1; n <= BASKET_COUNT; n += 1) {
+    db.baskets.push({
+      id: n,
+      basket_number: formatBasketNumber(n),
+      qr_token: generateQrToken(),
+      label: LABELS[(n - 1) % LABELS.length] as string,
+      status: RETIRED_BASKETS.includes(n) ? 'retired' : 'available',
+      notes: RETIRED_BASKETS.includes(n) ? 'Cracked handle, replaced' : null,
+      created_by: USER.LIZA,
+      created_at: seededAt,
+      updated_at: seededAt,
+    });
+  }
+  // When each usable basket is free again. Infinity means it holds an active order.
+  const busyUntil = new Map<number, number>(
+    db.baskets.filter((b) => b.status !== 'retired').map((b) => [b.id, 0]),
+  );
+  let basketCursor = 0;
+  /** Round-robin over the free baskets, so wear spreads and "times used" looks real. */
+  const takeBasket = (at: Date): number => {
+    const ids = [...busyUntil.keys()];
+    for (let tries = 0; tries < ids.length; tries += 1) {
+      const id = ids[(basketCursor + tries) % ids.length] as number;
+      if ((busyUntil.get(id) ?? Infinity) <= at.getTime()) {
+        basketCursor = (basketCursor + tries + 1) % ids.length;
+        return id;
+      }
+    }
+    throw new Error('Seed ran out of free baskets');
+  };
 
   const sequences = new Map<string, number>();
   let receiptSeq = 200;
@@ -601,7 +673,6 @@ export function createSeed(now: Date): MockDb {
       order_number: `LF-${key}-${String(sequence).padStart(4, '0')}`,
       customer_id: customer.id,
       current_status_id: stageIndex + 1,
-      qr_token: generateQrToken(),
       received_by: by,
       received_at: iso(receivedAt),
       promised_at: iso(promisedAt),
@@ -680,6 +751,48 @@ export function createSeed(now: Date): MockDb {
     order.updated_at = iso(finalAt);
     if (spec.stage === 'released') order.released_at = iso(finalAt);
 
+    // Baskets: one per load, a second one for big loads. Completed orders handed theirs back.
+    const kilos = spec.items.reduce(
+      (sum, [serviceId, amount]) =>
+        sum + (serviceId === SERVICE.WDF || serviceId === SERVICE.WASH ? amount : 0),
+      0,
+    );
+    const basketCount = kilos >= 7 || spec.items.length >= 3 ? 2 : 1;
+    for (let b = 0; b < basketCount; b += 1) {
+      const basketId = takeBasket(receivedAt);
+      const done = spec.stage === 'released';
+      busyUntil.set(basketId, done ? finalAt.getTime() : Infinity);
+      db.order_baskets.push({
+        id: db.order_baskets.length + 1,
+        order_id: id,
+        basket_id: basketId,
+        assigned_at: iso(receivedAt),
+        assigned_by: by,
+        released_at: done ? iso(finalAt) : null,
+      });
+      if (!done) {
+        const basket = db.baskets.find((row) => row.id === basketId);
+        if (basket) basket.status = 'in_use';
+      }
+    }
+
+    // What the customer saw in their account for recent orders.
+    if (spec.daysAgo <= 1) {
+      history.forEach((entry, index) => {
+        const status = STAGES[entry.status - 1] as StatusCode;
+        const notice = customerNotice(order.order_number, status);
+        db.customer_notifications.push({
+          id: db.customer_notifications.length + 1,
+          customer_id: customer.id,
+          order_id: id,
+          type: notice.type,
+          message: notice.message,
+          sent_at: iso(entry.at),
+          read_at: index < history.length - 1 ? iso(entry.at) : null,
+        });
+      });
+    }
+
     if (spec.stage === 'ready_for_pickup' && spec.daysAgo <= 4) {
       db.notifications.push({
         id: db.notifications.length + 1,
@@ -703,7 +816,9 @@ export function createSeed(now: Date): MockDb {
   };
 
   // Older history: released, paid in full, some of it in two instalments.
-  const regulars = CUSTOMERS.map(([name]) => name);
+  const regulars = CUSTOMERS.map(([name]) => name).filter(
+    (name) => !LEGACY_CUSTOMERS.includes(name),
+  );
   const older: OrderSpec[] = [];
   for (let daysAgo = 13; daysAgo >= 2; daysAgo -= 1) {
     const count = 3 + Math.floor(rand() * 2);

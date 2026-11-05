@@ -6,7 +6,7 @@ import { Money } from './Money';
 
 describe('status and payment chips', () => {
   it('always carry a text label, so status never relies on color alone', () => {
-    const labels = ['Received', 'Washing', 'Drying', 'Folding', 'Ready for Pickup', 'Released'];
+    const labels = ['Received', 'Washing', 'Drying', 'Folding', 'Ready for Pickup', 'Completed'];
     STATUS_ORDER.forEach((status, index) => {
       const { unmount } = render(<StatusChip status={status} dot />);
       expect(screen.getByText(labels[index] as string)).toBeInTheDocument();

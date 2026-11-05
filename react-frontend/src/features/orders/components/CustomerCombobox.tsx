@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { useId, useState } from 'react';
+import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { useCustomers } from '@/features/customers/api';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -11,11 +12,13 @@ import type { CustomerDto } from '@/types/api';
 interface CustomerComboboxProps {
   id?: string;
   onSelect: (customer: CustomerDto) => void;
+  /** A legacy profile cannot take an order until staff create its account. */
+  onNeedsAccount: (customer: CustomerDto) => void;
   'aria-invalid'?: true;
   'aria-describedby'?: string;
 }
 
-export function CustomerCombobox({ id, onSelect, ...aria }: CustomerComboboxProps) {
+export function CustomerCombobox({ id, onSelect, onNeedsAccount, ...aria }: CustomerComboboxProps) {
   const listId = useId();
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
@@ -26,7 +29,8 @@ export function CustomerCombobox({ id, onSelect, ...aria }: CustomerComboboxProp
   const showList = open && debounced === text;
 
   const choose = (customer: CustomerDto) => {
-    onSelect(customer);
+    if (customer.has_account) onSelect(customer);
+    else onNeedsAccount(customer);
     setText('');
     setOpen(false);
   };
@@ -41,7 +45,7 @@ export function CustomerCombobox({ id, onSelect, ...aria }: CustomerComboboxProp
         aria-controls={listId}
         aria-autocomplete="list"
         aria-activedescendant={showList && options[active] ? `${listId}-${active}` : undefined}
-        placeholder="Name or contact number"
+        placeholder="Name, email or contact number"
         autoComplete="off"
         icon={<Search className="size-4" aria-hidden="true" />}
         value={text}
@@ -90,6 +94,7 @@ export function CustomerCombobox({ id, onSelect, ...aria }: CustomerComboboxProp
             id={`${listId}-${index}`}
             role="option"
             aria-selected={index === active}
+            aria-describedby={customer.has_account ? undefined : `${listId}-${index}-note`}
             className={cn(
               'flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-1.5',
               index === active && 'bg-flow-soft',
@@ -103,13 +108,21 @@ export function CustomerCombobox({ id, onSelect, ...aria }: CustomerComboboxProp
           >
             <span className="min-w-0">
               <span className="block truncate font-semibold">{customer.full_name}</span>
-              <span className="block text-[13px] text-muted">
-                {formatPhone(customer.contact_number)} · {customer.barangay_name}
+              <span className="block truncate text-[13px] text-muted">
+                {formatPhone(customer.contact_number)} ·{' '}
+                {customer.account?.email ?? customer.barangay_name}
               </span>
             </span>
-            {customer.balance_cents > 0 && (
-              <span className="shrink-0 text-[13px] font-semibold text-warn">
-                {formatMoney(customer.balance_cents)} due
+            {customer.has_account ? (
+              customer.balance_cents > 0 && (
+                <span className="shrink-0 text-[13px] font-semibold text-warn">
+                  {formatMoney(customer.balance_cents)} due
+                </span>
+              )
+            ) : (
+              <span id={`${listId}-${index}-note`} className="shrink-0 text-right">
+                <Badge tone="warn">No account</Badge>
+                <span className="mt-0.5 block text-xs font-semibold text-flow">Create account</span>
               </span>
             )}
           </li>

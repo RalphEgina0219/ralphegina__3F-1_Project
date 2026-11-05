@@ -1,24 +1,8 @@
-import axios from 'axios';
-import { setupServer } from 'msw/node';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { clearSession, db, resetDb } from './db';
-import { handlers } from './handlers';
+import { describe, expect, it } from 'vitest';
+import { db } from './db';
+import { freeBasket, http, items, login, newOrder, startMockApiForTests } from './test-utils';
 
-const server = setupServer(...handlers);
-const http = axios.create({ baseURL: 'http://localhost/api', validateStatus: () => true });
-
-const login = (username: string) => http.post('/auth/login', { username, password: 'password123' });
-const items = [{ service_id: 1, weight_kg: 6.5 }];
-const later = () => new Date(Date.now() + 86_400_000).toISOString();
-
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterAll(() => server.close());
-beforeEach(() => {
-  localStorage.clear();
-  sessionStorage.clear();
-  clearSession();
-  resetDb();
-});
+startMockApiForTests();
 
 describe('seed', () => {
   it('has about 40 customers, about 60 orders and 8 supplies across every stage', () => {
@@ -95,18 +79,20 @@ describe('auth and permissions', () => {
 });
 
 describe('orders', () => {
-  it('creates an order with a snapshot price, a number, a token and an audit entry', async () => {
+  it('creates an order with a snapshot price, a number, a basket and an audit entry', async () => {
     await login('kevin.m');
     const logsBefore = db().audit_logs.length;
-    const { status, data } = await http.post('/orders', {
-      customer_id: 1,
+    const basket = freeBasket();
+    const { status, data } = await newOrder({
+      basket_ids: [basket],
       items: [...items, { service_id: 4, quantity: 6 }, { service_id: 5 }],
-      promised_at: later(),
       payment: { amount_cents: 20000, payment_method: 'cash' },
     });
     expect(status).toBe(201);
     expect(data.order_number).toMatch(/^LF-\d{6}-\d{4}$/);
-    expect(data.qr_token).toMatch(/^[A-Za-z0-9_-]{32}$/);
+    expect(data).not.toHaveProperty('qr_token');
+    expect(data.baskets.map((b: { id: number }) => b.id)).toEqual([basket]);
+    expect(data.status_label).toBe('Received');
     expect(data.total_cents).toBe(36750);
     expect(data.balance_cents).toBe(16750);
     expect(data.payment_status).toBe('partial');
@@ -115,19 +101,11 @@ describe('orders', () => {
 
   it('keeps old orders at their old rate after a rate change', async () => {
     await login('liza.ramos');
-    const { data: order } = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-    });
+    const { data: order } = await newOrder();
     await http.put('/services/1', { rate_cents: 9900 });
     const { data: reread } = await http.get(`/orders/${order.id}`);
     expect(reread.total_cents).toBe(22750);
-    const { data: next } = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-    });
+    const { data: next } = await newOrder();
     expect(next.total_cents).toBe(64350);
   });
 
@@ -135,43 +113,31 @@ describe('orders', () => {
     await login('kevin.m');
     const { status, data } = await http.post('/orders', {
       customer_id: 999,
+      basket_ids: [],
       items: [],
       promised_at: '',
     });
     expect(status).toBe(422);
     expect(data.errors.customer_id).toBeDefined();
+    expect(data.errors.basket_ids).toBeDefined();
     expect(data.errors.items).toBeDefined();
     expect(data.errors.promised_at).toBeDefined();
   });
 
   it('requires a GCash reference and refuses overpayment', async () => {
     await login('kevin.m');
-    const noRef = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-      payment: { amount_cents: 100, payment_method: 'gcash' },
-    });
+    const noRef = await newOrder({ payment: { amount_cents: 100, payment_method: 'gcash' } });
     expect(noRef.data.errors['payment.reference_number']).toBeDefined();
-    const over = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-      payment: { amount_cents: 999999, payment_method: 'cash' },
-    });
+    const over = await newOrder({ payment: { amount_cents: 999999, payment_method: 'cash' } });
     expect(over.data.errors['payment.amount_cents']).toBeDefined();
   });
 
-  it('walks the lifecycle, blocks release while unpaid, then notifies and releases', async () => {
+  it('walks the lifecycle, blocks completion while unpaid, then notifies and completes', async () => {
     await login('kevin.m');
-    const { data: order } = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-    });
+    const { data: order } = await newOrder();
     const move = (to_status: string) => http.post(`/orders/${order.id}/status`, { to_status });
 
-    expect((await move('drying')).status).toBe(422);
+    expect((await move('drying')).status).toBe(409);
     for (const status of ['washing', 'drying', 'folding'])
       expect((await move(status)).status).toBe(200);
 
@@ -180,7 +146,7 @@ describe('orders', () => {
     expect(db().notifications.length).toBe(notificationsBefore + 1);
 
     const blocked = await move('released');
-    expect(blocked.status).toBe(422);
+    expect(blocked.status).toBe(409);
     expect(blocked.data.message).toMatch(/balance/i);
 
     await http.post(`/orders/${order.id}/payments`, {
@@ -190,16 +156,20 @@ describe('orders', () => {
     const released = await move('released');
     expect(released.status).toBe(200);
     expect(released.data.released_at).not.toBeNull();
+    expect(released.data.status_label).toBe('Completed');
     expect(released.data.status_history).toHaveLength(6);
+
+    const again = await http.post(`/orders/${order.id}/status`, {
+      to_status: 'ready_for_pickup',
+      note: 'Customer came back',
+    });
+    expect(again.status).toBe(409);
+    expect(again.data.message).toBe('This transaction is completed.');
   });
 
   it('lets only an admin revert, and only with a reason', async () => {
     await login('kevin.m');
-    const { data: order } = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-    });
+    const { data: order } = await newOrder();
     await http.post(`/orders/${order.id}/status`, { to_status: 'washing' });
     expect(
       (await http.post(`/orders/${order.id}/status`, { to_status: 'received', note: 'x' })).status,
@@ -216,11 +186,7 @@ describe('orders', () => {
 
   it('caps a payment at the balance and recomputes after a void', async () => {
     await login('liza.ramos');
-    const { data: order } = await http.post('/orders', {
-      customer_id: 1,
-      items,
-      promised_at: later(),
-    });
+    const { data: order } = await newOrder();
     const over = await http.post(`/orders/${order.id}/payments`, {
       amount_cents: 22751,
       payment_method: 'cash',
@@ -255,51 +221,15 @@ describe('inventory', () => {
   });
 });
 
-describe('public tracking', () => {
-  it('returns only the minimal DTO, with no login', async () => {
-    const order = db().orders.find((o) => o.customer_id === 1 && o.notes);
-    const { status, data } = await http.get(`/public/track/${order?.qr_token}`);
-    expect(status).toBe(200);
-    expect(Object.keys(data).sort()).toEqual(
-      [
-        'customer_display_name',
-        'estimated_ready_at',
-        'order_number',
-        'shop',
-        'status',
-        'status_label',
-        'timeline',
-      ].sort(),
-    );
-    expect(data.customer_display_name).toBe('Maria S.');
-    expect(Object.keys(data.shop).sort()).toEqual(['address', 'hours', 'name']);
-    const text = JSON.stringify(data);
-    expect(text).not.toContain('Santos');
-    expect(text).not.toContain('09178452210');
-    expect(text).not.toMatch(/cents|payment|balance|contact|qr_token/);
-  });
-
-  it('answers unknown tokens with 404', async () => {
-    expect((await http.get('/public/track/not-a-real-token')).status).toBe(404);
-  });
-
-  it('needs the order number and the matching phone digits', async () => {
-    const order = db().orders.find((o) => o.customer_id === 1);
-    const good = await http.post('/public/track/lookup', {
-      order_number: order?.order_number,
-      phone_last4: '2210',
-    });
-    expect(good.data).toEqual({ token: order?.qr_token });
-    const wrong = await http.post('/public/track/lookup', {
-      order_number: order?.order_number,
-      phone_last4: '0000',
-    });
-    const unknown = await http.post('/public/track/lookup', {
-      order_number: 'LF-000000-0000',
-      phone_last4: '2210',
-    });
-    expect(wrong.status).toBe(404);
-    expect(unknown.status).toBe(404);
-    expect(wrong.data).toEqual(unknown.data);
+describe('removed receipt and public tracking endpoints', () => {
+  it('answer 404 like any unknown API path', async () => {
+    await login('liza.ramos');
+    const order = db().orders[0];
+    expect((await http.get(`/orders/${order?.id}/receipt`)).status).toBe(404);
+    expect((await http.get('/public/track/AbCdEfGhIjKlMnOpQrStUvWxYz012-_9')).status).toBe(404);
+    expect(
+      (await http.post('/public/track/lookup', { order_number: order?.order_number })).status,
+    ).toBe(404);
+    expect((await http.get(`/orders/lookup`, { params: { order_number: 'x' } })).status).toBe(404);
   });
 });

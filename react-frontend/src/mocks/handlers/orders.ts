@@ -1,22 +1,25 @@
 import { parseISO } from 'date-fns';
 import { kgToTenths, lineSubtotalCents } from '@/lib/billing';
 import { can } from '@/lib/permissions';
-import { checkTransition, STATUS_ORDER } from '@/lib/status';
-import type { OrderDto, ReceiptDto } from '@/types/api';
+import { checkTransition, STATUS_ORDER, type TransitionErrorCode } from '@/lib/status';
+import type { OrderDto } from '@/types/api';
 import type { Order, OrderItem, StatusCode } from '@/types/entities';
-import { db, generateQrToken, nextId } from '../db';
+import { db, nextId } from '../db';
 import { asNumber, asString, fail, inRange, invalid, ok, paginate, route } from '../http';
 import {
+  accountOf,
+  activeAssignment,
   addNotification,
   audit,
   nextOrderNumber,
+  notifyCustomer,
   orderMoney,
   statusCode,
   statusId,
   toOrderDetailDto,
   toOrderDto,
-  toPaymentDto,
 } from '../queries';
+import { assignBaskets, releaseBaskets, validateBasketIds } from './baskets';
 import { digitsOnly } from './customers';
 import { createPayment, validatePayment } from './payments';
 
@@ -24,11 +27,22 @@ function findOrder(id: string | undefined) {
   return db().orders.find((o) => o.id === Number(id));
 }
 
+/** Permission problems are 403, missing input 422, and a rule the order's state breaks is 409. */
+const TRANSITION_STATUS: Record<TransitionErrorCode, number> = {
+  revert_not_allowed: 403,
+  revert_reason_required: 422,
+  already_completed: 409,
+  same_status: 409,
+  skip_not_allowed: 409,
+  balance_due: 409,
+};
+
 function matchesSearch(order: OrderDto, search: string) {
   if (!search) return true;
   const digits = digitsOnly(search);
   return (
     order.order_number.toLowerCase().includes(search) ||
+    order.baskets.some((b) => b.basket_number.toLowerCase().includes(search)) ||
     order.customer.full_name.toLowerCase().includes(search) ||
     (digits.length >= 3 && order.customer.contact_number.includes(digits))
   );
@@ -157,6 +171,13 @@ export const orderHandlers = [
     const errors: Record<string, string> = {};
     const customer = db().customers.find((c) => c.id === asNumber(body.customer_id));
     if (!customer) errors.customer_id = 'Choose a customer.';
+    // The account is the only place the customer sees the order, so it must exist first.
+    else if (!accountOf(customer.id)) {
+      errors.customer_id = 'This customer has no account yet. Create one first.';
+    }
+
+    const baskets = validateBasketIds(body.basket_ids);
+    if (baskets.error) errors.basket_ids = baskets.error;
 
     const { errors: itemErrors, lines } = buildItems(body.items);
     Object.assign(errors, itemErrors);
@@ -164,9 +185,9 @@ export const orderHandlers = [
     const promised = asString(body.promised_at);
     const promisedDate = new Date(promised);
     if (!promised || Number.isNaN(promisedDate.getTime())) {
-      errors.promised_at = 'Choose the pickup date and time.';
+      errors.promised_at = 'Choose the estimated completion date and time.';
     } else if (promisedDate.getTime() < Date.now() - 60_000) {
-      errors.promised_at = 'Pickup cannot be in the past.';
+      errors.promised_at = 'Estimated completion cannot be in the past.';
     }
 
     const total = lines.reduce((sum, line) => sum + line.subtotal_cents, 0);
@@ -186,6 +207,7 @@ export const orderHandlers = [
 
     if (Object.keys(errors).length > 0 || !customer) return invalid(errors);
 
+    // Everything below is one transaction: order, items, baskets, history, audit, payment, notice.
     const now = new Date();
     const isoNow = now.toISOString();
     const order: Order = {
@@ -193,7 +215,6 @@ export const orderHandlers = [
       order_number: nextOrderNumber(now),
       customer_id: customer.id,
       current_status_id: statusId('received'),
-      qr_token: generateQrToken(),
       received_by: user.id,
       received_at: isoNow,
       promised_at: promisedDate.toISOString(),
@@ -215,19 +236,14 @@ export const orderHandlers = [
       note: null,
       changed_at: isoNow,
     });
-    audit(user.id, 'order.created', 'order', order.id, { order_number: order.order_number });
+    assignBaskets(order, baskets.ids, user.id, isoNow);
     if (payment) createPayment(order, payment, user.id);
+    notifyCustomer(order, 'received');
+    audit(user.id, 'order.created', 'order', order.id, {
+      order_number: order.order_number,
+      basket_ids: baskets.ids,
+    });
     return ok(toOrderDetailDto(order), 201);
-  }),
-
-  // Registered before /orders/:id so that "lookup" is not read as an id.
-  route('get', '/orders/lookup', 'qr.scan', ({ query }) => {
-    const token = query.get('token');
-    const number = query.get('order_number')?.trim().toUpperCase();
-    const order = db().orders.find((o) =>
-      token ? o.qr_token === token : number ? o.order_number === number : false,
-    );
-    return order ? ok(toOrderDetailDto(order)) : fail(404, 'No order matches that code.');
   }),
 
   route('get', '/orders/:id', 'orders.manage', ({ params }) => {
@@ -238,6 +254,9 @@ export const orderHandlers = [
   route('put', '/orders/:id', 'orders.manage', ({ user, params, body }) => {
     const order = findOrder(params.id);
     if (!order) return fail(404, 'Order not found.');
+    if (statusCode(order.current_status_id) === 'released') {
+      return fail(409, 'This transaction is completed.');
+    }
     const before = { notes: order.notes, promised_at: order.promised_at };
     if ('notes' in body) order.notes = asString(body.notes) || null;
     if ('promised_at' in body) {
@@ -266,6 +285,20 @@ export const orderHandlers = [
 
     const from = statusCode(order.current_status_id);
     const note = asString(body.note) || null;
+
+    // From the scanner: the basket in hand must still hold this order, or the screen is stale.
+    if (body.basket_id !== undefined && body.basket_id !== null) {
+      const active = activeAssignment(asNumber(body.basket_id) ?? 0);
+      if (!active || active.order_id !== order.id) {
+        return fail(
+          409,
+          from === 'released'
+            ? 'This transaction is completed.'
+            : 'This basket has no active laundry session.',
+        );
+      }
+    }
+
     const check = checkTransition({
       from,
       to,
@@ -273,12 +306,14 @@ export const orderHandlers = [
       balanceCents: orderMoney(order).balance,
       note,
     });
-    if (!check.ok) return fail(check.code === 'revert_not_allowed' ? 403 : 422, check.message);
+    if (!check.ok) return fail(TRANSITION_STATUS[check.code], check.message);
 
     const now = new Date().toISOString();
     order.current_status_id = statusId(to);
     order.updated_at = now;
     order.released_at = to === 'released' ? now : null;
+    // Completion hands the baskets back in the same transaction. The order record stays forever.
+    if (to === 'released') releaseBaskets(order, now);
     db().order_status_history.push({
       id: nextId(db().order_status_history),
       order_id: order.id,
@@ -297,6 +332,7 @@ export const orderHandlers = [
         order.id,
       );
     }
+    notifyCustomer(order, to);
     audit(user.id, 'order.status_changed', 'order', order.id, {
       order_number: order.order_number,
       from,
@@ -304,33 +340,5 @@ export const orderHandlers = [
       note,
     });
     return ok(toOrderDetailDto(order));
-  }),
-
-  route('get', '/orders/:id/receipt', 'orders.manage', ({ params }) => {
-    const order = findOrder(params.id);
-    if (!order) return fail(404, 'Order not found.');
-    const dto = toOrderDto(order);
-    const payments = db()
-      .payments.filter((p) => p.order_id === order.id && !p.voided_at)
-      .sort((a, b) => a.paid_at.localeCompare(b.paid_at))
-      .map(toPaymentDto);
-    const latest = payments[payments.length - 1];
-    const receipt: ReceiptDto = {
-      shop: db().shop_settings,
-      order_id: order.id,
-      order_number: order.order_number,
-      qr_token: order.qr_token,
-      receipt_number: latest?.receipt_number ?? null,
-      issued_at: latest?.paid_at ?? order.received_at,
-      customer_name: dto.customer.full_name,
-      staff_name: dto.received_by.name,
-      promised_at: order.promised_at,
-      items: dto.items,
-      total_cents: dto.total_cents,
-      paid_cents: dto.paid_cents,
-      paid_methods: [...new Set(payments.map((p) => p.method_label))],
-      balance_cents: dto.balance_cents,
-    };
-    return ok(receipt);
   }),
 ];

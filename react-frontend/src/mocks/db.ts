@@ -1,11 +1,15 @@
 import type {
   AuditLog,
   Barangay,
+  Basket,
   Customer,
+  CustomerAccount,
+  CustomerNotification,
   InventoryItem,
   InventoryMovement,
   Notification,
   Order,
+  OrderBasket,
   OrderItem,
   OrderStatus,
   OrderStatusHistory,
@@ -31,9 +35,14 @@ export interface MockDb {
   credentials: Record<number, string>;
   barangays: Barangay[];
   customers: Customer[];
+  customer_accounts: CustomerAccount[];
+  /** Mock-only stand-in for customer_accounts.password_hash, keyed by account id. */
+  customer_credentials: Record<number, string>;
   services: Service[];
   order_statuses: OrderStatus[];
   orders: Order[];
+  baskets: Basket[];
+  order_baskets: OrderBasket[];
   order_items: OrderItem[];
   payment_methods: PaymentMethod[];
   payments: Payment[];
@@ -42,12 +51,16 @@ export interface MockDb {
   inventory_items: InventoryItem[];
   inventory_movements: InventoryMovement[];
   notifications: Notification[];
+  customer_notifications: CustomerNotification[];
   shop_settings: ShopSettings;
   audit_logs: AuditLog[];
 }
 
-const DB_KEY = 'laundryflow.mock.db.v1';
+// v2 added customer accounts and baskets: older saved demo data is simply reseeded.
+const DB_KEY = 'laundryflow.mock.db.v2';
 const SESSION_KEY = 'laundryflow.mock.session';
+/** A separate key, like the separate Sanctum guard in Phase 2: the two sessions never mix. */
+const CUSTOMER_SESSION_KEY = 'laundryflow.mock.customer-session';
 
 let cache: MockDb | null = null;
 
@@ -78,8 +91,15 @@ export function persist() {
 
 export function resetDb() {
   cache = createSeed(new Date());
+  loginAttempts.clear();
   persist();
 }
+
+/**
+ * Failed customer sign-ins per "email|ip", as timestamps. In memory only, like a cache-backed
+ * Laravel RateLimiter. The mock has no client IP, so every request shares one.
+ */
+export const loginAttempts = new Map<string, number[]>();
 
 export function nextId(rows: readonly { id: number }[]): number {
   return rows.reduce((max, row) => Math.max(max, row.id), 0) + 1;
@@ -90,6 +110,15 @@ export function generateQrToken(): string {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join('');
+}
+
+/** 10 characters without look-alike symbols, for staff to read out at the counter. */
+export function generateTemporaryPassword(): string {
+  const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  const password = Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join('');
+  // Always meets the customer password rule: at least one letter and one number.
+  return /\d/.test(password) && /[a-z]/.test(password) ? password : `${password.slice(0, 8)}a7`;
 }
 
 function readStorage(storage: Storage, key: string): string | null {
@@ -119,6 +148,28 @@ export function clearSession() {
   try {
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    // Nothing to clear when storage is blocked.
+  }
+}
+
+/** The mock's stand-in for the customer guard's session. Holds the customer account id. */
+export function getCustomerSessionAccountId(): number | null {
+  const value = readStorage(localStorage, CUSTOMER_SESSION_KEY);
+  return value ? Number(value) : null;
+}
+
+export function setCustomerSession(accountId: number) {
+  try {
+    localStorage.setItem(CUSTOMER_SESSION_KEY, String(accountId));
+  } catch {
+    // Without storage the session ends on the next refresh.
+  }
+}
+
+export function clearCustomerSession() {
+  try {
+    localStorage.removeItem(CUSTOMER_SESSION_KEY);
   } catch {
     // Nothing to clear when storage is blocked.
   }

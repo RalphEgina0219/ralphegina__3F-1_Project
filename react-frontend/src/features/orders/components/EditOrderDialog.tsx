@@ -74,7 +74,7 @@ export function EditOrderDialog({
         noValidate
         className="space-y-4"
       >
-        <Field label="Promised pickup" required error={errors.promised_at?.message}>
+        <Field label="Estimated completion" required error={errors.promised_at?.message}>
           {(field) => <Input {...field} {...register('promised_at')} type="datetime-local" />}
         </Field>
         <Field label="Notes for staff" error={errors.notes?.message}>

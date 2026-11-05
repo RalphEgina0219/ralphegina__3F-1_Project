@@ -229,12 +229,12 @@ function OrdersTab({ report }: { report: OrdersReport }) {
   const columns: Column<OrdersReport['daily'][number]>[] = [
     { key: 'date', header: 'Date', card: 'title', cell: (d) => formatDate(d.date) },
     { key: 'orders', header: 'Orders in', cell: (d) => d.orders },
-    { key: 'released', header: 'Released', cell: (d) => d.released },
+    { key: 'released', header: 'Completed', cell: (d) => d.released },
   ];
   return (
     <div className="space-y-4 md:space-y-5">
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-        <KpiCard label="Orders" value={kpis.orders} hint={`${kpis.released} released`} />
+        <KpiCard label="Orders" value={kpis.orders} hint={`${kpis.released} completed`} />
         <KpiCard label="In process" value={kpis.in_process} hint="Washing, drying, folding" />
         <KpiCard
           label="Overdue"
@@ -245,7 +245,7 @@ function OrdersTab({ report }: { report: OrdersReport }) {
         <KpiCard
           label="Average turnaround"
           value={kpis.avg_turnaround_hours === null ? '—' : `${kpis.avg_turnaround_hours} hr`}
-          hint="Received to released"
+          hint="Received to completed"
         />
       </div>
       <Card className="avoid-break p-4 md:p-5">
@@ -467,7 +467,7 @@ export default function ReportsPage() {
     }
     if (tab === 'orders' && orders.data) {
       downloadCsv(name, [
-        ['Date', 'Orders in', 'Released'],
+        ['Date', 'Orders in', 'Completed'],
         ...orders.data.daily.map((d) => [d.date, d.orders, d.released]),
         [],
         ['Status', 'Orders'],

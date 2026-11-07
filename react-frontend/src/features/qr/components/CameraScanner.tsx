@@ -2,7 +2,9 @@ import { Scanner, type IScannerHandle, type IScannerError } from '@yudiel/react-
 import { Camera, CameraOff, Lock, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
+import { getDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/cn';
+import { isAndroid, isIos } from '@/lib/platform';
 import type { CameraState } from '../types';
 
 /**
@@ -44,6 +46,27 @@ function Message({
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
+}
+
+/**
+ * Where to switch the camera back on. The installed app has no address bar, so the browser's
+ * usual "site settings" icon is not there: the phone's own settings are.
+ */
+function deniedHelp(): string {
+  const installed = getDisplayMode() === 'standalone';
+  if (isIos()) {
+    return installed
+      ? 'Open the iPhone Settings app, go to Apps › Safari › Camera, choose Ask or Allow, then close and reopen LaundryFlow.'
+      : 'Tap aA in the address bar, then Website Settings › Camera › Allow, and reload this page.';
+  }
+  if (isAndroid()) {
+    return installed
+      ? 'Long-press the LaundryFlow icon, tap App info › Permissions › Camera › Allow, then reopen the app. (Or Chrome › Settings › Site settings › Camera.)'
+      : 'Tap the icon beside the address bar, then Permissions › Camera › Allow, and reload this page.';
+  }
+  return installed
+    ? 'Open the app menu (⋮ at the top of this window), choose App info or Site settings, allow the camera, then reload.'
+    : "Open your browser's site settings (the icon beside the address bar), allow the camera, then reload this page.";
 }
 
 interface CameraScannerProps {
@@ -174,8 +197,7 @@ export function CameraScanner({
           icon={<Lock className="size-9" aria-hidden="true" />}
           title="Camera access is blocked"
         >
-          Open your browser&apos;s site settings (the icon beside the address bar), allow the
-          camera, then reload this page. You can also type the order number.
+          {deniedHelp()} Meanwhile, type the basket or order number below.
         </Message>
       )}
       {state === 'no-camera' && (

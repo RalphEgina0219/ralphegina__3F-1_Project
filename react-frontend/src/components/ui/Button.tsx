@@ -1,7 +1,9 @@
 import { Loader2 } from 'lucide-react';
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { cn } from '@/lib/cn';
+import { blockOfflineClick, OfflineHint } from './OfflineHint';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'dashed';
 export type ButtonSize = 'md' | 'lg' | 'icon' | 'compact';
@@ -40,6 +42,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   icon?: ReactNode;
+  /**
+   * The button saves something on the server, so it cannot work offline. Defaults to true when
+   * `loading` is passed: every button with a pending state is a server action. Pass false for
+   * actions that must work offline, such as signing out.
+   */
+  needsNetwork?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -52,22 +60,30 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     children,
     disabled,
     type,
+    needsNetwork,
+    onClick,
     ...props
   },
   ref,
 ) {
+  const online = useOnlineStatus();
+  const blocked = !online && (needsNetwork ?? loading !== undefined) && !disabled;
   return (
-    <button
-      ref={ref}
-      type={type ?? 'button'}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      className={buttonClass(variant, size, className)}
-      {...props}
-    >
-      {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : icon}
-      {children}
-    </button>
+    <OfflineHint blocked={blocked}>
+      <button
+        ref={ref}
+        type={type ?? 'button'}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        aria-disabled={blocked || undefined}
+        className={buttonClass(variant, size, className)}
+        onClick={blocked ? blockOfflineClick : onClick}
+        {...props}
+      >
+        {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : icon}
+        {children}
+      </button>
+    </OfflineHint>
   );
 });
 

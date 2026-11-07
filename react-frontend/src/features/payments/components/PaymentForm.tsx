@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { centsToInput, parseMoney } from '@/lib/money';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { paymentSchema, type PaymentForm as PaymentFormValues } from '@/schemas/payment';
 import type { OrderDetailDto, OrderDto } from '@/types/api';
 import { useRecordPayment } from '../api';
@@ -35,11 +36,12 @@ export function PaymentForm({ order, formId, onSaved, onPendingChange }: Payment
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema(order.balance_cents)),
     defaultValues: { amount: centsToInput(order.balance_cents), method: 'cash', reference: '' },
   });
+  useUnsavedChanges(isDirty);
   const amount = useWatch({ control, name: 'amount' });
   const method = useWatch({ control, name: 'method' });
   const cents = parseMoney(amount ?? '') ?? 0;

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/TemporaryPasswordDialog';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { formatPhone } from '@/lib/format';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import {
   customerSchema,
   newCustomerSchema,
@@ -50,10 +51,11 @@ export function CustomerFormDialog({
     handleSubmit,
     reset,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CustomerForm>({
     resolver: zodResolver(customer ? customerSchema : newCustomerSchema),
   });
+  useUnsavedChanges(open && isDirty);
 
   useEffect(() => {
     if (open) {

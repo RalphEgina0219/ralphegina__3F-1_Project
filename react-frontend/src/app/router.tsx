@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
+import { OfflinePage } from '@/features/pwa/components/OfflinePage';
 import type { RouteHandle } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { PublicLayout } from '@/layouts/PublicLayout';
@@ -166,6 +167,8 @@ export const routes: RouteObject[] = [
             },
           ]
         : []),
+      // Not lazy: it must show even when page code can't be downloaded.
+      { path: '/offline', element: <OfflinePage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

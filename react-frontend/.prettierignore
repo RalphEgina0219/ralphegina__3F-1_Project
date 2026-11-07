@@ -3,3 +3,7 @@ node_modules
 public/mockServiceWorker.js
 docs
 package-lock.json
+dist-e2e
+test-results
+playwright-report
+public/screenshots

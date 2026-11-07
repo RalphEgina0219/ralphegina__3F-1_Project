@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { fetchScan } from '@/features/baskets/api';
+import { onPrivateDataCleared } from '@/lib/session';
 import type { RecentScan } from './types';
 
 /** Resolves a scanned or typed code and primes the order cache, so later moves show at once. */
@@ -35,3 +36,6 @@ export const useRecentScans = create<RecentScansState>()(
     { name: 'laundryflow.recent-scans.v2' },
   ),
 );
+
+// Recent scans name customers: they go when anyone signs out.
+onPrivateDataCleared(() => useRecentScans.setState({ scans: [] }));

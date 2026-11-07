@@ -1,0 +1,2 @@
+# Netlify (and Cloudflare Pages): every app route serves index.html. Real files win first.
+/*    /index.html    200

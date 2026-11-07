@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { toDateTimeLocal } from '@/lib/dates';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { editOrderSchema, type EditOrderForm } from '@/schemas/order';
 import type { OrderDto } from '@/types/api';
 import { useUpdateOrder } from '../api';
@@ -30,8 +31,9 @@ export function EditOrderDialog({
     handleSubmit,
     reset,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<EditOrderForm>({ resolver: zodResolver(editOrderSchema) });
+  useUnsavedChanges(open && isDirty);
 
   useEffect(() => {
     if (open) reset({ promised_at: toDateTimeLocal(order.promised_at), notes: order.notes ?? '' });

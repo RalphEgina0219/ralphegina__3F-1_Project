@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { useCan } from '@/features/auth/store';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { cn } from '@/lib/cn';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { movementSchema, type MovementForm } from '@/schemas/inventory';
 import type { InventoryItemDto } from '@/types/api';
 import { useRecordMovement } from '../api';
@@ -37,7 +38,7 @@ export function StockMovementForm({
     reset,
     setError,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<MovementForm>({
     resolver: zodResolver(movementSchema),
     defaultValues: {
@@ -48,6 +49,7 @@ export function StockMovementForm({
     },
   });
   const type = useWatch({ control, name: 'type' });
+  useUnsavedChanges(isDirty);
 
   useEffect(() => {
     if (presetItemId) setValue('item_id', String(presetItemId));

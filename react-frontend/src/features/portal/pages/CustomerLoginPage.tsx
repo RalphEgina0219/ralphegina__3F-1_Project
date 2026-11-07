@@ -7,6 +7,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Field } from '@/components/ui/Field';
 import { Input } from '@/components/ui/Input';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
+import { InstallAppButton } from '@/features/pwa/components/InstallAppButton';
 import { applyFieldErrors, errorMessage, errorStatus, safeNext } from '@/lib/api';
 import { customerLoginSchema, type CustomerLoginForm } from '@/schemas/portal';
 import { useCustomerLogin } from '../api';
@@ -72,6 +73,7 @@ export default function CustomerLoginPage() {
               Staff sign in
             </Link>
           </p>
+          <InstallAppButton variant="link" />
         </>
       }
     >

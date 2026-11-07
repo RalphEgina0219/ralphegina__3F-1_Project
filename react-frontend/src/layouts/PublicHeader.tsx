@@ -25,7 +25,7 @@ export function PublicHeader({ children, overlap, aside, homeTo, wide }: PublicH
     </>
   );
   return (
-    <header className={cn('on-dark bg-ink text-on-ink', !overlap && 'pb-1')}>
+    <header className={cn('on-dark pt-safe bg-ink text-on-ink', !overlap && 'pb-1')}>
       <div className={cn('mx-auto px-4 pt-4 pb-3 sm:px-5', wide ? 'max-w-5xl' : 'max-w-xl')}>
         <div className="flex min-h-11 items-center justify-between gap-3">
           {homeTo ? (

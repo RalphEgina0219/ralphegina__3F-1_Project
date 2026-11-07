@@ -1,12 +1,12 @@
 import { LogOut } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/Avatar';
-import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from '@/components/ui/Dropdown';
 import { Logo } from '@/components/ui/Logo';
 import { useLogout } from '@/features/auth/api';
 import { roleLabel, useCurrentUser } from '@/features/auth/store';
 import { useInventoryItems } from '@/features/inventory/api';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
+import { InstallAppButton } from '@/features/pwa/components/InstallAppButton';
 import { cn } from '@/lib/cn';
 import { can } from '@/lib/permissions';
 import { NAV_ITEMS } from './nav';
@@ -19,7 +19,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const lowStock = (stock.data ?? []).filter((item) => item.stock_status !== 'ok').length;
 
   return (
-    <div className="on-dark flex h-full flex-col bg-ink text-on-ink">
+    <div className="on-dark pt-safe pb-safe flex h-full flex-col bg-ink text-on-ink">
       <div className="flex items-center gap-2.5 px-4 pt-6 pb-5">
         <Logo className="size-9" />
         <div className="min-w-0">
@@ -65,8 +65,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="space-y-2 p-3">
         <NotificationBell variant="sidebar" />
-        <Dropdown>
-          <DropdownTrigger className="flex min-h-14 w-full items-center gap-2.5 rounded-card bg-ink-3 p-2.5 text-left">
+        <InstallAppButton variant="sidebar" />
+        <div className="rounded-card bg-ink-3 p-1.5">
+          <div className="flex items-center gap-2.5 p-1">
             <Avatar name={user.name} className="bg-aqua text-ink" solid={false} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-bold">{user.name}</span>
@@ -74,18 +75,19 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {roleLabel(user.role)}
               </span>
             </span>
-          </DropdownTrigger>
-          <DropdownContent side="top" align="start" className="w-56">
-            <DropdownItem
-              icon={<LogOut className="size-4" aria-hidden="true" />}
-              onSelect={() =>
-                logout.mutate(undefined, { onSettled: () => navigate('/login', { replace: true }) })
-              }
-            >
-              Sign out
-            </DropdownItem>
-          </DropdownContent>
-        </Dropdown>
+          </div>
+          <button
+            type="button"
+            disabled={logout.isPending}
+            onClick={() =>
+              logout.mutate(undefined, { onSettled: () => navigate('/login', { replace: true }) })
+            }
+            className="mt-1 flex min-h-11 w-full items-center gap-3 rounded-control px-2.5 text-sm font-semibold text-on-ink-muted transition-colors hover:bg-ink-2 hover:text-on-ink disabled:cursor-wait disabled:opacity-60"
+          >
+            <LogOut className="size-4.5 shrink-0" aria-hidden="true" />
+            {logout.isPending ? 'Signing out…' : 'Sign out'}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { Drawer } from '@/components/ui/Dialog';
 import { Logo } from '@/components/ui/Logo';
 import { WaveDivider } from '@/components/ui/WaveDivider';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
+import { InstallBanner } from '@/features/pwa/components/InstallBanner';
+import { rememberSide } from '@/features/pwa/side';
 import { cn } from '@/lib/cn';
 import { tabClass } from './nav';
 import { SidebarContent } from './Sidebar';
@@ -36,7 +38,7 @@ function TopBar({ hideOnPhone }: { hideOnPhone: boolean }) {
   return (
     <header
       className={cn(
-        'on-dark sticky top-0 z-20 bg-ink text-on-ink lg:hidden print:hidden',
+        'on-dark pt-safe sticky top-0 z-20 bg-ink text-on-ink lg:hidden print:hidden',
         hideOnPhone && 'hidden md:block',
       )}
     >
@@ -114,6 +116,8 @@ export function AppShell() {
   const mainRef = useRef<HTMLElement>(null);
   const firstRender = useRef(true);
 
+  useEffect(() => rememberSide('staff'), []);
+
   useEffect(() => {
     setDrawerOpen(false);
     window.scrollTo(0, 0);
@@ -149,14 +153,20 @@ export function AppShell() {
         tabIndex={-1}
         className={cn(
           'mx-auto max-w-375 px-4 pt-8 outline-none md:px-6 md:pb-8 lg:px-8 lg:pt-7 print:p-0',
-          fullscreenOnPhone ? 'pb-8 max-md:pt-0' : 'pb-[calc(96px+env(safe-area-inset-bottom))]',
+          // A full-screen phone page has no top bar, so it starts below the status bar itself.
+          fullscreenOnPhone ? 'pb-8 max-md:pt-safe' : 'pb-[calc(96px+env(safe-area-inset-bottom))]',
         )}
       >
         <Suspense fallback={<PageFallback />}>
           <Outlet />
         </Suspense>
       </main>
-      {!fullscreenOnPhone && <BottomTabs />}
+      {!fullscreenOnPhone && (
+        <>
+          <BottomTabs />
+          <InstallBanner className="bottom-[calc(76px+env(safe-area-inset-bottom))]" />
+        </>
+      )}
     </div>
   );
 }

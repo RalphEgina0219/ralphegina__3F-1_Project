@@ -10,8 +10,10 @@ import { Field } from '@/components/ui/Field';
 import { Input } from '@/components/ui/Input';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
 import { Select } from '@/components/ui/Select';
+import { InstallAppButton } from '@/features/pwa/components/InstallAppButton';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { formatPhone, normalizePhone } from '@/lib/format';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { accountSchema, type AccountForm } from '@/schemas/portal';
 import { useCustomerLogout, usePortalBarangays, useUpdateMyAccount } from '../api';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
@@ -37,6 +39,7 @@ function ProfileCard() {
       street_address: customer.street_address ?? '',
     },
   });
+  useUnsavedChanges(isDirty);
 
   const onSubmit = handleSubmit((form) => {
     setFormError(null);
@@ -160,11 +163,14 @@ export default function PortalAccountPage() {
             <CardHeader title="Change password" className="mb-3" />
             <ChangePasswordForm onDone={() => toast.success('Password changed')} />
           </Card>
-          <Card className="p-4 md:p-5">
+          <Card className="space-y-2 p-4 md:p-5">
+            <InstallAppButton variant="button" className="w-full" />
             <Button
               variant="secondary"
               className="w-full"
               loading={logout.isPending}
+              // Signing out must work offline too: it clears this device either way.
+              needsNetwork={false}
               icon={<LogOut className="size-4" aria-hidden="true" />}
               onClick={() =>
                 logout.mutate(undefined, {

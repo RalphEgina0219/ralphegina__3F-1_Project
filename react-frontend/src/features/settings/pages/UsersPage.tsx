@@ -15,6 +15,7 @@ import {
   type TemporaryPassword,
 } from '@/components/ui/TemporaryPasswordDialog';
 import { useCurrentUser } from '@/features/auth/store';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { errorMessage } from '@/lib/api';
 import { formatRelativeDay } from '@/lib/dates';
 import type { UserDto } from '@/types/api';
@@ -32,6 +33,7 @@ import { UserFormDialog } from '../components/UserFormDialog';
 function StaffPermissions() {
   const query = useRolePermissions();
   const update = useUpdateStaffPermissions();
+  const online = useOnlineStatus();
   // Set in the click handler itself so that the box ticks at once, and rolled back on failure.
   const [optimistic, setOptimistic] = useState<PermissionCode[] | null>(null);
   const staff = optimistic ?? query.data?.staff ?? [];
@@ -55,7 +57,14 @@ function StaffPermissions() {
       />
       {query.isPending && <SkeletonRows rows={3} className="p-0" />}
       {query.isError && <ErrorState error={query.error} onRetry={() => void query.refetch()} />}
-      <div className="flex flex-col">
+      {/* Each tick saves at once, so the list waits for a connection. */}
+      <fieldset disabled={!online} className="flex flex-col">
+        <legend className="sr-only">Staff permissions</legend>
+        {!online && (
+          <p className="mb-1 text-[13px] text-muted">
+            You&apos;re offline. Permissions can&apos;t be changed until you reconnect.
+          </p>
+        )}
         {query.data?.available.map((permission) => (
           <Checkbox
             key={permission.code}
@@ -64,7 +73,7 @@ function StaffPermissions() {
             onChange={(event) => toggle(permission.code, event.target.checked)}
           />
         ))}
-      </div>
+      </fieldset>
     </Card>
   );
 }
@@ -158,6 +167,7 @@ export default function UsersPage() {
               variant="secondary"
               size="compact"
               aria-label={`Enable ${u.name}`}
+              loading={save.isPending && save.variables?.id === u.id}
               onClick={() =>
                 save.mutate(
                   { id: u.id, is_active: true },

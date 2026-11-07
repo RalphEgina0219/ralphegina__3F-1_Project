@@ -7,8 +7,10 @@ import { Card } from '@/components/ui/Card';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Money } from '@/components/ui/Money';
 import { Mono } from '@/components/ui/Mono';
+import { blockOfflineClick, OfflineHint } from '@/components/ui/OfflineHint';
 import { useCan, useCurrentUser } from '@/features/auth/store';
 import { useChangeStatus, useOrder } from '@/features/orders/api';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { errorMessage } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatRelativeDay } from '@/lib/dates';
@@ -30,6 +32,7 @@ function OrderPanel({
   const user = useCurrentUser();
   const canRevert = useCan('orders.revert');
   const change = useChangeStatus();
+  const online = useOnlineStatus();
   const [confirmComplete, setConfirmComplete] = useState(false);
   const [reverting, setReverting] = useState(false);
   const next = nextStatus(order.status);
@@ -139,29 +142,37 @@ function OrderPanel({
                   role: user.role,
                   balanceCents: order.balance_cents,
                 }).ok;
+              const blocked = allowed && !online;
               return (
-                <button
-                  type="button"
-                  key={status}
-                  disabled={!allowed || change.isPending}
-                  aria-current={isCurrent ? 'step' : undefined}
-                  onClick={() => (status === 'released' ? setConfirmComplete(true) : move(status))}
-                  className={cn(
-                    'flex min-h-12 items-center justify-center gap-1 rounded-control border px-1 text-[13px] font-semibold',
-                    isCurrent && 'border-status-washing-dot bg-status-washing-dot text-white',
-                    !isCurrent &&
-                      allowed &&
-                      [meta.chip, 'border-current hover:opacity-85'].join(' '),
-                    !isCurrent &&
-                      !allowed &&
-                      'cursor-not-allowed border-transparent bg-foam-2 text-muted',
-                  )}
-                >
-                  {meta.shortLabel}
-                  {isCurrent && <Check className="size-4" aria-hidden="true" />}
-                  {isCurrent && <span className="sr-only">(current)</span>}
-                  {allowed && <span aria-hidden="true">→</span>}
-                </button>
+                <OfflineHint key={status} blocked={blocked}>
+                  <button
+                    type="button"
+                    disabled={!allowed || change.isPending}
+                    aria-current={isCurrent ? 'step' : undefined}
+                    aria-disabled={blocked || undefined}
+                    onClick={
+                      blocked
+                        ? blockOfflineClick
+                        : () => (status === 'released' ? setConfirmComplete(true) : move(status))
+                    }
+                    className={cn(
+                      'flex min-h-12 items-center justify-center gap-1 rounded-control border px-1 text-[13px] font-semibold',
+                      isCurrent && 'border-status-washing-dot bg-status-washing-dot text-white',
+                      !isCurrent &&
+                        allowed &&
+                        [meta.chip, 'border-current hover:opacity-85'].join(' '),
+                      !isCurrent &&
+                        !allowed &&
+                        'cursor-not-allowed border-transparent bg-foam-2 text-muted',
+                      blocked && 'cursor-not-allowed opacity-50',
+                    )}
+                  >
+                    {meta.shortLabel}
+                    {isCurrent && <Check className="size-4" aria-hidden="true" />}
+                    {isCurrent && <span className="sr-only">(current)</span>}
+                    {allowed && <span aria-hidden="true">→</span>}
+                  </button>
+                </OfflineHint>
               );
             })}
           </div>

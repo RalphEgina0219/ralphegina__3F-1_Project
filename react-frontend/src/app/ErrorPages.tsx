@@ -3,6 +3,7 @@ import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/States';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
+import { isChunkLoadError, OfflinePage } from '@/features/pwa/components/OfflinePage';
 
 export function NotFoundPage() {
   useDocumentTitle('Page not found');
@@ -51,6 +52,8 @@ export function RouteErrorPage() {
   const error = useRouteError();
   useDocumentTitle('Something went wrong');
   if (isRouteErrorResponse(error) && error.status === 404) return <NotFoundPage />;
+  // A page's code could not be downloaded: no connection, or a newer deploy replaced it.
+  if (isChunkLoadError(error) || !navigator.onLine) return <OfflinePage />;
   return (
     <div className="flex min-h-[70dvh] items-center justify-center p-4">
       <div>

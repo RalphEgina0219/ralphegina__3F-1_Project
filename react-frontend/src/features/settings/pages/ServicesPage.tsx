@@ -73,6 +73,7 @@ export default function ServicesPage() {
           checked={s.is_active}
           onCheckedChange={(next) => toggle(s, next)}
           aria-label={`${s.name} is active`}
+          needsNetwork
         />
       ),
     },

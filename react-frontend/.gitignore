@@ -6,6 +6,10 @@ coverage
 .env.*
 !.env.example
 !.env.development
+!.env.demo
 .DS_Store
 npm-debug.log*
 *.tsbuildinfo
+dist-e2e
+test-results
+playwright-report

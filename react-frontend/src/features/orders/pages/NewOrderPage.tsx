@@ -31,6 +31,7 @@ import { cn } from '@/lib/cn';
 import { toDateTimeLocal } from '@/lib/dates';
 import { formatKg, formatPhone, itemRateSuffix } from '@/lib/format';
 import { centsToInput, formatMoney, formatRate, parseMoney } from '@/lib/money';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { newOrderSchema, type NewOrderForm } from '@/schemas/order';
 import type { BasketRefDto, CustomerDto, NewOrderInput, Service } from '@/types/api';
 import { useCreateOrder } from '../api';
@@ -127,6 +128,8 @@ export default function NewOrderPage() {
   const [needsAccount, setNeedsAccount] = useState<CustomerDto | null>(null);
   const [baskets, setBaskets] = useState<BasketRefDto[]>([]);
   const available = useAvailableBaskets();
+  // Work starts once a customer or a basket is picked; saving navigates away and clears this.
+  useUnsavedChanges(customer !== null || baskets.length > 0);
 
   const {
     control,

@@ -78,7 +78,17 @@ export function Dialog({
               <X className="size-5" aria-hidden="true" />
             </RadixDialog.Close>
           </div>
-          {children && <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">{children}</div>}
+          {children && (
+            <div
+              className={cn(
+                'min-h-0 flex-1 overflow-y-auto px-5',
+                // A sheet without a footer ends at the screen edge: clear the home indicator.
+                footer ? 'pb-5' : 'pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-5',
+              )}
+            >
+              {children}
+            </div>
+          )}
           {footer && (
             <div className="pb-safe shrink-0 border-t border-line">
               <div className="flex flex-col-reverse gap-2 px-5 py-3 sm:flex-row sm:justify-end">

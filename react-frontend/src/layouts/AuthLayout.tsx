@@ -46,7 +46,7 @@ export function AuthLayout() {
         <WaveDivider className="h-24" fill="fill-ink-2" backFill="fill-ink-3" />
       </aside>
 
-      <header className="bg-ink text-on-ink lg:hidden">
+      <header className="pt-safe bg-ink text-on-ink lg:hidden">
         <div className="px-5 pt-10 pb-2">
           <Logo className="size-14" />
           <p className="mt-4 text-[28px] font-extrabold tracking-[-0.02em]">LaundryFlow</p>

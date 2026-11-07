@@ -22,6 +22,7 @@ export default function ForcePasswordPage() {
         <Button
           variant="ghost"
           loading={logout.isPending}
+          needsNetwork={false}
           onClick={() =>
             logout.mutate(undefined, {
               onSettled: () => navigate('/my/login', { replace: true }),

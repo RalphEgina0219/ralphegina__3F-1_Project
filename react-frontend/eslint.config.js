@@ -7,7 +7,16 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'public/mockServiceWorker.js', 'docs'] },
+  {
+    ignores: [
+      'dist',
+      'dist-e2e',
+      'test-results',
+      'playwright-report',
+      'public/mockServiceWorker.js',
+      'docs',
+    ],
+  },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

@@ -3,6 +3,8 @@ import { Suspense, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { PageFallback } from '@/app/PageFallback';
 import { CustomerNotificationBell } from '@/features/portal/components/CustomerNotificationBell';
+import { InstallBanner } from '@/features/pwa/components/InstallBanner';
+import { rememberSide } from '@/features/pwa/side';
 import { cn } from '@/lib/cn';
 import { tabClass } from './nav';
 import { PublicHeader } from './PublicHeader';
@@ -21,6 +23,8 @@ export function CustomerLayout() {
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const firstRender = useRef(true);
+
+  useEffect(() => rememberSide('customer'), []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -90,6 +94,7 @@ export function CustomerLayout() {
           ))}
         </div>
       </nav>
+      <InstallBanner className="bottom-[calc(64px+env(safe-area-inset-bottom))]" />
     </div>
   );
 }

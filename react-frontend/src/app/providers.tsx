@@ -4,7 +4,9 @@ import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/features/auth/store';
 import { useCustomerAuth } from '@/features/portal/store';
+import { OfflineBanner } from '@/features/pwa/components/OfflineBanner';
 import { errorStatus, setCustomerUnauthorizedHandler, setUnauthorizedHandler } from '@/lib/api';
+import { clearPrivateDeviceData } from '@/lib/session';
 import { router } from './router';
 
 export const queryClient = new QueryClient({
@@ -18,12 +20,16 @@ export const queryClient = new QueryClient({
         return failureCount < 1 && (status === undefined || status >= 500);
       },
     },
+    // Money and statuses: a save made offline fails at once and says so. It is never queued to
+    // replay later, when the screen it came from may no longer be true.
+    mutations: { networkMode: 'always' },
   },
 });
 
 setUnauthorizedHandler(() => {
   useAuthStore.getState().setUser(null);
   queryClient.clear();
+  clearPrivateDeviceData();
   const { pathname, search } = window.location;
   void router.navigate(`/login?next=${encodeURIComponent(pathname + search)}`, { replace: true });
 });
@@ -42,6 +48,7 @@ export function Providers() {
   return (
     <QueryClientProvider client={queryClient}>
       <Tooltip.Provider delayDuration={200}>
+        <OfflineBanner />
         <RouterProvider router={router} future={{ v7_startTransition: true }} />
         <Toaster position="top-center" richColors closeButton duration={3500} />
       </Tooltip.Provider>

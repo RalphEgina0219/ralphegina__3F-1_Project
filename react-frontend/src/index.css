@@ -118,6 +118,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     overflow-x: clip;
+    /* A downward pull inside a long form must not reload the page and lose what was typed. */
+    overscroll-behavior-y: contain;
   }
 
   body {
@@ -130,6 +132,24 @@
     font-size: 14px;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
+    /* Landscape phones with a notch: keep content clear of it. */
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  }
+
+  /*
+   * Installed on iPhone, the status bar floats over the page (black-translucent) with white text.
+   * This ink band sits behind it on every screen; headers pad themselves below it with pt-safe.
+   * Its height is 0 wherever there is no notch or status bar overlay.
+   */
+  body::before {
+    content: '';
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 60;
+    height: env(safe-area-inset-top);
+    background: var(--color-ink);
+    pointer-events: none;
   }
 
   button:not(:disabled),
@@ -178,6 +198,10 @@
 
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
 }
 
 @utility no-scrollbar {

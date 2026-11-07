@@ -11,11 +11,36 @@ import { Input } from '@/components/ui/Input';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
 import { ErrorState, SkeletonRows } from '@/components/ui/States';
 import { Textarea } from '@/components/ui/Textarea';
+import { InstallAppButton } from '@/features/pwa/components/InstallAppButton';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
+import { clearPrivateDeviceData } from '@/lib/session';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { shopSchema, type ShopForm } from '@/schemas/settings';
 import { useShopSettings, useUpdateShopSettings } from '../api';
 
 const USING_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
+
+/** Which version this device runs, and what the installed app keeps for offline use. */
+function AboutApp() {
+  return (
+    <Card className="p-4 md:p-5">
+      <CardHeader title="About LaundryFlow" className="mb-3" />
+      <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+        <dt className="text-muted">Version</dt>
+        <dd className="font-mono font-semibold" data-testid="app-version">
+          {__APP_VERSION__}
+        </dd>
+        <dt className="text-muted">Offline</dt>
+        <dd>
+          {USING_MOCKS
+            ? 'Demo build: the sample data lives in this browser and nothing is kept for offline use.'
+            : 'The app opens without a connection. Saving orders, payments and statuses always needs one.'}
+        </dd>
+      </dl>
+      <InstallAppButton variant="button" className="mt-4 max-sm:w-full" />
+    </Card>
+  );
+}
 
 function ResetDemoData() {
   const [open, setOpen] = useState(false);
@@ -25,7 +50,7 @@ function ResetDemoData() {
     setBusy(true);
     const { resetDb } = await import('@/mocks/browser');
     resetDb();
-    localStorage.removeItem('laundryflow.recent-scans');
+    clearPrivateDeviceData();
     window.location.assign('/settings/shop');
   };
 
@@ -69,6 +94,7 @@ export default function ShopPage() {
     setError,
     formState: { errors, isDirty },
   } = useForm<ShopForm>({ resolver: zodResolver(shopSchema) });
+  useUnsavedChanges(isDirty);
 
   useEffect(() => {
     if (query.data)
@@ -150,6 +176,7 @@ export default function ShopPage() {
           </form>
         )}
       </Card>
+      <AboutApp />
       {USING_MOCKS && <ResetDemoData />}
     </div>
   );

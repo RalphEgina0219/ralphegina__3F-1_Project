@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { Mono } from '@/components/ui/Mono';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/States';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { errorMessage } from '@/lib/api';
 import { parseScanInput } from '@/lib/basket';
 import { formatSmartTime } from '@/lib/dates';
@@ -16,6 +17,7 @@ import { CameraScanner } from '../components/CameraScanner';
 import { BasketAvailable, BasketRetired, ScanOrderPanel } from '../components/ScanResult';
 
 const NOT_RECOGNIZED = 'QR not recognized. Scan a LaundryFlow basket label.';
+const OFFLINE_LOOKUP = "You're offline. Looking up a basket or order needs a connection.";
 
 function ManualLookup({
   value,
@@ -70,6 +72,7 @@ export default function ScanPage() {
   const scan = useScan();
   const { scans, add } = useRecentScans();
   const lastScan = useRef<{ text: string; at: number } | null>(null);
+  const online = useOnlineStatus();
 
   const resolve = useCallback(
     (text: string) => {
@@ -77,6 +80,12 @@ export default function ScanPage() {
       if (!input) {
         setResult(null);
         setError(NOT_RECOGNIZED);
+        return;
+      }
+      // Checked here too: a camera keeps reading labels while the connection is gone.
+      if (!navigator.onLine) {
+        setResult(null);
+        setError(OFFLINE_LOOKUP);
         return;
       }
       setError(null);
@@ -218,7 +227,7 @@ export default function ScanPage() {
               <Card className="border-danger-bar p-4 md:p-5">
                 <p className="flex items-center gap-2 font-bold text-danger">
                   <CircleAlert className="size-5 shrink-0" aria-hidden="true" />
-                  Not found
+                  {error === OFFLINE_LOOKUP || !online ? 'No connection' : 'Not found'}
                 </p>
                 <p className="mt-1 text-sm text-muted">{error}</p>
               </Card>

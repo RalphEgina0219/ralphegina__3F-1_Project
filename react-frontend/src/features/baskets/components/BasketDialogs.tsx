@@ -66,7 +66,12 @@ export function AddBasketsDialog({
       description="Numbers continue from the last basket and each gets its permanent QR when saved."
       footer={
         <>
-          <Button variant="secondary" disabled={add.isPending} onClick={() => submit(20)}>
+          <Button
+            variant="secondary"
+            disabled={add.isPending}
+            needsNetwork
+            onClick={() => submit(20)}
+          >
             Add 20 baskets
           </Button>
           <Button type="submit" form={ADD_FORM} loading={add.isPending}>

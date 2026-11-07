@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store';
+import { lastSide } from '@/features/pwa/side';
 
 export function RequireAuth() {
   const status = useAuthStore((state) => state.status);
@@ -19,6 +20,9 @@ export function RequireAuth() {
     );
   }
   if (status === 'guest') {
+    // The installed app always opens at "/": a customer's phone goes back to their own account.
+    if (location.pathname === '/' && lastSide() === 'customer')
+      return <Navigate to="/my" replace />;
     const next = location.pathname + location.search;
     const keepPage = !signedOut && next !== '/';
     return (

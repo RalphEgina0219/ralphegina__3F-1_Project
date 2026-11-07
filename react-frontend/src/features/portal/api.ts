@@ -68,7 +68,8 @@ export function useCustomerLogout() {
     mutationFn: () => api.post('/customer/auth/logout'),
     onSettled: () => {
       setCustomer(null);
-      queryClient.removeQueries({ queryKey: ['portal'] });
+      // Nothing of this customer's stays in memory for whoever uses the device next.
+      queryClient.clear();
     },
   });
 }

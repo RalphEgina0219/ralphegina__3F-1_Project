@@ -1,14 +1,33 @@
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Providers } from '@/app/providers';
 import { bootstrapAuth } from '@/features/auth/store';
+import { listenForInstallPrompt } from '@/features/pwa/install';
+import { recordVisit } from '@/features/pwa/visits';
+import { removeOtherWorkers } from '@/features/pwa/workers';
 import './index.css';
+
+const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
+
+/**
+ * Exactly one service worker owns "/":
+ * - mocks on (dev and the demo build): MSW's worker, which serves the mock API. No offline cache.
+ * - mocks off (real API): the Workbox worker with the offline app shell. MSW is not bundled.
+ */
+const ServiceWorkerUpdates = USE_MOCKS
+  ? null
+  : lazy(() => import('@/features/pwa/components/ServiceWorkerUpdates'));
 
 const root = document.getElementById('root') as HTMLElement;
 
 async function start() {
+  // Before anything awaits: the browser may offer installation straight away.
+  listenForInstallPrompt();
+  recordVisit();
+  await removeOtherWorkers(USE_MOCKS ? 'mock' : 'pwa');
+
   // The mock API is a separate chunk, so a production build with mocks off never downloads it.
-  if (import.meta.env.VITE_USE_MOCKS === 'true') {
+  if (USE_MOCKS) {
     try {
       const { startMockApi } = await import('@/mocks/browser');
       await startMockApi();
@@ -26,6 +45,11 @@ async function start() {
   createRoot(root).render(
     <StrictMode>
       <Providers />
+      {ServiceWorkerUpdates && (
+        <Suspense fallback={null}>
+          <ServiceWorkerUpdates />
+        </Suspense>
+      )}
     </StrictMode>,
   );
 }

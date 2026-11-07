@@ -1,0 +1,31 @@
+# Netlify: deploy the demo build (mock API in the browser) over HTTPS for testing on phones.
+# In the Netlify UI set "Base directory" to react-frontend; this file is read from there.
+[build]
+  command = "npm run build:demo"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  VITE_USE_MOCKS = "true"
+
+# Workers and the manifest must never be served stale, or updates stop arriving.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/mockServiceWorker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

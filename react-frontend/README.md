@@ -54,15 +54,23 @@ printed before it stop matching.
 
 ### Scripts
 
-| Script              | What it does                                 |
-| ------------------- | -------------------------------------------- |
-| `npm run dev`       | Dev server with the mock API                 |
-| `npm run build`     | Typecheck, then production build to `dist/`  |
-| `npm run preview`   | Serve the production build locally           |
-| `npm run lint`      | ESLint, including accessibility rules        |
-| `npm run typecheck` | TypeScript strict check                      |
-| `npm test`          | Vitest: business rules, mock API, components |
-| `npm run format`    | Prettier                                     |
+| Script                | What it does                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `npm run dev`         | Dev server with the mock API                                                            |
+| `npm run build`       | Typecheck, then the real-API production build to `dist/` (mocks off, offline app shell) |
+| `npm run build:demo`  | Typecheck, then the demo build to `dist/`: production code with the mock API            |
+| `npm run preview`     | Serve `dist/` locally                                                                   |
+| `npm run preview:pwa` | `build:demo`, then serve it on your network (`--host`) to open on a phone               |
+| `npm run lint`        | ESLint, including accessibility rules                                                   |
+| `npm run typecheck`   | TypeScript strict check                                                                 |
+| `npm test`            | Vitest: business rules, mock API, components, PWA hooks                                 |
+| `npm run test:e2e`    | Playwright on both builds: manifest, service workers, offline, updates, install UI      |
+| `npm run screenshots` | Recapture `public/screenshots/` (the install-dialog images) from the demo build         |
+| `npm run icons`       | Regenerate every app icon from `public/logo.svg` (see `pwa-assets.config.ts`)           |
+| `npm run format`      | Prettier                                                                                |
+
+`test:e2e` and `screenshots` use your installed Google Chrome (`channel: 'chrome'`), so they need no
+browser download. They build into `dist-e2e/` and serve on ports 4310 (demo) and 4311 (real API).
 
 The scripts call each tool through `node node_modules/...` on purpose. The project folder name contains
 `&`, which breaks npm's Windows `.cmd` shims (`vite`, `tsc`, and so on).
@@ -76,7 +84,7 @@ The scripts call each tool through `node node_modules/...` on purpose. The proje
 | `VITE_USE_MOCKS`  | not set | `true` serves the API from the mock. Set in `.env.development`                           |
 
 A plain `npm run build` has mocks **off** and leaves the mock code out of the bundle. For a demo build
-with mocks, set `VITE_USE_MOCKS=true` when building. Set `VITE_PUBLIC_URL` before printing labels for
+with mocks, use `npm run build:demo` (it reads `.env.demo`). Set `VITE_PUBLIC_URL` before printing labels for
 real: the URL is printed on every basket and should never change.
 
 ## Screens
@@ -118,11 +126,15 @@ src/
   features/     auth dashboard customers orders baskets qr payments inventory reports settings
                 notifications portal
                   each with api.ts (TanStack Query hooks), components/, pages/, types.ts
+                pwa: install prompt, service workers, offline banner, update toast, /offline
+  hooks/        useMediaQuery, useDebouncedValue, useOnlineStatus, useDisplayMode
   lib/          api, money, billing, status, inventory, permissions, basket, accounts, dates,
-                format, print, csv
+                format, print, csv, platform, unsaved (forms with unsaved work), session
   mocks/        db (localStorage store), seed, queries (DTO builders), http helpers, handlers/
   schemas/      Zod schema per form
   types/        entities.ts (one interface per MySQL table), api.ts (request and response shapes)
+e2e/            Playwright: PWA checks on the demo and the real-API builds, install screenshots
+public/         logo.svg (source of every icon), generated icons, screenshots/, _redirects
 ```
 
 The rules live in one place and are shared by the UI and the mock API, so the two cannot disagree:
@@ -142,6 +154,84 @@ The customer pages re-fetch every 15 seconds, on window focus and on reconnect, 
 "Last updated" with a manual refresh. There are no WebSockets in Phase 1. Laravel Reverb broadcasting
 on a private `customer.{id}` channel is an optional Phase 2 upgrade that needs no screen changes.
 
+## Install LaundryFlow as an app
+
+LaundryFlow is a Progressive Web App: staff and customers can install it on a phone, tablet or laptop.
+It then opens from its own icon in its own window, without the browser's address bar.
+
+**Android (Chrome, Edge, Samsung Internet).** Open the site and tap **Install app**: in the staff menu
+(sidebar or **More**), under the sign-in form, or on **My account**. On the second visit a banner also
+suggests it. Or use the browser menu **⋮ › Install app** (older versions: **Add to Home screen**).
+Long-press the icon for the shortcuts **Scan QR**, **New order** and **My laundry**.
+
+**iPhone and iPad (Safari).** iOS has no install prompt. Tap **Share**, then **Add to Home Screen**,
+then **Add**. The **Install app** button shows these steps.
+
+**Desktop (Chrome, Edge).** Click the install icon at the right of the address bar, or **Install app**
+in the sidebar.
+
+The installed app starts at `/`. A device that last used the customer portal goes to `/my` instead of
+the staff sign-in.
+
+### Updates
+
+The app checks for a new version when it opens, every hour, and whenever its window regains focus.
+When one is ready, a toast stays on screen, **A new version of LaundryFlow is available**, with
+**Reload** and **Later**. Nothing reloads by itself. If a form on screen has unsaved changes (a new
+order, a payment, a customer, the shop profile, a registration), **Reload** asks first. The version
+number is under **Settings › Shop profile › About LaundryFlow**.
+
+### What works offline
+
+LaundryFlow handles money, statuses and personal data, so offline support is deliberately narrow:
+
+- **The app itself opens offline.** Its code, styles, icons and fonts are stored on the device, so
+  even a page never visited before opens.
+- **Data already on screen stays visible**, and the offline banner says when it was last updated.
+- **Nothing is saved offline.** Every button that saves (orders, statuses, payments, stock, settings,
+  sign-in) is blocked with an explanation, and API requests are never cached or queued. When the
+  connection returns, the screen refreshes and says **Back online**.
+- **Signing out always works.** It clears this device's cached data and recent scans, so the next
+  person on a shared shop phone sees nothing of the last one's.
+- If a page's code can't be downloaded, `/offline` explains and offers **Retry**.
+
+### Service workers: demo build vs real API
+
+A site can have only one service worker per scope, and MSW (the mock API) is one. So:
+
+| Build                                          | Service worker                           | Installable | Offline app shell |
+| ---------------------------------------------- | ---------------------------------------- | ----------- | ----------------- |
+| `npm run dev`, `npm run build:demo` (mocks on) | MSW's `mockServiceWorker.js` only        | Yes         | No                |
+| `npm run build` (mocks off, real API)          | Workbox `sw.js` only; MSW is not shipped | Yes         | Yes               |
+
+`src/main.tsx` registers exactly one of them, after removing the other mode's leftover worker (and,
+in the demo, any old Workbox caches). A demo build's `sw.js` only unregisters itself, so a device that
+once ran a real-API build at the same address cleans up on its own.
+
+Running Workbox inside MSW's worker (`importScripts`) was considered and left out. Both answer every
+request, and MSW only works from its own script, so the demo would lose either its mocks or its cache.
+
+### Testing on a real phone (HTTPS needed)
+
+Service workers, installation and the camera all need **HTTPS** (or `localhost`). Two ways:
+
+**(a) A free static host, for the demo build.** Netlify is set up: `netlify.toml` builds with
+`npm run build:demo` (`VITE_USE_MOCKS=true`), and `public/_redirects` sends every route to
+`index.html`. In Netlify choose **Add new site › Import an existing project**, pick the repository and
+set **Base directory** to `react-frontend`. Cloudflare Pages reads the same `_redirects` file: use the
+build command `npm run build:demo` and the output directory `dist`.
+
+**(b) A temporary tunnel to your computer.**
+
+```bash
+npm run preview:pwa                              # demo build on http://localhost:4173
+cloudflared tunnel --url http://localhost:4173   # prints an https://….trycloudflare.com address
+```
+
+Open the printed address on the phone. `vite.config.ts` already allows `*.trycloudflare.com` for
+both `dev` and `preview`. To try the offline app shell instead, run `npm run build` and then
+`npm run preview -- --host`. There is no API behind it, so only the sign-in screens work.
+
 ## Moving to the Laravel API (Phase 2)
 
 The `laravel-backend/` folder is a fresh Laravel 13 skeleton: none of the API exists there yet.
@@ -155,8 +245,13 @@ The `laravel-backend/` folder is a fresh Laravel 13 skeleton: none of the API ex
    ```
 
 2. Delete `src/mocks/`, `public/mockServiceWorker.js`, the `msw` dev dependency, the mock branch in
-   `src/main.tsx`, and the **Reset demo data** card in `features/settings/pages/ShopPage.tsx`.
-3. Laravel has to implement the contract below. The integration tests in `src/mocks/*.test.ts`
+   `src/main.tsx`, and the **Reset demo data** card in `features/settings/pages/ShopPage.tsx`. Keep
+   `removeOtherWorkers('pwa')`: it removes the MSW worker from phones that ran the demo.
+3. Serve `sw.js`, `manifest.webmanifest` and `index.html` with `Cache-Control: no-cache`, over HTTPS
+   (hashed files under `/assets/` can be cached for a year). Keep the API under paths starting with
+   `/api/` and `/sanctum/`: the service worker never caches those and never answers them with the app
+   shell.
+4. Laravel has to implement the contract below. The integration tests in `src/mocks/*.test.ts`
    (`api`, `baskets`, `portal`, `flow`) describe the expected behaviour and are a good checklist for
    feature tests.
 
@@ -306,6 +401,8 @@ basket assignments for active orders. Reuse `mocks/seed.ts` as the reference.
 - **Cross-device needs Phase 2.** The data lives in one browser's `localStorage`, so a phone cannot see
   an order created on the shop's computer. The whole flow (staff, customer, scan) works on one device:
   open `/b/<token>` from a printed label preview, or type `BSK-0001` in the scanner.
+- **The demo build has no offline app shell**, because MSW owns the service worker (see "Service
+  workers: demo build vs real API"). Offline behaviour is tested on the real-API build.
 - **The camera and the mock both need HTTPS or localhost.** A phone opening `http://192.168.x.x` gets a
   message saying so instead of the app. Deploy with HTTPS in Phase 2.
 - **QR decoding on browsers without a native `BarcodeDetector`** (desktop Chrome, Firefox, Safari) downloads a

@@ -9,6 +9,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Field } from '@/components/ui/Field';
 import { Input } from '@/components/ui/Input';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
+import { InstallAppButton } from '@/features/pwa/components/InstallAppButton';
 import { applyFieldErrors, errorMessage, safeNext } from '@/lib/api';
 import { loginSchema, type LoginInput } from '@/schemas/auth';
 import { useLogin } from '../api';
@@ -160,6 +161,9 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+      <footer className="flex justify-center pt-3 lg:pt-5">
+        <InstallAppButton variant="link" />
+      </footer>
 
       <Dialog
         open={forgotOpen}

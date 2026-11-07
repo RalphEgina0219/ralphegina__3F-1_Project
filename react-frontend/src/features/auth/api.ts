@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, API_URL } from '@/lib/api';
+import { clearPrivateDeviceData } from '@/lib/session';
 import type { AuthUser } from '@/types/api';
 import { useAuthStore } from './store';
 import type { LoginInput } from '@/schemas/auth';
@@ -31,7 +32,9 @@ export function useLogout() {
     mutationFn: () => api.post('/auth/logout'),
     onSettled: () => {
       useAuthStore.getState().signOut();
+      // A shared shop phone: the next person sees nothing of this one's data.
       queryClient.clear();
+      clearPrivateDeviceData();
     },
   });
 }

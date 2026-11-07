@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { applyFieldErrors, errorMessage } from '@/lib/api';
 import { cleanName, normalizeEmail, PASSWORD_MIN } from '@/lib/accounts';
 import { normalizePhone } from '@/lib/format';
+import { useUnsavedChanges } from '@/lib/unsaved';
 import { registerSchema, type RegisterForm } from '@/schemas/portal';
 import { useCustomerRegister, usePortalBarangays } from '../api';
 import { PortalAuthShell } from '../components/PortalAuthShell';
@@ -27,7 +28,7 @@ export default function RegisterPage() {
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -40,6 +41,7 @@ export default function RegisterPage() {
       street_address: '',
     },
   });
+  useUnsavedChanges(isDirty);
 
   useEffect(() => {
     void bootstrapCustomer();

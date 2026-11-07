@@ -1,4 +1,5 @@
 import { delay, http, HttpResponse, type HttpResponseResolver, type JsonBodyType } from 'msw';
+import { manilaDay } from '@/lib/analytics/time';
 import { API_URL } from '@/lib/api';
 import { can, type Ability } from '@/lib/permissions';
 import type { AuthUser } from '@/types/api';
@@ -157,11 +158,11 @@ export function paginate<T, M extends object>(
   };
 }
 
-/** Matches an ISO timestamp against yyyy-MM-dd bounds in the shop's local time. */
+/** Matches an ISO timestamp against yyyy-MM-dd bounds, by its calendar day in Manila. */
 export function inRange(iso: string, from: string | null, to: string | null) {
-  const date = new Date(iso);
-  if (from && date < new Date(`${from}T00:00:00`)) return false;
-  if (to && date > new Date(`${to}T23:59:59.999`)) return false;
+  const day = manilaDay(iso);
+  if (from && day < from) return false;
+  if (to && day > to) return false;
   return true;
 }
 

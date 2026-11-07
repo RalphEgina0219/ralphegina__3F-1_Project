@@ -1,4 +1,5 @@
 import { parseISO } from 'date-fns';
+import { manilaDay } from '@/lib/analytics/time';
 import { kgToTenths, lineSubtotalCents } from '@/lib/billing';
 import { can } from '@/lib/permissions';
 import { checkTransition, STATUS_ORDER, type TransitionErrorCode } from '@/lib/status';
@@ -130,6 +131,13 @@ export const orderHandlers = [
     const to = query.get('to');
     const customerId = Number(query.get('customer_id')) || null;
     const statuses = (query.get('status') ?? '').split(',').filter(Boolean);
+    // Dashboard drill-downs: how long an order has sat in its status, and when it is due.
+    const nowMs = Date.now();
+    const waitingMin = query.get('waiting_min');
+    const waitingMax = query.get('waiting_max');
+    const due = query.get('due');
+    const daysWaiting = (since: string) => (nowMs - Date.parse(since)) / 86_400_000;
+    const working = (status: StatusCode) => status !== 'released' && status !== 'ready_for_pickup';
 
     const filtered = db()
       .orders.filter((o) => inRange(o.received_at, from, to))
@@ -137,6 +145,16 @@ export const orderHandlers = [
       .map(toOrderDto)
       .filter((o) => matchesSearch(o, search))
       .filter((o) => !paymentFilter || o.payment_status === paymentFilter)
+      .filter((o) => !waitingMin || daysWaiting(o.status_since) >= Number(waitingMin))
+      .filter((o) => !waitingMax || daysWaiting(o.status_since) < Number(waitingMax))
+      .filter(
+        (o) =>
+          !due ||
+          (working(o.status) &&
+            (due === 'overdue'
+              ? Date.parse(o.promised_at) < nowMs
+              : Date.parse(o.promised_at) >= nowMs && manilaDay(o.promised_at) === due)),
+      )
       .sort((a, b) => b.received_at.localeCompare(a.received_at));
 
     const status_counts = Object.fromEntries(

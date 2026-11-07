@@ -231,6 +231,12 @@ export interface OrderFilters {
   from?: string;
   to?: string;
   customer_id?: number;
+  /** Days in the current status, from a dashboard drill-down: at least … */
+  waiting_min?: number;
+  /** … and under. */
+  waiting_max?: number;
+  /** Active orders due on a Manila day (yyyy-MM-dd), or "overdue". */
+  due?: string;
   page?: number;
   per_page?: number;
 }
@@ -351,83 +357,7 @@ export interface DashboardSummary {
   needs_action?: NeedsActionDto[];
 }
 
-export interface DailySalesRow {
-  date: string;
-  orders: number;
-  kilos: number;
-  sales_cents: number;
-  collected_cents: number;
-}
-
-export interface SalesReport {
-  kpis: {
-    gross_sales_cents: number;
-    prior_gross_sales_cents: number;
-    orders: number;
-    orders_per_day: number;
-    kilos: number;
-    kilos_per_order: number;
-    collected_cents: number;
-    unpaid_cents: number;
-  };
-  daily: DailySalesRow[];
-  by_service: { service_name: string; sales_cents: number }[];
-}
-
-export interface OrdersReport {
-  kpis: {
-    orders: number;
-    released: number;
-    in_process: number;
-    overdue: number;
-    avg_turnaround_hours: number | null;
-  };
-  by_status: { status: StatusCode; label: string; count: number }[];
-  daily: { date: string; orders: number; released: number }[];
-}
-
-export interface PaymentsReport {
-  kpis: {
-    collected_cents: number;
-    cash_cents: number;
-    gcash_cents: number;
-    outstanding_cents: number;
-    voided_cents: number;
-    count: number;
-  };
-  daily: { date: string; cash_cents: number; gcash_cents: number }[];
-  balances: {
-    order_id: number;
-    order_number: string;
-    customer_name: string;
-    status_label: string;
-    received_at: string;
-    balance_cents: number;
-  }[];
-}
-
-export interface InventoryReport {
-  kpis: { tracked: number; critical: number; low: number; movements: number };
-  items: {
-    id: number;
-    name: string;
-    unit_code: string;
-    on_hand: number;
-    reorder_level: number;
-    stock_status: 'ok' | 'low' | 'critical';
-    stock_in: number;
-    stock_out: number;
-  }[];
-}
-
-export type ReportKind = 'sales' | 'orders' | 'payments' | 'inventory';
-
-export interface ReportMap {
-  sales: SalesReport;
-  orders: OrdersReport;
-  payments: PaymentsReport;
-  inventory: InventoryReport;
-}
+// Dashboard charts and every report: see lib/analytics/build.ts (AnalyticsEnvelope).
 
 export interface UserDto extends Omit<User, 'role_id'> {
   role: RoleName;

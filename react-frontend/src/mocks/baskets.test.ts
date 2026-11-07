@@ -28,12 +28,12 @@ async function completeOrder(orderId: number, totalCents: number) {
 }
 
 describe('basket seed', () => {
-  it('has BSK-0001 to BSK-0030 with unique tokens, 2 retired and the rest in use or available', () => {
+  it('has BSK-0001 to BSK-0070 with unique tokens, 2 retired and the rest in use or available', () => {
     const { baskets } = db();
     expect(baskets.map((b) => b.basket_number)).toEqual(
-      Array.from({ length: 30 }, (_, i) => `BSK-${String(i + 1).padStart(4, '0')}`),
+      Array.from({ length: 70 }, (_, i) => `BSK-${String(i + 1).padStart(4, '0')}`),
     );
-    expect(new Set(baskets.map((b) => b.qr_token)).size).toBe(30);
+    expect(new Set(baskets.map((b) => b.qr_token)).size).toBe(70);
     for (const basket of baskets) expect(basket.qr_token).toMatch(TOKEN);
     expect(baskets.filter((b) => b.status === 'retired')).toHaveLength(2);
     expect(baskets.some((b) => b.status === 'available')).toBe(true);
@@ -74,9 +74,9 @@ describe('basket management', () => {
     const { status, data } = await http.post('/baskets', { count: 20, label: 'Green' });
     expect(status).toBe(201);
     expect(data.data).toHaveLength(20);
-    expect(data.data[0].basket_number).toBe('BSK-0031');
-    expect(data.data[19].basket_number).toBe('BSK-0050');
-    expect(new Set(db().baskets.map((b) => b.qr_token)).size).toBe(50);
+    expect(data.data[0].basket_number).toBe('BSK-0071');
+    expect(data.data[19].basket_number).toBe('BSK-0090');
+    expect(new Set(db().baskets.map((b) => b.qr_token)).size).toBe(90);
   });
 
   it('keeps a basket token permanent: edits and reprints return the same QR', async () => {
@@ -104,9 +104,9 @@ describe('basket management', () => {
     const free = freeBasket();
     expect((await http.post(`/baskets/${free}/retire`, { reason: 'Broken' })).status).toBe(200);
     expect(db().baskets.find((b) => b.id === free)?.status).toBe('retired');
-    expect(db().baskets).toHaveLength(30);
+    expect(db().baskets).toHaveLength(70);
     const added = await http.post('/baskets', { count: 1 });
-    expect(added.data.data[0].basket_number).toBe('BSK-0031');
+    expect(added.data.data[0].basket_number).toBe('BSK-0071');
   });
 
   it('is admin-only to manage, while staff can list and scan', async () => {

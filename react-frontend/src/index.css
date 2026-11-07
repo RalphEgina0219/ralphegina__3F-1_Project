@@ -280,4 +280,59 @@
   .avoid-break {
     break-inside: avoid;
   }
+
+  /*
+   * Reports on paper: no app chrome (every shell part is print:hidden), each chart whole on one
+   * page, no heading stranded at the foot of a page, the table header repeated on every page.
+   */
+  .chart-card,
+  .report-insights,
+  .report-table tr {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  .report-table thead {
+    display: table-header-group;
+  }
+
+  /* Totals once, at the very end, not at the foot of every page. */
+  .report-table tfoot {
+    display: table-row-group;
+  }
+
+  /*
+   * Charts drawn at screen width scale to the page, keeping their proportions: the plot box takes
+   * the height of the scaled drawing instead of its screen height.
+   */
+  [data-chart-plot],
+  .chart-plot,
+  .recharts-responsive-container {
+    height: auto !important;
+  }
+
+  .chart-plot svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Paper needs no tap targets: compact rows fit about 30 to a page. */
+  .report-table td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    font-size: 11px;
+  }
+
+  .report-table a {
+    min-height: 0 !important;
+  }
+
+  .recharts-tooltip-wrapper {
+    display: none !important;
+  }
 }

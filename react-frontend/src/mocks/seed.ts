@@ -1,6 +1,14 @@
-import { addDays, format, setHours, setMinutes, subDays, subMinutes } from 'date-fns';
+import { subDays, subMinutes } from 'date-fns';
 import { formatBasketNumber } from '@/lib/basket';
 import { lineSubtotalCents } from '@/lib/billing';
+import {
+  addDays,
+  manilaDay,
+  manilaHour,
+  manilaInstant,
+  weekdayOf,
+  type DayKey,
+} from '@/lib/analytics/time';
 import type { Order, Payment, PaymentMethodCode, StatusCode } from '@/types/entities';
 import { generateQrToken, type MockDb } from './db';
 import { customerNotice, demoEmail } from './messages';
@@ -108,9 +116,17 @@ export const LEGACY_CUSTOMERS: readonly string[] = [
   'Sarah Ramos',
 ];
 
-const BASKET_COUNT = 30;
+/** Usable baskets were 30 at opening; the shop bought 40 more as it grew. 29 and 30 are retired. */
+const BASKET_COUNT = 70;
 /** Lost or broken baskets: kept for their history, never deleted, numbers never reused. */
 const RETIRED_BASKETS: readonly number[] = [29, 30];
+
+/** Days of history before today. With today, 120 days in all. */
+const HISTORY_DAYS = 119;
+/** Older events stay in the tables they belong to; only these last days get audit-log rows. */
+const AUDIT_DAYS = 14;
+/** Jessa Lopez left the shop (her account is disabled) about 49 days ago. */
+const JESSA_LEFT_DAYS_AGO = 49;
 
 const SERVICE = { WDF: 1, WASH: 2, COMFORTER: 3, IRONING: 4, EXPRESS: 5, DRY_CLEAN: 6 } as const;
 const USER = { LIZA: 1, KEVIN: 2, AIRA: 3, JESSA: 4 } as const;
@@ -121,6 +137,148 @@ const STAGES: readonly StatusCode[] = [
   'folding',
   'ready_for_pickup',
   'released',
+];
+
+/** Drop-offs per hour of a shop day (7 AM to 6 PM): a morning rush and an after-work rush. */
+const HOUR_WEIGHTS: readonly [hour: number, weight: number][] = [
+  [7, 1.6],
+  [8, 1.9],
+  [9, 1.7],
+  [10, 1.1],
+  [11, 0.8],
+  [12, 0.6],
+  [13, 0.6],
+  [14, 0.7],
+  [15, 0.9],
+  [16, 1.5],
+  [17, 1.7],
+  [18, 0.9],
+];
+
+const FIRST_NAMES = [
+  'Adrian',
+  'Alma',
+  'Alvin',
+  'Amelia',
+  'Andrea',
+  'Anthony',
+  'April',
+  'Arlene',
+  'Benjie',
+  'Bernadette',
+  'Carlo',
+  'Carmen',
+  'Catherine',
+  'Cesar',
+  'Christian',
+  'Clarissa',
+  'Daisy',
+  'Darwin',
+  'Dolores',
+  'Edgar',
+  'Edwin',
+  'Erlinda',
+  'Ernesto',
+  'Evelyn',
+  'Fernando',
+  'Florence',
+  'Gemma',
+  'Gerald',
+  'Gina',
+  'Hazel',
+  'Imelda',
+  'Irene',
+  'Jasmine',
+  'Jayson',
+  'Jennifer',
+  'Jessica',
+  'Joel',
+  'Jonathan',
+  'Josefina',
+  'Kristine',
+  'Leah',
+  'Leonardo',
+  'Lilibeth',
+  'Lourdes',
+  'Manuel',
+  'Marlon',
+  'Melanie',
+  'Michelle',
+  'Nestor',
+  'Norma',
+  'Oscar',
+  'Patricia',
+  'Perla',
+  'Ramon',
+  'Ricardo',
+  'Rosalie',
+  'Ruben',
+  'Susan',
+  'Victor',
+  'Wilma',
+];
+
+const LAST_NAMES = [
+  'Abad',
+  'Agustin',
+  'Alonzo',
+  'Andrada',
+  'Arellano',
+  'Bacani',
+  'Bautista',
+  'Belmonte',
+  'Cabrera',
+  'Calderon',
+  'Concepcion',
+  'Cordero',
+  'Cortez',
+  'David',
+  'De Guzman',
+  'De Leon',
+  'Del Rosario',
+  'Dizon',
+  'Esguerra',
+  'Estrada',
+  'Fajardo',
+  'Flores',
+  'Galang',
+  'Gatchalian',
+  'Guevarra',
+  'Hernandez',
+  'Ilagan',
+  'Jimenez',
+  'Lacson',
+  'Lagman',
+  'Lopez',
+  'Macaraeg',
+  'Magbanua',
+  'Malabanan',
+  'Manalo',
+  'Medina',
+  'Mercado',
+  'Miranda',
+  'Morales',
+  'Nepomuceno',
+  'Ordoñez',
+  'Panganiban',
+  'Perez',
+  'Quiambao',
+  'Quijano',
+  'Reyes',
+  'Robles',
+  'Roque',
+  'Sablan',
+  'Salvador',
+  'Samonte',
+  'Sison',
+  'Soriano',
+  'Tolentino',
+  'Umali',
+  'Valencia',
+  'Velasco',
+  'Villafuerte',
+  'Yap',
+  'Zamora',
 ];
 
 type ItemSpec = readonly [serviceId: number, amount: number];
@@ -141,7 +299,6 @@ interface OrderSpec {
   overdue?: boolean;
 }
 
-/** The orders the approved mockups show, placed relative to the day the data is seeded. */
 const FEATURED: readonly OrderSpec[] = [
   {
     customer: 'Arnel Pascual',
@@ -341,11 +498,49 @@ const FEATURED: readonly OrderSpec[] = [
   },
 ];
 
+/** A payment planned with an order: a fixed amount, or whatever the order still owes. */
+interface PlannedPayment {
+  at: number;
+  by: number;
+  method: PaymentMethodCode;
+  amount: number | 'full' | 'rest' | 'deposit';
+}
+
+/** Everything about one order, decided before it is written into the tables. */
+interface PlannedOrder {
+  customerId: number;
+  receivedAt: number;
+  items: readonly ItemSpec[];
+  /** Status changes already made by now, starting with Received. */
+  steps: { status: number; at: number; by: number }[];
+  promisedAt: number;
+  by: number;
+  payments: PlannedPayment[];
+  notes: string | null;
+  /** One of the hand-written orders from the mockups. */
+  featured: boolean;
+}
+
 export function createSeed(now: Date): MockDb {
   const rand = mulberry32(20261031);
   const pick = <T>(list: readonly T[]): T => list[Math.floor(rand() * list.length)] as T;
-  const iso = (date: Date) => date.toISOString();
-  const seededAt = iso(subDays(now, 120));
+  const between = (min: number, max: number) => min + rand() * (max - min);
+  const weighted = <T>(entries: readonly (readonly [T, number])[]): T => {
+    const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
+    let roll = rand() * total;
+    for (const [value, weight] of entries) {
+      roll -= weight;
+      if (roll <= 0) return value;
+    }
+    return (entries[entries.length - 1] as readonly [T, number])[0];
+  };
+  const iso = (value: Date | number) => new Date(value).toISOString();
+  const HOUR = 3_600_000;
+  const MINUTE = 60_000;
+  const nowMs = now.getTime();
+  const today = manilaDay(now);
+  const seededAt = iso(manilaInstant(addDays(today, -HISTORY_DAYS - 1), 9));
+  const auditFrom = nowMs - AUDIT_DAYS * 24 * HOUR;
 
   const db: MockDb = {
     roles: [
@@ -526,13 +721,14 @@ export function createSeed(now: Date): MockDb {
   };
 
   const audit = (
-    at: Date,
+    at: number,
     userId: number,
     action: string,
     type: string,
     id: number | null,
     values: Record<string, unknown>,
   ) => {
+    if (at < auditFrom) return;
     db.audit_logs.push({
       id: db.audit_logs.length + 1,
       user_id: userId,
@@ -545,9 +741,40 @@ export function createSeed(now: Date): MockDb {
     });
   };
 
-  // Customers: the first dozen are long-time regulars.
+  /** Moves a time that falls after closing (7 PM) or before opening (7 AM) to the next opening. */
+  const shopHours = (ms: number) => {
+    const hour = manilaHour(ms);
+    const day = manilaDay(ms);
+    if (hour >= 19) return manilaInstant(addDays(day, 1), 7, Math.floor(between(0, 50))).getTime();
+    if (hour < 7) return manilaInstant(day, 7, Math.floor(between(0, 50))).getTime();
+    return ms;
+  };
+
+  /** Who was at the counter that day. Jessa worked shifts until she left. */
+  const staffOn = (daysAgo: number) =>
+    daysAgo > JESSA_LEFT_DAYS_AGO
+      ? weighted<number>([
+          [USER.KEVIN, 0.3],
+          [USER.AIRA, 0.25],
+          [USER.JESSA, 0.3],
+          [USER.LIZA, 0.15],
+        ])
+      : weighted<number>([
+          [USER.KEVIN, 0.42],
+          [USER.AIRA, 0.38],
+          [USER.LIZA, 0.2],
+        ]);
+  const daysAgoOf = (ms: number) => Math.max(0, Math.round((nowMs - ms) / (24 * HOUR)));
+
+  // Customers from the mockups: long-time regulars, on file since the shop opened.
+  const usedNames = new Set<string>();
+  const usedPhones = new Set<string>();
   CUSTOMERS.forEach(([full_name, contact_number, barangay, notes], index) => {
-    const since = iso(subDays(now, 20 + Math.floor(rand() * 120)));
+    const since = iso(
+      manilaInstant(addDays(today, -HISTORY_DAYS + Math.floor(rand() * 25)), 8, 30),
+    );
+    usedNames.add(full_name);
+    usedPhones.add(contact_number);
     db.customers.push({
       id: index + 1,
       full_name,
@@ -560,25 +787,85 @@ export function createSeed(now: Date): MockDb {
     });
   });
 
+  const openAccount = (customerId: number, fullName: string, at: string) => {
+    const id = db.customer_accounts.length + 1;
+    db.customer_accounts.push({
+      id,
+      customer_id: customerId,
+      email: demoEmail(fullName),
+      is_active: true,
+      must_change_password: false,
+      last_login_at: null,
+      created_at: at,
+      updated_at: at,
+    });
+    db.customer_credentials[id] = 'password123';
+  };
+
   // Every customer except the legacy profiles has an account. Demo password: password123.
   db.customers
     .filter((customer) => !LEGACY_CUSTOMERS.includes(customer.full_name))
-    .forEach((customer) => {
-      const id = db.customer_accounts.length + 1;
-      db.customer_accounts.push({
-        id,
-        customer_id: customer.id,
-        email: demoEmail(customer.full_name),
-        is_active: true,
-        must_change_password: false,
-        last_login_at: null,
-        created_at: customer.created_at,
-        updated_at: customer.created_at,
-      });
-      db.customer_credentials[id] = 'password123';
-    });
+    .forEach((customer) => openAccount(customer.id, customer.full_name, customer.created_at));
 
-  // Baskets BSK-0001 to BSK-0030, labelled when the shop opened.
+  /** Customers who can be served: everyone with an account, with how often they have come. */
+  const pool = db.customers
+    .filter((customer) => !LEGACY_CUSTOMERS.includes(customer.full_name))
+    .map((customer) => ({
+      id: customer.id,
+      since: Date.parse(customer.created_at),
+      orders: 0,
+      regular: true,
+    }));
+  const usedEmails = new Set(db.customer_accounts.map((account) => account.email));
+
+  /** A walk-in registered at the counter a few minutes before their first drop-off. */
+  const signUp = (at: number) => {
+    let fullName = '';
+    for (let tries = 0; tries < 200 && !fullName; tries += 1) {
+      const candidate = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+      if (!usedNames.has(candidate) && !usedEmails.has(demoEmail(candidate))) fullName = candidate;
+    }
+    if (!fullName) throw new Error('Seed ran out of customer names');
+    let phone = '';
+    while (!phone || usedPhones.has(phone)) {
+      phone = `09${String(Math.floor(rand() * 1e9)).padStart(9, '0')}`;
+    }
+    usedNames.add(fullName);
+    usedPhones.add(phone);
+    usedEmails.add(demoEmail(fullName));
+    const created = iso(at - Math.floor(between(2, 10)) * MINUTE);
+    const id = db.customers.length + 1;
+    const barangay =
+      rand() < 0.28
+        ? BARANGAYS.indexOf('Poblacion') + 1
+        : 1 + Math.floor(rand() * BARANGAYS.length);
+    db.customers.push({
+      id,
+      full_name: fullName,
+      contact_number: phone,
+      barangay_id: barangay,
+      street_address: rand() > 0.5 ? `Purok ${1 + Math.floor(rand() * 7)}` : null,
+      notes: null,
+      created_at: created,
+      updated_at: created,
+    });
+    openAccount(id, fullName, created);
+    const entry = { id, since: Date.parse(created), orders: 0, regular: false };
+    pool.push(entry);
+    return entry;
+  };
+
+  /** About 45% of drop-offs come from returning customers, more of them as the shop matures. */
+  const chooseCustomer = (at: number, daysAgo: number) => {
+    const newShare = 0.45 + 0.17 * (daysAgo / HISTORY_DAYS);
+    const known = pool.filter((entry) => entry.since <= at);
+    if (known.length === 0 || rand() < newShare) return signUp(at);
+    return weighted(
+      known.map((entry) => [entry, (entry.orders + 1) ** 1.3 * (entry.regular ? 2.5 : 1)] as const),
+    );
+  };
+
+  // Baskets BSK-0001 to BSK-0070. The first 30 were labelled when the shop opened.
   const LABELS = ['Blue, large', 'Blue, medium', 'Green, large', 'Yellow, medium', 'Red, small'];
   for (let n = 1; n <= BASKET_COUNT; n += 1) {
     db.baskets.push({
@@ -599,11 +886,11 @@ export function createSeed(now: Date): MockDb {
   );
   let basketCursor = 0;
   /** Round-robin over the free baskets, so wear spreads and "times used" looks real. */
-  const takeBasket = (at: Date): number => {
+  const takeBasket = (at: number): number => {
     const ids = [...busyUntil.keys()];
     for (let tries = 0; tries < ids.length; tries += 1) {
       const id = ids[(basketCursor + tries) % ids.length] as number;
-      if ((busyUntil.get(id) ?? Infinity) <= at.getTime()) {
+      if ((busyUntil.get(id) ?? Infinity) <= at) {
         basketCursor = (basketCursor + tries + 1) % ids.length;
         return id;
       }
@@ -611,15 +898,195 @@ export function createSeed(now: Date): MockDb {
     throw new Error('Seed ran out of free baskets');
   };
 
+  // ---------------------------------------------------------------------------------------------
+  // Plan every order first, then write them in time order (order numbers and receipts read right).
+
+  const plans: PlannedOrder[] = [];
+
+  /** The mockup orders, exactly as before: they hold today's active work. */
+  for (const spec of FEATURED) {
+    const customer = db.customers.find((c) => c.full_name === spec.customer);
+    if (!customer) throw new Error(`Unknown seed customer ${spec.customer}`);
+    let receivedAt = manilaInstant(
+      addDays(today, -spec.daysAgo),
+      spec.time[0],
+      spec.time[1],
+    ).getTime();
+    if (receivedAt > nowMs) receivedAt = nowMs - (12 + (plans.length % 50)) * MINUTE;
+    const by = spec.by ?? USER.KEVIN;
+    const stageIndex = STAGES.indexOf(spec.stage);
+    let promisedAt = receivedAt + (spec.promiseHours ?? 28) * HOUR;
+    if (stageIndex < 4 && !spec.overdue && promisedAt <= nowMs) {
+      // Keep active orders on time however late the data is seeded, and inside shop hours.
+      promisedAt = nowMs + 3 * HOUR;
+      if (manilaHour(promisedAt) >= 19) promisedAt = manilaInstant(addDays(today, 1), 10).getTime();
+      else if (manilaHour(promisedAt) < 7) {
+        promisedAt = manilaInstant(manilaDay(promisedAt), 10).getTime();
+      }
+    }
+
+    // Status history, walking forward from Received at a believable pace but never past now.
+    const steps = [{ status: 1, at: receivedAt, by }];
+    let cursor = receivedAt;
+    for (let stage = 2; stage <= stageIndex + 1; stage += 1) {
+      const worker = pick([USER.KEVIN, USER.AIRA]);
+      cursor += (25 + Math.floor(rand() * 70)) * MINUTE;
+      if (stage === 6) cursor = Math.max(cursor, promisedAt + Math.floor(rand() * 240) * MINUTE);
+      steps.push({ status: stage, at: cursor, by: worker });
+    }
+    const last = steps[steps.length - 1]?.at ?? receivedAt;
+    if (last > nowMs && steps.length > 1) {
+      const span = nowMs - receivedAt - MINUTE;
+      steps.forEach((step, index) => {
+        step.at = receivedAt + (span * index) / (steps.length - 1);
+      });
+    }
+
+    const method = spec.method ?? 'cash';
+    const payments: PlannedPayment[] = [];
+    if (spec.paid === 'full')
+      payments.push({ at: receivedAt + 2 * MINUTE, by, method, amount: 'full' });
+    else if (typeof spec.paid === 'number') {
+      payments.push({ at: receivedAt + 2 * MINUTE, by, method, amount: spec.paid * 100 });
+    }
+    plans.push({
+      customerId: customer.id,
+      receivedAt,
+      items: spec.items,
+      steps,
+      promisedAt,
+      by,
+      payments,
+      notes: spec.notes ?? null,
+      featured: true,
+    });
+  }
+
+  /** What a drop-off on `day` at `at` looks like: services, timeline and payments. */
+  const planOrder = (at: number, daysAgo: number, force?: 'unclaimed' | 'unclaimed-deposit') => {
+    const customer = chooseCustomer(at, daysAgo);
+    customer.orders += 1;
+    const by = staffOn(daysAgo);
+
+    const items: ItemSpec[] = [];
+    const kind = rand();
+    if (kind < 0.6) items.push([SERVICE.WDF, Math.round(between(3, 9.5) * 10) / 10]);
+    else if (kind < 0.75) items.push([SERVICE.WASH, Math.round(between(3, 8.5) * 10) / 10]);
+    else if (kind < 0.85) items.push([SERVICE.COMFORTER, 1 + Math.floor(rand() * 3)]);
+    else if (kind < 0.95) items.push([SERVICE.IRONING, 3 + Math.floor(rand() * 13)]);
+    else {
+      items.push([SERVICE.WDF, Math.round(between(3, 8) * 10) / 10]);
+      items.push([SERVICE.IRONING, 2 + Math.floor(rand() * 8)]);
+    }
+    if (kind < 0.6 && rand() < 0.1) items.push([SERVICE.IRONING, 2 + Math.floor(rand() * 8)]);
+    const express = rand() < 0.2;
+    if (express) items.push([SERVICE.EXPRESS, 1]);
+
+    // Received to Ready: 18–30 hours, or 4–8 hours for Express. The shop works 7 AM to 7 PM.
+    const readyAt = shopHours(at + between(express ? 4 : 18, express ? 8 : 30) * HOUR);
+    const span = readyAt - at;
+    const times = [
+      at,
+      shopHours(at + between(10, 60) * MINUTE),
+      shopHours(at + span * between(0.38, 0.5)),
+      shopHours(at + span * between(0.7, 0.82)),
+      readyAt,
+    ];
+    for (let index = 1; index < times.length; index += 1) {
+      times[index] = Math.max(times[index] as number, (times[index - 1] as number) + 5 * MINUTE);
+    }
+    // Pickup: most the same or next day, a few leave it for days.
+    const wait = rand();
+    const pickupDelay =
+      wait < 0.55
+        ? between(0.5, 8)
+        : wait < 0.85
+          ? between(18, 34)
+          : wait < 0.95
+            ? between(40, 70)
+            : wait < 0.99
+              ? between(72, 120)
+              : between(150, 300);
+    const pickupAt = force ? Infinity : shopHours((times[4] as number) + pickupDelay * HOUR);
+    if (pickupAt !== Infinity) times.push(Math.max(pickupAt, (times[4] as number) + 10 * MINUTE));
+
+    const steps = times
+      .map((time, index) => ({
+        status: index + 1,
+        at: time,
+        by: index === 0 ? by : staffOn(daysAgo),
+      }))
+      .filter((step) => step.at <= nowMs - MINUTE);
+    const promisedAt = shopHours(at + (express ? 6 : 24) * HOUR);
+
+    // About 25% leave a deposit, some pay everything at drop-off, most pay when they collect.
+    const payments: PlannedPayment[] = [];
+    const mode = force === 'unclaimed' ? 1 : force === 'unclaimed-deposit' ? 0 : rand();
+    const method = (): PaymentMethodCode => (rand() < 0.7 ? 'cash' : 'gcash');
+    const pickupStep = steps[5];
+    if (mode < 0.25) {
+      payments.push({ at: at + 2 * MINUTE, by, method: method(), amount: 'deposit' });
+      if (pickupStep)
+        payments.push({ at: pickupStep.at, by: pickupStep.by, method: method(), amount: 'rest' });
+    } else if (mode < 0.4) {
+      payments.push({ at: at + 2 * MINUTE, by, method: method(), amount: 'full' });
+    } else if (pickupStep) {
+      payments.push({ at: pickupStep.at, by: pickupStep.by, method: method(), amount: 'full' });
+    }
+
+    plans.push({
+      customerId: customer.id,
+      receivedAt: at,
+      items,
+      steps,
+      promisedAt,
+      by,
+      payments,
+      notes: force ? 'Unclaimed. Customer was texted twice.' : null,
+      featured: false,
+    });
+  };
+
+  // History: busier on weekends, a morning and an after-work rush, and steady growth.
+  for (let daysAgo = HISTORY_DAYS; daysAgo >= 0; daysAgo -= 1) {
+    const day: DayKey = addDays(today, -daysAgo);
+    const growth = 9 + 7 * ((HISTORY_DAYS - daysAgo) / HISTORY_DAYS);
+    const weekend = weekdayOf(day) >= 5 ? 1.35 : 1;
+    const count = Math.round(growth * weekend * between(0.85, 1.15));
+    const times: number[] = [];
+    for (let n = 0; n < count; n += 1) {
+      const hour = weighted(HOUR_WEIGHTS.map(([h, w]) => [h, w] as const));
+      const at = manilaInstant(day, hour, Math.floor(rand() * 60)).getTime();
+      // Today's mockup orders already cover the first hours; history adds the rest of the day so far.
+      if (daysAgo === 0 && (hour < 10 || at > nowMs - 15 * MINUTE)) continue;
+      times.push(at);
+    }
+    times.sort((a, b) => a - b);
+    times.forEach((at, index) => {
+      // Two loads nobody came back for, to show old unpaid balances and long waits.
+      const force =
+        index === 0 && daysAgo === 34
+          ? 'unclaimed'
+          : index === 0 && daysAgo === 12
+            ? 'unclaimed-deposit'
+            : undefined;
+      planOrder(at, daysAgo, force);
+    });
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Write the orders.
+
   const sequences = new Map<string, number>();
   let receiptSeq = 200;
+  const statusAt = (status: number) => STAGES[status - 1] as StatusCode;
 
   const addPayment = (
     order: Order,
     amount: number,
     method: PaymentMethodCode,
     by: number,
-    at: Date,
+    at: number,
   ) => {
     receiptSeq += 1;
     const payment: Payment = {
@@ -645,47 +1112,41 @@ export function createSeed(now: Date): MockDb {
     return payment;
   };
 
-  const addOrder = (spec: OrderSpec) => {
-    const customer = db.customers.find((c) => c.full_name === spec.customer);
-    if (!customer) throw new Error(`Unknown seed customer ${spec.customer}`);
-
-    let receivedAt = setMinutes(setHours(subDays(now, spec.daysAgo), spec.time[0]), spec.time[1]);
-    if (receivedAt > now) receivedAt = subMinutes(now, 12 + (db.orders.length % 50));
-
-    const key = format(receivedAt, 'yyMMdd');
+  /** Ready-for-pickup notices for the staff bell: the mockup orders only, as in the designs. */
+  const writeOrder = (plan: PlannedOrder) => {
+    const customer = db.customers.find((c) => c.id === plan.customerId);
+    if (!customer) throw new Error(`Unknown seed customer ${plan.customerId}`);
+    const key = manilaDay(plan.receivedAt).slice(2).replace(/-/g, '');
     const sequence = (sequences.get(key) ?? 0) + 1;
     sequences.set(key, sequence);
-
-    const by = spec.by ?? USER.KEVIN;
-    const stageIndex = STAGES.indexOf(spec.stage);
     const id = db.orders.length + 1;
-    let promisedAt = new Date(receivedAt.getTime() + (spec.promiseHours ?? 28) * 3_600_000);
-    const inProcess = stageIndex < 4;
-    if (inProcess && !spec.overdue && promisedAt <= now) {
-      // Keep active orders on time however late the data is seeded, and inside shop hours.
-      promisedAt = new Date(now.getTime() + 3 * 3_600_000);
-      if (promisedAt.getHours() >= 19) promisedAt = setMinutes(setHours(addDays(now, 1), 10), 0);
-      else if (promisedAt.getHours() < 7) promisedAt = setMinutes(setHours(promisedAt, 10), 0);
-    }
+    const last = plan.steps[plan.steps.length - 1] ?? {
+      status: 1,
+      at: plan.receivedAt,
+      by: plan.by,
+    };
+    const daysAgo = daysAgoOf(plan.receivedAt);
 
     const order: Order = {
       id,
       order_number: `LF-${key}-${String(sequence).padStart(4, '0')}`,
       customer_id: customer.id,
-      current_status_id: stageIndex + 1,
-      received_by: by,
-      received_at: iso(receivedAt),
-      promised_at: iso(promisedAt),
-      released_at: null,
-      notes: spec.notes ?? null,
-      created_at: iso(receivedAt),
-      updated_at: iso(receivedAt),
+      current_status_id: last.status,
+      received_by: plan.by,
+      received_at: iso(plan.receivedAt),
+      promised_at: iso(plan.promisedAt),
+      released_at: last.status === 6 ? iso(last.at) : null,
+      notes: plan.notes,
+      created_at: iso(plan.receivedAt),
+      updated_at: iso(last.at),
     };
     db.orders.push(order);
-    audit(receivedAt, by, 'order.created', 'order', id, { order_number: order.order_number });
+    audit(plan.receivedAt, plan.by, 'order.created', 'order', id, {
+      order_number: order.order_number,
+    });
 
     let total = 0;
-    for (const [serviceId, amount] of spec.items) {
+    for (const [serviceId, amount] of plan.items) {
       const service = db.services.find((s) => s.id === serviceId);
       if (!service) throw new Error(`Unknown seed service ${serviceId}`);
       const weight_kg = service.pricing_type === 'per_kg' ? amount : null;
@@ -703,72 +1164,44 @@ export function createSeed(now: Date): MockDb {
       });
     }
 
-    // Status history, walking forward from Received at a believable pace but never past now.
-    const history: { status: number; at: Date; user: number }[] = [
-      { status: 1, at: receivedAt, user: by },
-    ];
-    let cursor = receivedAt;
-    for (let stage = 2; stage <= stageIndex + 1; stage += 1) {
-      const worker = pick([USER.KEVIN, USER.AIRA]);
-      cursor = new Date(cursor.getTime() + (25 + Math.floor(rand() * 70)) * 60_000);
-      if (stage === 6) {
-        const pickup = new Date(promisedAt.getTime() + Math.floor(rand() * 240) * 60_000);
-        cursor = pickup > cursor ? pickup : cursor;
-      }
-      history.push({ status: stage, at: cursor, user: worker });
-    }
-
-    // Squeeze the whole timeline in before "now" when it would otherwise run into the future.
-    const last = history[history.length - 1]?.at ?? receivedAt;
-    if (last > now && history.length > 1) {
-      const span = now.getTime() - receivedAt.getTime() - 60_000;
-      history.forEach((entry, index) => {
-        entry.at = new Date(receivedAt.getTime() + (span * index) / (history.length - 1));
-      });
-    }
-
-    history.forEach((entry, index) => {
-      const previous = history[index - 1];
+    plan.steps.forEach((step, index) => {
+      const previous = plan.steps[index - 1];
       db.order_status_history.push({
         id: db.order_status_history.length + 1,
         order_id: id,
         from_status_id: previous ? previous.status : null,
-        to_status_id: entry.status,
-        changed_by: entry.user,
+        to_status_id: step.status,
+        changed_by: step.by,
         note: null,
-        changed_at: iso(entry.at),
+        changed_at: iso(step.at),
       });
       if (previous) {
-        audit(entry.at, entry.user, 'order.status_changed', 'order', id, {
+        audit(step.at, step.by, 'order.status_changed', 'order', id, {
           order_number: order.order_number,
-          from: STAGES[previous.status - 1],
-          to: STAGES[entry.status - 1],
+          from: statusAt(previous.status),
+          to: statusAt(step.status),
         });
       }
     });
 
-    const finalAt = history[history.length - 1]?.at ?? receivedAt;
-    order.updated_at = iso(finalAt);
-    if (spec.stage === 'released') order.released_at = iso(finalAt);
-
     // Baskets: one per load, a second one for big loads. Completed orders handed theirs back.
-    const kilos = spec.items.reduce(
+    const kilos = plan.items.reduce(
       (sum, [serviceId, amount]) =>
         sum + (serviceId === SERVICE.WDF || serviceId === SERVICE.WASH ? amount : 0),
       0,
     );
-    const basketCount = kilos >= 7 || spec.items.length >= 3 ? 2 : 1;
+    const done = last.status === 6;
+    const basketCount = kilos >= 7 || plan.items.length >= 3 ? 2 : 1;
     for (let b = 0; b < basketCount; b += 1) {
-      const basketId = takeBasket(receivedAt);
-      const done = spec.stage === 'released';
-      busyUntil.set(basketId, done ? finalAt.getTime() : Infinity);
+      const basketId = takeBasket(plan.receivedAt);
+      busyUntil.set(basketId, done ? last.at : Infinity);
       db.order_baskets.push({
         id: db.order_baskets.length + 1,
         order_id: id,
         basket_id: basketId,
-        assigned_at: iso(receivedAt),
-        assigned_by: by,
-        released_at: done ? iso(finalAt) : null,
+        assigned_at: iso(plan.receivedAt),
+        assigned_by: plan.by,
+        released_at: done ? iso(last.at) : null,
       });
       if (!done) {
         const basket = db.baskets.find((row) => row.id === basketId);
@@ -777,23 +1210,22 @@ export function createSeed(now: Date): MockDb {
     }
 
     // What the customer saw in their account for recent orders.
-    if (spec.daysAgo <= 1) {
-      history.forEach((entry, index) => {
-        const status = STAGES[entry.status - 1] as StatusCode;
-        const notice = customerNotice(order.order_number, status);
+    if (daysAgo <= 1) {
+      plan.steps.forEach((step, index) => {
+        const notice = customerNotice(order.order_number, statusAt(step.status));
         db.customer_notifications.push({
           id: db.customer_notifications.length + 1,
           customer_id: customer.id,
           order_id: id,
           type: notice.type,
           message: notice.message,
-          sent_at: iso(entry.at),
-          read_at: index < history.length - 1 ? iso(entry.at) : null,
+          sent_at: iso(step.at),
+          read_at: index < plan.steps.length - 1 ? iso(step.at) : null,
         });
       });
     }
 
-    if (spec.stage === 'ready_for_pickup' && spec.daysAgo <= 4) {
+    if (plan.featured && last.status === 5 && daysAgo <= 4) {
       db.notifications.push({
         id: db.notifications.length + 1,
         order_id: id,
@@ -801,61 +1233,37 @@ export function createSeed(now: Date): MockDb {
         channel: 'in_app',
         message: `${order.order_number} is ready for pickup (${customer.full_name}).`,
         status: 'recorded',
-        sent_at: iso(finalAt),
+        sent_at: iso(last.at),
         read_at: null,
       });
     }
 
-    const method = spec.method ?? 'cash';
-    if (spec.paid === 'full') {
-      addPayment(order, total, method, by, new Date(receivedAt.getTime() + 2 * 60_000));
-    } else if (typeof spec.paid === 'number') {
-      addPayment(order, spec.paid * 100, method, by, new Date(receivedAt.getTime() + 2 * 60_000));
+    let paid = 0;
+    for (const payment of plan.payments) {
+      const due = total - paid;
+      const amount =
+        payment.amount === 'full' || payment.amount === 'rest'
+          ? due
+          : payment.amount === 'deposit'
+            ? Math.min(due, Math.max(5000, Math.floor((total * between(0.3, 0.6)) / 1000) * 1000))
+            : Math.min(due, payment.amount);
+      if (amount <= 0) continue;
+      addPayment(order, amount, payment.method, payment.by, payment.at);
+      paid += amount;
     }
-    return { order, total, finalAt };
+    return { order, finalAt: last.at };
   };
 
-  // Older history: released, paid in full, some of it in two instalments.
-  const regulars = CUSTOMERS.map(([name]) => name).filter(
-    (name) => !LEGACY_CUSTOMERS.includes(name),
-  );
-  const older: OrderSpec[] = [];
-  for (let daysAgo = 13; daysAgo >= 2; daysAgo -= 1) {
-    const count = 3 + Math.floor(rand() * 2);
-    for (let n = 0; n < count; n += 1) {
-      const items: ItemSpec[] = [];
-      const kind = rand();
-      if (kind < 0.62) items.push([SERVICE.WDF, Math.round((3 + rand() * 7) * 10) / 10]);
-      else if (kind < 0.85) items.push([SERVICE.WASH, Math.round((3 + rand() * 6) * 10) / 10]);
-      else items.push([SERVICE.COMFORTER, 1 + Math.floor(rand() * 3)]);
-      if (rand() < 0.28) items.push([SERVICE.IRONING, 2 + Math.floor(rand() * 8)]);
-      if (rand() < 0.14) items.push([SERVICE.EXPRESS, 1]);
-      older.push({
-        customer: pick(regulars),
-        daysAgo,
-        time: [7 + Math.floor(rand() * 10), Math.floor(rand() * 60)],
-        items,
-        stage: 'released',
-        paid: 'full',
-        method: rand() < 0.3 ? 'gcash' : 'cash',
-        by: pick([USER.KEVIN, USER.AIRA, USER.LIZA]),
-      });
-    }
-  }
+  plans.sort((a, b) => a.receivedAt - b.receivedAt);
 
-  // Create every order in time order so that daily sequences and receipt numbers read correctly.
-  const all = [...older, ...FEATURED].sort(
-    (a, b) => b.daysAgo - a.daysAgo || a.time[0] - b.time[0] || a.time[1] - b.time[1],
-  );
-
-  // A released order that had a mistaken payment voided, for the payment history screen.
+  // A completed order that had a mistaken payment voided, for the payment history screen.
   let voidedDemoDone = false;
-  for (const spec of all) {
-    const { order, total, finalAt } = addOrder(spec);
-    if (!voidedDemoDone && spec.stage === 'released' && spec.daysAgo <= 6) {
-      voidedDemoDone = true;
+  for (const plan of plans) {
+    const { order, finalAt } = writeOrder(plan);
+    if (!voidedDemoDone && order.released_at && daysAgoOf(plan.receivedAt) <= 6) {
       const voided = db.payments.find((p) => p.order_id === order.id);
       if (voided) {
+        voidedDemoDone = true;
         voided.voided_at = iso(finalAt);
         voided.voided_by = USER.LIZA;
         voided.void_reason = 'Wrong amount keyed in at the counter';
@@ -864,51 +1272,142 @@ export function createSeed(now: Date): MockDb {
           receipt_number: voided.receipt_number,
           reason: voided.void_reason,
         });
-        addPayment(order, total, 'cash', USER.LIZA, finalAt);
+        // The replacement covers what the voided payment had paid.
+        addPayment(order, voided.amount_cents, 'cash', USER.LIZA, finalAt);
       }
     }
   }
 
-  // Inventory: on-hand is computed from these, so they land on the figures in the mockups.
-  const moves: readonly [number, number, 'in' | 'out', number, number, string][] = [
-    [1, USER.LIZA, 'in', 10, 13, 'Opening stock'],
-    [1, USER.KEVIN, 'out', 3, 7, 'Used this week'],
-    [1, USER.AIRA, 'out', 3.5, 3, 'Used this week'],
-    [1, USER.KEVIN, 'out', 1.5, 0, 'Refilled dispenser'],
-    [2, USER.LIZA, 'in', 8, 13, 'Opening stock'],
-    [2, USER.AIRA, 'out', 3, 6, 'Used this week'],
-    [2, USER.KEVIN, 'out', 1.5, 2, 'Refilled dispenser'],
-    [3, USER.LIZA, 'in', 100, 13, 'Opening stock'],
-    [3, USER.AIRA, 'out', 25, 6, 'Bagging'],
-    [3, USER.KEVIN, 'out', 35, 1, 'Bagging'],
-    [4, USER.LIZA, 'in', 8, 13, 'Opening stock'],
-    [4, USER.KEVIN, 'out', 6, 5, 'Used this week'],
-    [4, USER.LIZA, 'in', 10, 3, 'Supplier delivery, Calapan'],
-    [5, USER.LIZA, 'in', 8, 13, 'Opening stock'],
-    [5, USER.AIRA, 'out', 2, 4, 'Used this week'],
-    [6, USER.LIZA, 'in', 150, 13, 'Opening stock'],
-    [6, USER.KEVIN, 'out', 30, 8, 'Given with ironed items'],
-    [7, USER.LIZA, 'in', 12, 13, 'Opening stock'],
-    [7, USER.AIRA, 'out', 3, 5, 'Loaded in printer'],
-    [8, USER.LIZA, 'in', 400, 13, 'Opening stock'],
-    [8, USER.KEVIN, 'out', 90, 4, 'Order tags'],
+  // ---------------------------------------------------------------------------------------------
+  // Supplies: daily use follows the laundry received, with restocks when an item runs low.
+  // Worked backwards from today's levels (the figures in the mockups), so they land exactly.
+
+  interface Supply {
+    item: number;
+    /** Use per order, from its lines. */
+    use: (lines: { service: number; amount: number }[]) => number;
+    /** Today's on-hand level. */
+    target: number;
+    restock: number;
+    whole: boolean;
+  }
+  const kg = (lines: { service: number; amount: number }[], ...services: number[]) =>
+    lines
+      .filter((line) => services.includes(line.service))
+      .reduce((sum, line) => sum + line.amount, 0);
+  const SUPPLIES: readonly Supply[] = [
+    {
+      item: 1,
+      use: (l) => kg(l, SERVICE.WDF, SERVICE.WASH) * 0.012,
+      target: 2,
+      restock: 25,
+      whole: false,
+    },
+    { item: 2, use: (l) => kg(l, SERVICE.WDF) * 0.007, target: 3.5, restock: 12, whole: false },
+    { item: 3, use: () => 1, target: 40, restock: 300, whole: true },
+    {
+      item: 4,
+      use: (l) => kg(l, SERVICE.COMFORTER) * 0.3 + kg(l, SERVICE.WASH) * 0.004,
+      target: 12,
+      restock: 10,
+      whole: false,
+    },
+    { item: 5, use: (l) => kg(l, SERVICE.WDF) * 0.0015, target: 6, restock: 4, whole: false },
+    { item: 6, use: (l) => kg(l, SERVICE.IRONING) * 0.5, target: 120, restock: 150, whole: true },
+    { item: 7, use: () => 1 / 80, target: 9, restock: 6, whole: true },
+    { item: 8, use: () => 0.3, target: 310, restock: 500, whole: true },
   ];
-  moves.forEach(([item_id, user_id, type, quantity, daysAgo, remarks], index) => {
-    const moved_at = daysAgo === 0 ? subMinutes(now, 40) : subDays(now, daysAgo);
+  const linesByDay = new Map<DayKey, { service: number; amount: number }[][]>();
+  for (const order of db.orders) {
+    const day = manilaDay(order.received_at);
+    const lines = db.order_items
+      .filter((item) => item.order_id === order.id)
+      .map((item) => ({ service: item.service_id, amount: item.weight_kg ?? item.quantity ?? 0 }));
+    linesByDay.set(day, [...(linesByDay.get(day) ?? []), lines]);
+  }
+  const firstDay = addDays(today, -HISTORY_DAYS);
+  const days: DayKey[] = [];
+  for (let day = firstDay; day <= today; day = addDays(day, 1)) days.push(day);
+
+  const moves: {
+    item: number;
+    type: 'in' | 'out';
+    quantity: number;
+    at: number;
+    by: number;
+    remarks: string;
+  }[] = [];
+  for (const supply of SUPPLIES) {
+    const reorder = db.inventory_items.find((item) => item.id === supply.item)?.reorder_level ?? 0;
+    const cap = reorder + supply.restock;
+    const round = (value: number) =>
+      supply.whole ? Math.round(value) : Math.round(value * 10) / 10;
+    // Daily use, with whole units carried over so that pieces add up.
+    const usage: number[] = [];
+    let carry = 0;
+    for (const day of days) {
+      const raw =
+        (linesByDay.get(day) ?? []).reduce((sum, lines) => sum + supply.use(lines), 0) + carry;
+      const used = round(raw);
+      carry = raw - used;
+      usage.push(Math.max(0, used));
+    }
+    let level = supply.target;
+    for (let index = days.length - 1; index >= 0; index -= 1) {
+      const day = days[index] as DayKey;
+      const used = usage[index] as number;
+      const daysAgo = HISTORY_DAYS - index;
+      const closing =
+        index === days.length - 1 ? nowMs - 40 * MINUTE : manilaInstant(day, 18, 45).getTime();
+      if (used > 0) {
+        moves.push({
+          item: supply.item,
+          type: 'out',
+          quantity: used,
+          at: closing,
+          by: staffOn(daysAgo),
+          remarks: 'Used today',
+        });
+      }
+      level = round(level + used);
+      // Before this day the level was higher; a delivery explains it once it tops the shelf.
+      while (level > cap && index > 0) {
+        moves.push({
+          item: supply.item,
+          type: 'in',
+          quantity: supply.restock,
+          at: manilaInstant(day, 9, 30).getTime(),
+          by: USER.LIZA,
+          remarks: 'Supplier delivery, Calapan',
+        });
+        level = round(level - supply.restock);
+      }
+    }
+    moves.push({
+      item: supply.item,
+      type: 'in',
+      quantity: level,
+      at: manilaInstant(firstDay, 7, 30).getTime(),
+      by: USER.LIZA,
+      remarks: 'Opening stock',
+    });
+  }
+  moves.sort((a, b) => a.at - b.at || (a.type === 'in' ? -1 : 1));
+  moves.forEach((move, index) => {
     db.inventory_movements.push({
       id: index + 1,
-      item_id,
-      user_id,
-      type,
-      quantity,
-      remarks,
-      moved_at: iso(moved_at),
+      item_id: move.item,
+      user_id: move.by,
+      type: move.type,
+      quantity: move.quantity,
+      remarks: move.remarks,
+      moved_at: iso(move.at),
     });
-    audit(moved_at, user_id, 'inventory.movement', 'inventory_item', item_id, {
-      item_name: db.inventory_items.find((item) => item.id === item_id)?.name,
-      type,
-      quantity,
-      remarks,
+    audit(move.at, move.by, 'inventory.movement', 'inventory_item', move.item, {
+      item_name: db.inventory_items.find((item) => item.id === move.item)?.name,
+      type: move.type,
+      quantity: move.quantity,
+      remarks: move.remarks,
     });
   });
 
@@ -925,17 +1424,17 @@ export function createSeed(now: Date): MockDb {
       channel: 'in_app',
       message,
       status: 'recorded',
-      sent_at: iso(subMinutes(now, minutes)),
+      sent_at: iso(nowMs - minutes * MINUTE),
       read_at: null,
     });
   });
 
-  audit(subDays(now, 2), USER.LIZA, 'service.updated', 'service', SERVICE.IRONING, {
+  audit(nowMs - 2 * 24 * HOUR, USER.LIZA, 'service.updated', 'service', SERVICE.IRONING, {
     name: 'Ironing',
     summary: 'updated rate Ironing ₱12 → ₱15',
   });
-  audit(subMinutes(now, 150), USER.LIZA, 'auth.login', 'user', USER.LIZA, {});
-  audit(subMinutes(now, 190), USER.KEVIN, 'auth.login', 'user', USER.KEVIN, {});
+  audit(nowMs - 150 * MINUTE, USER.LIZA, 'auth.login', 'user', USER.LIZA, {});
+  audit(nowMs - 190 * MINUTE, USER.KEVIN, 'auth.login', 'user', USER.KEVIN, {});
 
   db.audit_logs.sort((a, b) => a.created_at.localeCompare(b.created_at));
   db.audit_logs.forEach((log, index) => {

@@ -36,6 +36,7 @@ import type {
   User,
 } from '@/types/entities';
 import { db, nextId, persist } from './db';
+import { lookup } from './lookup';
 import { customerNotice } from './messages';
 
 export const userRef = (id: number): UserRef => {
@@ -80,10 +81,12 @@ export function toUserDto(user: User): UserDto {
 }
 
 export function orderMoney(order: Order) {
-  const total = db()
-    .order_items.filter((item) => item.order_id === order.id)
-    .reduce((sum, item) => sum + item.subtotal_cents, 0);
-  const paid = amountPaidCents(db().payments.filter((p) => p.order_id === order.id));
+  const { itemsByOrder, paymentsByOrder } = lookup();
+  const total = (itemsByOrder.get(order.id) ?? []).reduce(
+    (sum, item) => sum + item.subtotal_cents,
+    0,
+  );
+  const paid = amountPaidCents(paymentsByOrder.get(order.id) ?? []);
   return { total, paid, balance: balanceCents(total, paid), status: paymentStatus(total, paid) };
 }
 
@@ -94,7 +97,7 @@ export function isOverdue(order: Order, now = new Date()) {
 }
 
 export function accountOf(customerId: number) {
-  return db().customer_accounts.find((a) => a.customer_id === customerId);
+  return lookup().accountByCustomer.get(customerId);
 }
 
 export const toBasketRef = (basket: Basket): BasketRefDto => ({
@@ -104,10 +107,8 @@ export const toBasketRef = (basket: Basket): BasketRefDto => ({
 
 /** The baskets an order uses, in basket-number order. */
 export function orderBaskets(orderId: number): BasketRefDto[] {
-  const { order_baskets, baskets } = db();
-  const ids = new Set(
-    order_baskets.filter((ob) => ob.order_id === orderId).map((ob) => ob.basket_id),
-  );
+  const { baskets } = db();
+  const ids = new Set((lookup().basketsByOrder.get(orderId) ?? []).map((ob) => ob.basket_id));
   return baskets
     .filter((b) => ids.has(b.id))
     .sort((a, b) => a.basket_number.localeCompare(b.basket_number))
@@ -120,13 +121,15 @@ export function shopInfo(): ShopInfoDto {
 }
 
 export function toOrderDto(order: Order): OrderDto {
-  const { customers, barangays, orders, services, order_items, order_status_history } = db();
-  const customer = customers.find((c) => c.id === order.customer_id) as Customer;
+  const { barangays, services } = db();
+  const { customerById, ordersByCustomer, itemsByOrder, historyByOrder } = lookup();
+  const customer = customerById.get(order.customer_id) as Customer;
   const code = statusCode(order.current_status_id);
   const money = orderMoney(order);
-  const lastChange = order_status_history
-    .filter((h) => h.order_id === order.id)
-    .reduce((latest, h) => (h.changed_at > latest ? h.changed_at : latest), order.received_at);
+  const lastChange = (historyByOrder.get(order.id) ?? []).reduce(
+    (latest, h) => (h.changed_at > latest ? h.changed_at : latest),
+    order.received_at,
+  );
 
   return {
     id: order.id,
@@ -137,7 +140,7 @@ export function toOrderDto(order: Order): OrderDto {
       contact_number: customer.contact_number,
       barangay_name: barangays.find((b) => b.id === customer.barangay_id)?.name ?? '',
       street_address: customer.street_address,
-      orders_count: orders.filter((o) => o.customer_id === customer.id).length,
+      orders_count: ordersByCustomer.get(customer.id)?.length ?? 0,
     },
     baskets: orderBaskets(order.id),
     status: code,
@@ -148,16 +151,14 @@ export function toOrderDto(order: Order): OrderDto {
     promised_at: order.promised_at,
     released_at: order.released_at,
     notes: order.notes,
-    items: order_items
-      .filter((item) => item.order_id === order.id)
-      .map((item) => {
-        const service = services.find((s) => s.id === item.service_id);
-        return {
-          ...item,
-          service_name: service?.name ?? 'Service',
-          pricing_type: service?.pricing_type ?? 'flat',
-        };
-      }),
+    items: (itemsByOrder.get(order.id) ?? []).map((item) => {
+      const service = services.find((s) => s.id === item.service_id);
+      return {
+        ...item,
+        service_name: service?.name ?? 'Service',
+        pricing_type: service?.pricing_type ?? 'flat',
+      };
+    }),
     total_cents: money.total,
     paid_cents: money.paid,
     balance_cents: money.balance,
@@ -169,14 +170,15 @@ export function toOrderDto(order: Order): OrderDto {
 }
 
 export function toPaymentDto(payment: Payment): PaymentDto {
-  const { orders, customers, payment_methods } = db();
-  const order = orders.find((o) => o.id === payment.order_id) as Order;
+  const { payment_methods } = db();
+  const { orderById, customerById } = lookup();
+  const order = orderById.get(payment.order_id) as Order;
   const method = payment_methods.find((m) => m.id === payment.payment_method_id);
   return {
     id: payment.id,
     order_id: payment.order_id,
     order_number: order.order_number,
-    customer_name: customers.find((c) => c.id === order.customer_id)?.full_name ?? '',
+    customer_name: customerById.get(order.customer_id)?.full_name ?? '',
     method: method?.code ?? 'cash',
     method_label: method?.label ?? 'Cash',
     amount_cents: payment.amount_cents,
@@ -229,8 +231,8 @@ export function toOrderDetailDto(order: Order): OrderDetailDto {
 }
 
 export function toCustomerDto(customer: Customer): CustomerDto {
-  const { orders, barangays } = db();
-  const own = orders.filter((o) => o.customer_id === customer.id);
+  const { barangays } = db();
+  const own = lookup().ordersByCustomer.get(customer.id) ?? [];
   const money = own.map(orderMoney);
   const lastVisit = own.reduce<string | null>(
     (latest, o) => (!latest || o.received_at > latest ? o.received_at : latest),
@@ -299,14 +301,14 @@ export function toMovementDto(movement: InventoryMovement): InventoryMovementDto
 
 /** The active assignment of a basket: its row with released_at IS NULL, if any. */
 export function activeAssignment(basketId: number) {
-  return db().order_baskets.find((ob) => ob.basket_id === basketId && ob.released_at === null);
+  return (lookup().usesByBasket.get(basketId) ?? []).find((ob) => ob.released_at === null);
 }
 
 export function toBasketDto(basket: Basket): BasketDto {
-  const { order_baskets, orders } = db();
-  const uses = order_baskets.filter((ob) => ob.basket_id === basket.id);
+  const { usesByBasket, orderById } = lookup();
+  const uses = usesByBasket.get(basket.id) ?? [];
   const active = activeAssignment(basket.id);
-  const activeOrder = active ? orders.find((o) => o.id === active.order_id) : undefined;
+  const activeOrder = active ? orderById.get(active.order_id) : undefined;
   return {
     ...basket,
     current_order: activeOrder

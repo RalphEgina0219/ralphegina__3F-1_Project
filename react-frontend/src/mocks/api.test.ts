@@ -5,11 +5,13 @@ import { freeBasket, http, items, login, newOrder, startMockApiForTests } from '
 startMockApiForTests();
 
 describe('seed', () => {
-  it('has about 40 customers, about 60 orders and 8 supplies across every stage', () => {
+  it('has 120 days of customers and orders, and 8 supplies across every stage', () => {
     const { customers, orders, inventory_items, order_statuses } = db();
-    expect(customers).toHaveLength(40);
-    expect(orders.length).toBeGreaterThanOrEqual(55);
-    expect(orders.length).toBeLessThanOrEqual(75);
+    // The 40 named customers from the mockups, then walk-ins registered over 120 days.
+    expect(customers.slice(0, 2).map((c) => c.full_name)).toEqual(['Maria Santos', 'Ana Reyes']);
+    expect(customers.length).toBeGreaterThan(600);
+    expect(orders.length).toBeGreaterThanOrEqual(1400);
+    expect(orders.length).toBeLessThanOrEqual(1800);
     expect(inventory_items).toHaveLength(8);
     for (const status of order_statuses) {
       expect(orders.some((o) => o.current_status_id === status.id)).toBe(true);

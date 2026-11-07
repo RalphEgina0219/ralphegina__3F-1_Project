@@ -15,9 +15,11 @@ import { Pagination } from '@/components/ui/Pagination';
 import { Select } from '@/components/ui/Select';
 import { EmptyState, ErrorState, SkeletonRows } from '@/components/ui/States';
 import { Table, type Column } from '@/components/ui/Table';
+import { FilterChips } from '@/components/ui/FilterChips';
 import { NavTabs } from '@/components/ui/Tabs';
 import { useCurrentUser } from '@/features/auth/store';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { formatDayShort } from '@/lib/analytics/time';
 import { errorMessage } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatDate, formatDateTime, presetRange, type DatePreset } from '@/lib/dates';
@@ -46,6 +48,13 @@ const PAYMENT_OPTIONS = [
   { value: 'unpaid', label: 'Unpaid' },
 ];
 
+/** "Waiting over 3 days", "Waiting 1–2 days", "Waiting under 1 day". */
+function waitingLabel(min: string | null, max: string | null) {
+  if (min && !max) return `Waiting over ${min} ${min === '1' ? 'day' : 'days'}`;
+  if (!min || min === '0') return `Waiting under ${max} ${max === '1' ? 'day' : 'days'}`;
+  return `Waiting ${min}–${max} days`;
+}
+
 export default function OrdersPage() {
   const user = useCurrentUser();
   const [params, setParams] = useSearchParams();
@@ -63,6 +72,10 @@ export default function OrdersPage() {
   }, [urlSearch]);
 
   const status = params.get('status') ?? '';
+  // Drill-downs from dashboard charts.
+  const waitingMin = params.get('waiting_min');
+  const waitingMax = params.get('waiting_max');
+  const due = params.get('due');
   const payment = params.get('payment') ?? 'all';
   const range = (params.get('range') ?? (urlSearch ? 'all' : '7d')) as DatePreset;
   const page = Number(params.get('page')) || 1;
@@ -88,9 +101,12 @@ export default function OrdersPage() {
       status,
       payment_status: payment === 'all' ? '' : payment,
       page,
+      waiting_min: waitingMin ? Number(waitingMin) : undefined,
+      waiting_max: waitingMax ? Number(waitingMax) : undefined,
+      due: due ?? undefined,
       ...presetRange(range),
     }),
-    [debounced, status, payment, page, range],
+    [debounced, status, payment, page, range, waitingMin, waitingMax, due],
   );
   const query = useOrders(filters);
   const rows = useMemo(() => query.data?.data ?? [], [query.data]);
@@ -290,6 +306,31 @@ export default function OrdersPage() {
           />
         </div>
       </div>
+
+      <FilterChips
+        className="mb-3"
+        chips={[
+          ...(waitingMin || waitingMax
+            ? [
+                {
+                  key: 'waiting',
+                  label: waitingLabel(waitingMin, waitingMax),
+                  onRemove: () => setFilter({ waiting_min: null, waiting_max: null }),
+                },
+              ]
+            : []),
+          ...(due
+            ? [
+                {
+                  key: 'due',
+                  label:
+                    due === 'overdue' ? 'Past estimated completion' : `Due ${formatDayShort(due)}`,
+                  onRemove: () => setFilter({ due: null }),
+                },
+              ]
+            : []),
+        ]}
+      />
 
       <div
         role="group"

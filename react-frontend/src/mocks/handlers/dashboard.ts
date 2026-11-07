@@ -65,7 +65,9 @@ export const dashboardHandlers = [
           sales_cents: sum(payments.filter((p) => isSameDay(parseISO(p.paid_at), day))),
         };
       });
-    } else {
+    }
+    // Both roles see what needs doing next; only admins see money above.
+    {
       const waiting = BOARD_STATUSES.filter((code) => code !== 'ready_for_pickup').flatMap(
         (code) => {
           const oldest = orders

@@ -56,8 +56,9 @@ export interface MockDb {
   audit_logs: AuditLog[];
 }
 
-// v2 added customer accounts and baskets: older saved demo data is simply reseeded.
-const DB_KEY = 'laundryflow.mock.db.v2';
+// v2 added customer accounts and baskets; v3 holds 120 days of history in a packed format.
+// Older saved demo data is simply reseeded.
+const DB_KEY = 'laundryflow.mock.db.v3';
 const SESSION_KEY = 'laundryflow.mock.session';
 /** A separate key, like the separate Sanctum guard in Phase 2: the two sessions never mix. */
 const CUSTOMER_SESSION_KEY = 'laundryflow.mock.customer-session';
@@ -69,7 +70,7 @@ export function db(): MockDb {
   const stored = readStorage(localStorage, DB_KEY);
   if (stored) {
     try {
-      cache = JSON.parse(stored) as MockDb;
+      cache = unpackDb(stored);
       return cache;
     } catch {
       // Corrupt demo data is simply reseeded below.
@@ -83,10 +84,44 @@ export function db(): MockDb {
 export function persist() {
   if (!cache) return;
   try {
-    localStorage.setItem(DB_KEY, JSON.stringify(cache));
+    localStorage.setItem(DB_KEY, packDb(cache));
   } catch {
     // Storage may be blocked or full: the demo keeps working in memory until the tab closes.
   }
+}
+
+type Row = Record<string, unknown>;
+interface Packed {
+  $cols: string[];
+  $rows: unknown[][];
+}
+
+const isRow = (value: unknown): value is Row =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Tables are stored column-wise, each field name written once instead of once per row. 120 days
+ * of history then fit the 5 MB localStorage limit of every browser, Safari included.
+ */
+export function packDb(data: MockDb): string {
+  return JSON.stringify(data, (_key, value: unknown) => {
+    if (!Array.isArray(value) || value.length < 2 || !value.every(isRow)) return value;
+    const cols = Object.keys(value[0] as Row);
+    const sameShape = value.every(
+      (row) => Object.keys(row).length === cols.length && cols.every((col) => col in row),
+    );
+    if (!sameShape) return value;
+    const packed: Packed = { $cols: cols, $rows: value.map((row) => cols.map((col) => row[col])) };
+    return packed;
+  });
+}
+
+export function unpackDb(text: string): MockDb {
+  return JSON.parse(text, (_key, value: unknown) => {
+    if (!isRow(value) || !Array.isArray(value.$cols) || !Array.isArray(value.$rows)) return value;
+    const { $cols, $rows } = value as unknown as Packed;
+    return $rows.map((cells) => Object.fromEntries($cols.map((col, i) => [col, cells[i]])));
+  }) as MockDb;
 }
 
 export function resetDb() {

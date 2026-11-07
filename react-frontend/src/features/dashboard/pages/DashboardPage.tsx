@@ -5,26 +5,36 @@ import { StatusChip } from '@/components/ui/Badge';
 import { ButtonLink, linkClass } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { KpiCard } from '@/components/ui/KpiCard';
 import { Money } from '@/components/ui/Money';
 import { OrderLink } from '@/components/ui/Mono';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { EmptyState, ErrorState, Skeleton, SkeletonRows } from '@/components/ui/States';
+import { EmptyState, Skeleton, SkeletonRows } from '@/components/ui/States';
 import { Table, type Column } from '@/components/ui/Table';
+import { useDashboardAnalytics, type DashboardAnalytics } from '@/features/analytics/api';
+import { KpiTile } from '@/features/analytics/components/KpiTile';
+import { RangeFilter } from '@/features/analytics/components/RangeFilter';
+import { useRangeParams } from '@/features/analytics/useRangeParams';
 import { useCan, useCurrentUser } from '@/features/auth/store';
 import { ScanAndNewButtons } from '@/features/orders/components/GlobalActions';
 import { MoveStatusButton } from '@/features/orders/components/MoveStatusButton';
+import type { AdminDashboardSeries, StaffDashboardSeries } from '@/lib/analytics/build';
+import { formatRange, rangeLength } from '@/lib/analytics/time';
+import type { AnalyticsEnvelope } from '@/lib/analytics/types';
 import { cn } from '@/lib/cn';
-import { formatDate, formatDayMonth, formatDateFull, formatWeekday, greeting } from '@/lib/dates';
+import { formatDateFull, greeting } from '@/lib/dates';
 import { loadSummary, servicesSummary } from '@/lib/format';
 import { STOCK_META } from '@/lib/inventory';
-import { formatMoney, formatPeso } from '@/lib/money';
 import { STATUS_META, STATUS_ORDER } from '@/lib/status';
 import type { DashboardSummary, InventoryItemDto, NeedsActionDto, OrderDto } from '@/types/api';
 import { useDashboard } from '../api';
 
-const BarChart = lazy(() => import('@/features/reports/components/BarChart'));
+// Recharts is the heaviest dependency: the KPI row shows first, the charts load right after.
+const AdminCharts = lazy(() => import('../components/AdminCharts'));
+const StaffCharts = lazy(() => import('../components/StaffCharts'));
+const CollectedCard = lazy(() =>
+  import('../components/AdminCharts').then((module) => ({ default: module.CollectedCard })),
+);
 
 const RECENT_COLUMNS: Column<OrderDto>[] = [
   {
@@ -194,7 +204,10 @@ function NeedsAction({ rows }: { rows: readonly NeedsActionDto[] }) {
                   aria-hidden="true"
                 />
                 <div className="min-w-44">
-                  <Link to={`/orders/${order.id}`} className="font-bold hover:text-flow">
+                  <Link
+                    to={`/orders/${order.id}`}
+                    className="-my-3 inline-flex min-h-11 items-center font-bold hover:text-flow"
+                  >
                     {order.customer.full_name}
                   </Link>
                   <p className="font-mono text-xs font-medium text-muted">{order.order_number}</p>
@@ -229,173 +242,155 @@ function NeedsAction({ rows }: { rows: readonly NeedsActionDto[] }) {
   );
 }
 
-function WeeklySales({ points }: { points: NonNullable<DashboardSummary['weekly_sales']> }) {
-  const total = points.reduce((sum, point) => sum + point.sales_cents, 0);
-  const first = points[0];
-  const last = points[points.length - 1];
+function ChartsFallback({ count }: { count: number }) {
   return (
-    <Card className="p-4 md:p-5">
-      <CardHeader
-        title="Sales this week"
-        subtitle={
-          first && last
-            ? `${formatPeso(total)} total · ${formatDate(first.date)} to ${formatDate(last.date)}`
-            : undefined
-        }
-        className="mb-2"
-      />
-      <Suspense fallback={<Skeleton className="h-40 rounded-card" />}>
-        <BarChart
-          ariaLabel={`Sales for the last seven days, ${formatPeso(total)} in total.`}
-          height={150}
-          data={points.map((point) => ({
-            label: formatWeekday(point.date),
-            title: formatDayMonth(point.date),
-            sales: point.sales_cents,
-          }))}
-          series={[{ key: 'sales', label: 'Sales', color: 'var(--color-flow)' }]}
-          formatValue={formatMoney}
-          highlightIndex={points.length - 1}
+    <>
+      {Array.from({ length: count }, (_, index) => (
+        <Skeleton
+          key={index}
+          className={cn(
+            'h-96 rounded-card',
+            index % 2 === 0 ? 'md:col-span-2 lg:col-span-8' : 'lg:col-span-4',
+          )}
         />
-      </Suspense>
-    </Card>
+      ))}
+    </>
+  );
+}
+
+function KpiRow({ data, compare }: { data?: DashboardAnalytics; compare: boolean }) {
+  if (!data) {
+    return (
+      <div
+        role="status"
+        aria-label="Loading figures"
+        className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-5"
+      >
+        {[0, 1, 2, 3, 4].map((n) => (
+          <Skeleton key={n} className="h-40 rounded-card max-md:last:col-span-2" />
+        ))}
+      </div>
+    );
+  }
+  const days = rangeLength(data.range);
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-5">
+      {data.kpis.map((kpi) => (
+        <div key={kpi.key} className="flex min-w-0 max-md:last:col-span-2 [&>*]:flex-1">
+          <KpiTile kpi={kpi} days={days} compare={compare} />
+        </div>
+      ))}
+    </div>
   );
 }
 
 export default function DashboardPage() {
   const user = useCurrentUser();
-  const seesSales = useCan('sales.view');
+  const isAdmin = useCan('sales.view');
   const canRestock = useCan('inventory.manage');
-  const query = useDashboard();
+  const rangeState = useRangeParams();
+  const analytics = useDashboardAnalytics(rangeState.range, rangeState.compare);
+  const summary = useDashboard();
   const firstName = user.name.split(' ')[0];
   const now = new Date();
-
-  const header = (
-    <PageHeader
-      eyebrow={formatDateFull(now)}
-      title={`${greeting(now)}, ${firstName}`}
-      documentTitle="Dashboard"
-      actions={
-        <div className="flex items-center gap-2 max-md:hidden">
-          <GlobalSearch />
-          <ScanAndNewButtons hideScanOnPhone={false} />
-        </div>
-      }
-    />
-  );
-
-  if (query.isPending) {
-    return (
-      <>
-        {header}
-        <div role="status" aria-label="Loading dashboard" className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-            {[0, 1, 2, 3, 4].map((n) => (
-              <Skeleton key={n} className="h-28 rounded-card" />
-            ))}
-          </div>
-          <Skeleton className="h-32 rounded-card" />
-          <SkeletonRows rows={5} />
-        </div>
-      </>
-    );
-  }
-  if (query.isError) {
-    return (
-      <>
-        {header}
-        <Card>
-          <ErrorState error={query.error} onRetry={() => void query.refetch()} />
-        </Card>
-      </>
-    );
-  }
-
-  const { kpis, flow_counts, recent_orders, low_stock, weekly_sales, needs_action } = query.data;
-  const versus = kpis.orders_vs_last_week;
+  const data = analytics.data;
+  const adminQuery = {
+    ...analytics,
+    data:
+      data?.series.role === 'admin' ? (data as AnalyticsEnvelope<AdminDashboardSeries>) : undefined,
+  };
+  const staffQuery = {
+    ...analytics,
+    data:
+      data?.series.role === 'staff' ? (data as AnalyticsEnvelope<StaffDashboardSeries>) : undefined,
+  };
 
   return (
     <>
-      {header}
-      <div
-        className={cn(
-          'mb-4 grid grid-cols-2 gap-3 md:mb-5 md:gap-4',
-          seesSales ? 'lg:grid-cols-3 xl:grid-cols-5' : 'lg:grid-cols-4',
-        )}
-      >
-        <KpiCard
-          label="Orders today"
-          value={kpis.orders_today}
-          hint={`${versus >= 0 ? '+' : ''}${versus} vs. last ${formatWeekday(now)}`}
-        />
-        <KpiCard label="In process" value={kpis.in_process} hint="Washing, drying, folding" />
-        <KpiCard
-          label="Ready for pickup"
-          tone="ok"
-          value={kpis.ready_for_pickup}
-          hint={
-            kpis.ready_over_2_days > 0
-              ? `${kpis.ready_over_2_days} waiting over 2 days`
-              : 'None waiting long'
-          }
-        />
-        {seesSales && kpis.sales_today_cents !== undefined && (
-          <KpiCard
-            label="Sales today"
-            value={<Money cents={kpis.sales_today_cents} whole />}
-            hint={`Cash ${formatPeso(kpis.sales_today_cash_cents ?? 0)} · GCash ${formatPeso(kpis.sales_today_gcash_cents ?? 0)}`}
-          />
-        )}
-        <KpiCard
-          label="Unpaid balances"
-          tone="warn"
-          value={<Money cents={kpis.unpaid_cents} whole />}
-          hint={`Across ${kpis.unpaid_orders} orders`}
-        />
-      </div>
+      <PageHeader
+        eyebrow={formatDateFull(now)}
+        title={`${greeting(now)}, ${firstName}`}
+        documentTitle="Dashboard"
+        subtitle={<span className="tabular">Showing {formatRange(rangeState.range)}</span>}
+        actions={<RangeFilter state={rangeState} />}
+        className="md:mb-6"
+      />
 
-      <FlowStrip counts={flow_counts} />
+      <section aria-label="Key figures" className="mb-6">
+        <KpiRow data={data} compare={rangeState.compare} />
+      </section>
 
-      <div className="grid gap-4 md:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-        <div className="order-2 min-w-0 xl:order-1">
-          <Card className="overflow-hidden">
-            <CardHeader
-              title="Recent orders"
-              className="p-4 pb-2 md:p-5 md:pb-2"
-              action={
-                <Link to="/orders" className={cn(linkClass, 'text-sm')}>
-                  View all
-                </Link>
-              }
-            />
-            {recent_orders.length === 0 ? (
-              <EmptyState
-                icon={WashingMachine}
-                title="No orders yet"
-                action={
-                  <ButtonLink to="/orders/new" variant="primary">
-                    New order
-                  </ButtonLink>
-                }
-              />
-            ) : (
-              <Table
-                columns={RECENT_COLUMNS}
-                rows={recent_orders}
-                rowKey={(o) => o.id}
-                caption="Recent orders"
-                minWidth="640px"
-                dense
-              />
-            )}
-          </Card>
+      {isAdmin && (
+        <div className="mb-6">
+          <Suspense fallback={<Skeleton className="h-28 rounded-card" />}>
+            <CollectedCard query={adminQuery} />
+          </Suspense>
         </div>
-        <div className="order-1 grid min-w-0 gap-4 md:grid-cols-2 md:gap-5 xl:order-2 xl:grid-cols-1">
-          {needs_action && <NeedsAction rows={needs_action} />}
-          <LowStock items={low_stock} canRestock={canRestock} />
-          {weekly_sales && <WeeklySales points={weekly_sales} />}
+      )}
+
+      <section aria-label="Charts" className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-12">
+        <Suspense fallback={<ChartsFallback count={isAdmin ? 7 : 5} />}>
+          {isAdmin ? <AdminCharts query={adminQuery} /> : <StaffCharts query={staffQuery} />}
+        </Suspense>
+      </section>
+
+      <section aria-labelledby="today-heading">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="today-heading" className="text-xl font-extrabold tracking-[-0.01em]">
+            Today in the shop
+          </h2>
+          <div className="flex items-center gap-2 max-md:hidden">
+            <GlobalSearch />
+            <ScanAndNewButtons hideScanOnPhone={false} />
+          </div>
         </div>
-      </div>
+        {summary.data ? (
+          <>
+            <FlowStrip counts={summary.data.flow_counts} />
+            <div className="grid gap-4 md:gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+              <div className="order-2 min-w-0 xl:order-1">
+                <Card className="overflow-hidden">
+                  <CardHeader
+                    title="Recent orders"
+                    className="p-4 pb-2 md:p-5 md:pb-2"
+                    action={
+                      <Link to="/orders" className={cn(linkClass, 'text-sm')}>
+                        View all
+                      </Link>
+                    }
+                  />
+                  {summary.data.recent_orders.length === 0 ? (
+                    <EmptyState
+                      icon={WashingMachine}
+                      title="No orders yet"
+                      action={
+                        <ButtonLink to="/orders/new" variant="primary">
+                          New order
+                        </ButtonLink>
+                      }
+                    />
+                  ) : (
+                    <Table
+                      columns={RECENT_COLUMNS}
+                      rows={summary.data.recent_orders}
+                      rowKey={(o) => o.id}
+                      caption="Recent orders"
+                      minWidth="640px"
+                      dense
+                    />
+                  )}
+                </Card>
+              </div>
+              <div className="order-1 grid min-w-0 gap-4 md:grid-cols-2 md:gap-5 xl:order-2 xl:grid-cols-1">
+                {summary.data.needs_action && <NeedsAction rows={summary.data.needs_action} />}
+                <LowStock items={summary.data.low_stock} canRestock={canRestock} />
+              </div>
+            </div>
+          </>
+        ) : (
+          <SkeletonRows rows={5} />
+        )}
+      </section>
     </>
   );
 }

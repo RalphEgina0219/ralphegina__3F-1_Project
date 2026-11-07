@@ -11,6 +11,7 @@ export default tseslint.config(
     ignores: [
       'dist',
       'dist-e2e',
+      'dist-qa',
       'test-results',
       'playwright-report',
       'public/mockServiceWorker.js',

@@ -15,7 +15,7 @@ describe('end-to-end basket flow', () => {
     await login('liza.ramos');
     const added = await http.post('/baskets', { count: 1, label: 'Blue, large' });
     const basket = added.data.data[0];
-    expect(basket.basket_number).toBe('BSK-0031');
+    expect(basket.basket_number).toBe('BSK-0071');
     expect((await http.get(`/baskets/${basket.id}`)).data.qr_token).toBe(basket.qr_token);
 
     // 2. Staff create an order for a registered customer in that basket.
@@ -46,7 +46,7 @@ describe('end-to-end basket flow', () => {
       (o: { order_number: string }) => o.order_number === order.order_number,
     );
     expect(mine).toMatchObject({ status: 'washing', status_label: 'Washing' });
-    expect(mine.baskets[0].basket_number).toBe('BSK-0031');
+    expect(mine.baskets[0].basket_number).toBe('BSK-0071');
     const notices = (await http.get('/customer/notifications')).data.data.map(
       (n: { message: string }) => n.message,
     );

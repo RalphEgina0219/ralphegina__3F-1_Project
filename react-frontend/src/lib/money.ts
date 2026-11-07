@@ -32,3 +32,15 @@ export function parseMoney(input: string): number | null {
 export function centsToInput(cents: number): string {
   return (cents / 100).toFixed(2);
 }
+
+const compactNumber = (value: number) => {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (abs >= 1_000) return `${(value / 1_000).toFixed(1).replace(/\.0$/, '')}k`;
+  return String(Math.round(value));
+};
+
+/** Chart axes and tight labels: 4825000 -> ₱48.3k, 95000 -> ₱950, 125000000 -> ₱1.3M. */
+export function formatPesoCompact(cents: number): string {
+  return `₱${compactNumber(Math.round(cents / 100))}`;
+}

@@ -11,7 +11,7 @@ import { blockOfflineClick, OfflineHint } from '@/components/ui/OfflineHint';
 import { useCan, useCurrentUser } from '@/features/auth/store';
 import { useChangeStatus, useOrder } from '@/features/orders/api';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { errorMessage } from '@/lib/api';
+import { useReasonError } from '@/hooks/useReasonError';
 import { cn } from '@/lib/cn';
 import { formatRelativeDay } from '@/lib/dates';
 import { formatPhone, itemQuantityLabel, loadSummary } from '@/lib/format';
@@ -35,6 +35,7 @@ function OrderPanel({
   const online = useOnlineStatus();
   const [confirmComplete, setConfirmComplete] = useState(false);
   const [reverting, setReverting] = useState(false);
+  const reasonCheck = useReasonError();
   const next = nextStatus(order.status);
   const previous = prevStatus(order.status);
   const completed = order.status === 'released';
@@ -51,7 +52,7 @@ function OrderPanel({
           setReverting(false);
         },
         onError: (error) => {
-          toast.error(errorMessage(error));
+          reasonCheck.onError(error);
           setConfirmComplete(false);
         },
       },
@@ -210,10 +211,14 @@ function OrderPanel({
       {previous && (
         <ConfirmDialog
           open={reverting}
-          onOpenChange={setReverting}
+          onOpenChange={(open) => {
+            if (!open) reasonCheck.clear();
+            setReverting(open);
+          }}
           title={`Move back to ${STATUS_META[previous].label}?`}
           description="Only an administrator can do this. The reason is saved in the status history."
           reasonLabel="Reason"
+          reasonError={reasonCheck.reasonError}
           confirmLabel="Move back"
           loading={change.isPending}
           onConfirm={(note) => move(previous, note)}

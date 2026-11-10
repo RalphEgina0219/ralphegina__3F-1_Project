@@ -38,6 +38,7 @@ export const adminHandlers = [
       name: values.name,
       username: values.username,
       is_active: true,
+      must_change_password: false,
       last_login_at: null,
       created_at: now,
       updated_at: now,
@@ -91,6 +92,9 @@ export const adminHandlers = [
     if (!target) return fail(404, 'User not found.');
     const temporary_password = generateTemporaryPassword();
     db().credentials[target.id] = temporary_password;
+    // As in Laravel: the next sign-in must choose a new password before anything else opens.
+    target.must_change_password = true;
+    target.updated_at = new Date().toISOString();
     audit(user.id, 'user.password_reset', 'user', target.id, { username: target.username });
     return ok({ temporary_password });
   }),

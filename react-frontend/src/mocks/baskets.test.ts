@@ -126,8 +126,8 @@ describe('orders and baskets', () => {
     const first = await newOrder({ basket_ids: [basket] });
     expect(first.status).toBe(201);
     const second = await newOrder({ basket_ids: [basket] });
-    expect(second.status).toBe(422);
-    expect(second.data.errors.basket_ids[0]).toBe(
+    expect(second.status).toBe(409);
+    expect(second.data.message).toBe(
       `${first.data.baskets[0].basket_number} is in use by ${first.data.order_number}.`,
     );
   });

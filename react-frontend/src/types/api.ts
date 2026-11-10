@@ -46,6 +46,8 @@ export interface AuthUser {
   username: string;
   role: RoleName;
   permissions: PermissionCode[];
+  /** True after the owner reset the password: only the change-password screen opens. */
+  must_change_password: boolean;
 }
 
 export type { Barangay, Notification, Service, ShopSettings };

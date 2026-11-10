@@ -19,9 +19,10 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
 import { Stepper, type StepItem } from '@/components/ui/Stepper';
 import { StickyActions } from '@/components/ui/StickyActions';
 import { useCan, useCurrentUser } from '@/features/auth/store';
+import { useReasonError } from '@/hooks/useReasonError';
 import { RecordPaymentDialog } from '@/features/payments/components/RecordPaymentDialog';
 import { VoidPaymentDialog } from '@/features/payments/components/VoidPaymentDialog';
-import { errorMessage, errorStatus } from '@/lib/api';
+import { errorStatus } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatDateTime, formatRelativeDay, formatSmartTime } from '@/lib/dates';
 import { formatPhone } from '@/lib/format';
@@ -208,6 +209,7 @@ export default function OrderDetailPage() {
   const [paying, setPaying] = useState(false);
   const [editing, setEditing] = useState(false);
   const [reverting, setReverting] = useState(false);
+  const reasonCheck = useReasonError();
   const [voiding, setVoiding] = useState<PaymentDto | null>(null);
 
   if (query.isPending) {
@@ -415,10 +417,14 @@ export default function OrderDetailPage() {
       {previous && (
         <ConfirmDialog
           open={reverting}
-          onOpenChange={setReverting}
+          onOpenChange={(open) => {
+            if (!open) reasonCheck.clear();
+            setReverting(open);
+          }}
           title={`Move back to ${STATUS_META[previous].label}?`}
           description={`Only an administrator (${user.name}) can do this. The reason is saved in the status history.`}
           reasonLabel="Reason"
+          reasonError={reasonCheck.reasonError}
           confirmLabel="Move back"
           loading={change.isPending}
           onConfirm={(note) =>
@@ -431,7 +437,7 @@ export default function OrderDetailPage() {
                   );
                   setReverting(false);
                 },
-                onError: (error) => toast.error(errorMessage(error)),
+                onError: reasonCheck.onError,
               },
             )
           }

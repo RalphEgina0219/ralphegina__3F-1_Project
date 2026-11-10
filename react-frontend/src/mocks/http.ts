@@ -69,17 +69,24 @@ async function readBody(request: Request): Promise<Record<string, unknown>> {
 
 const path = (route: string) => `*${API_URL}${route}`;
 
-/** A route behind the session. A missing session is 401, a missing ability is 403. */
+/**
+ * A route behind the session. A missing session is 401, a missing ability is 403. As in Laravel,
+ * while a reset password is pending only the routes marked `whilePasswordPending` answer.
+ */
 export function route(
   method: Method,
   url: string,
   ability: Ability | Ability[] | null,
   handler: Handler,
+  { whilePasswordPending = false }: { whilePasswordPending?: boolean } = {},
 ) {
   const resolver: HttpResponseResolver = async ({ request, params }) => {
     await latency();
     const user = currentUser();
     if (!user) return fail(401, 'Unauthenticated.');
+    if (user.must_change_password && !whilePasswordPending) {
+      return fail(403, 'Change your temporary password first.');
+    }
     const required = Array.isArray(ability) ? ability : ability ? [ability] : [];
     if (required.length > 0 && !required.some((a) => can(user, a))) {
       return fail(403, 'You do not have permission to do that.');

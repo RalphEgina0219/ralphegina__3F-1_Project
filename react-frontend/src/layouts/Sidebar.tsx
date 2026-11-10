@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { KeyRound, LogOut } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/Avatar';
 import { Logo } from '@/components/ui/Logo';
@@ -76,6 +76,14 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               </span>
             </span>
           </div>
+          <NavLink
+            to="/password"
+            onClick={onNavigate}
+            className="mt-1 flex min-h-11 w-full items-center gap-3 rounded-control px-2.5 text-sm font-semibold text-on-ink-muted transition-colors hover:bg-ink-2 hover:text-on-ink"
+          >
+            <KeyRound className="size-4.5 shrink-0" aria-hidden="true" />
+            Change password
+          </NavLink>
           <button
             type="button"
             disabled={logout.isPending}

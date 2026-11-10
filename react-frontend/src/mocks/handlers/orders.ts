@@ -224,6 +224,8 @@ export const orderHandlers = [
     }
 
     if (Object.keys(errors).length > 0 || !customer) return invalid(errors);
+    // As in Laravel: the input is valid, but a basket's state refuses the order.
+    if (baskets.conflict) return fail(409, baskets.conflict);
 
     // Everything below is one transaction: order, items, baskets, history, audit, payment, notice.
     const now = new Date();

@@ -3,8 +3,12 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store';
 import { lastSide } from '@/features/pwa/side';
 
+/** The staff change-password page: the only page while a reset password is pending. */
+export const STAFF_PASSWORD_PATH = '/password';
+
 export function RequireAuth() {
   const status = useAuthStore((state) => state.status);
+  const mustChangePassword = useAuthStore((state) => state.user?.must_change_password === true);
   const signedOut = useAuthStore((state) => state.signedOut);
   const location = useLocation();
 
@@ -28,6 +32,9 @@ export function RequireAuth() {
     return (
       <Navigate to={keepPage ? `/login?next=${encodeURIComponent(next)}` : '/login'} replace />
     );
+  }
+  if (mustChangePassword && location.pathname !== STAFF_PASSWORD_PATH) {
+    return <Navigate to={STAFF_PASSWORD_PATH} replace />;
   }
   return <Outlet />;
 }

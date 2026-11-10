@@ -42,6 +42,8 @@ export function RequireCustomer() {
   if (customer.must_change_password && !onForcedPage) {
     return <Navigate to={FORCED_PASSWORD_PATH} replace />;
   }
-  if (!customer.must_change_password && onForcedPage) return <Navigate to="/my/account" replace />;
+  // Nothing to change (any more): the dashboard. This also runs the moment the forced change
+  // saves, before the page's own navigation, so it must lead where that one does.
+  if (!customer.must_change_password && onForcedPage) return <Navigate to="/my" replace />;
   return <Outlet />;
 }

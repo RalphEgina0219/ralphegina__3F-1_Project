@@ -2,10 +2,17 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { useAuthStore } from '@/features/auth/store';
+import { bootstrapAuth, useAuthStore } from '@/features/auth/store';
 import { useCustomerAuth } from '@/features/portal/store';
 import { OfflineBanner } from '@/features/pwa/components/OfflineBanner';
-import { errorStatus, setCustomerUnauthorizedHandler, setUnauthorizedHandler } from '@/lib/api';
+import {
+  api,
+  errorStatus,
+  setCustomerUnauthorizedHandler,
+  setPasswordPendingHandler,
+  setUnauthorizedHandler,
+} from '@/lib/api';
+import type { CustomerSelfDto } from '@/types/api';
 import { clearPrivateDeviceData } from '@/lib/session';
 import { router } from './router';
 
@@ -42,6 +49,19 @@ setCustomerUnauthorizedHandler(() => {
   void router.navigate(`/my/login?next=${encodeURIComponent(pathname + search)}`, {
     replace: true,
   });
+});
+
+// Reset by the owner or the shop mid-session: re-read the account, and the route guards open the
+// change-password page.
+setPasswordPendingHandler((kind) => {
+  if (kind === 'staff') {
+    void bootstrapAuth();
+    return;
+  }
+  void api
+    .get<{ customer: CustomerSelfDto }>('/customer/auth/me')
+    .then(({ data }) => useCustomerAuth.getState().setCustomer(data.customer))
+    .catch(() => undefined);
 });
 
 export function Providers() {

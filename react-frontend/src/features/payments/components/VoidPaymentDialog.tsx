@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { errorMessage } from '@/lib/api';
+import { useReasonError } from '@/hooks/useReasonError';
 import { formatMoney } from '@/lib/money';
 import type { PaymentDto } from '@/types/api';
 import { useVoidPayment } from '../api';
@@ -13,12 +13,17 @@ export function VoidPaymentDialog({
   onClose: () => void;
 }) {
   const voidPayment = useVoidPayment();
+  const reasonCheck = useReasonError();
   return (
     <ConfirmDialog
       open={Boolean(payment)}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          reasonCheck.clear();
+          onClose();
+        }
       }}
+      reasonError={reasonCheck.reasonError}
       title={payment ? `Void ${payment.receipt_number}?` : ''}
       description={
         payment
@@ -38,7 +43,7 @@ export function VoidPaymentDialog({
               toast.success(`${payment.receipt_number} voided`);
               onClose();
             },
-            onError: (error) => toast.error(errorMessage(error)),
+            onError: reasonCheck.onError,
           },
         );
       }}

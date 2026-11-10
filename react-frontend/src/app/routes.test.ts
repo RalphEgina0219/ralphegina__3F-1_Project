@@ -24,6 +24,13 @@ describe('routes', () => {
     expect(leaf('/settings/baskets')).toBe('baskets');
   });
 
+  it('serves the staff change-password page outside the app shell', () => {
+    const matched = matchRoutes(routes, '/password') ?? [];
+    expect(matched.at(-1)?.route.path).toBe('/password');
+    // Under RequireAuth, but not under the AppShell that would load the app's data.
+    expect(matched.some((m) => m.route.path === '/')).toBe(false);
+  });
+
   it('leaves no link, call or print style pointing at the removed features', () => {
     const sources = import.meta.glob<string>(
       ['/src/**/*.{ts,tsx,css}', '!/src/**/*.test.{ts,tsx}'],

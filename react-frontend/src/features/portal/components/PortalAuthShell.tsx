@@ -8,17 +8,22 @@ export function PortalAuthShell({
   subtitle,
   children,
   footer,
+  homeTo = '/my',
+  tagline = 'My laundry',
 }: {
   title: string;
   subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /** The staff password page reuses this frame with its own home and tagline. */
+  homeTo?: string;
+  tagline?: string;
 }) {
   return (
     <>
       <PublicHeader
-        homeTo="/my"
-        aside={<span className="text-[13px] text-on-ink-muted">My laundry</span>}
+        homeTo={homeTo}
+        aside={<span className="text-[13px] text-on-ink-muted">{tagline}</span>}
       >
         <h1 className="mt-4 text-[28px] leading-tight font-extrabold tracking-[-0.02em] text-on-ink">
           {title}

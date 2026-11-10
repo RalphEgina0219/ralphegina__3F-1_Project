@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, API_URL, cleanParams } from '@/lib/api';
+import { api, cleanParams } from '@/lib/api';
+import { clearToken, setToken } from '@/lib/tokens';
 import type {
   Barangay,
   CustomerNotificationDto,
@@ -14,13 +14,15 @@ import type {
 } from '@/types/api';
 import { useCustomerAuth } from './store';
 
-const USING_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
+/** The Laravel API answers sign-in and registration with the customer guard's JWT (course L8). */
+interface CustomerAnswer {
+  customer: CustomerSelfDto;
+  access_token?: string;
+}
 
-/** Sanctum needs the CSRF cookie before the first state-changing request. */
-async function ensureCsrfCookie() {
-  if (USING_MOCKS) return;
-  const origin = API_URL.startsWith('http') ? new URL(API_URL).origin : '';
-  await axios.get(`${origin}/sanctum/csrf-cookie`, { withCredentials: true });
+function keepToken(data: CustomerAnswer) {
+  if (data.access_token) setToken('customer', data.access_token);
+  return data.customer;
 }
 
 /**
@@ -40,9 +42,8 @@ const setCustomer = (customer: CustomerSelfDto | null) =>
 export function useCustomerLogin() {
   return useMutation({
     mutationFn: async (input: { email: string; password: string }) => {
-      await ensureCsrfCookie();
-      const { data } = await api.post<{ customer: CustomerSelfDto }>('/customer/auth/login', input);
-      return data.customer;
+      const { data } = await api.post<CustomerAnswer>('/customer/auth/login', input);
+      return keepToken(data);
     },
     onSuccess: setCustomer,
   });
@@ -51,12 +52,8 @@ export function useCustomerLogin() {
 export function useCustomerRegister() {
   return useMutation({
     mutationFn: async (input: CustomerRegisterInput) => {
-      await ensureCsrfCookie();
-      const { data } = await api.post<{ customer: CustomerSelfDto }>(
-        '/customer/auth/register',
-        input,
-      );
-      return data.customer;
+      const { data } = await api.post<CustomerAnswer>('/customer/auth/register', input);
+      return keepToken(data);
     },
     onSuccess: setCustomer,
   });
@@ -67,6 +64,7 @@ export function useCustomerLogout() {
   return useMutation({
     mutationFn: () => api.post('/customer/auth/logout'),
     onSettled: () => {
+      clearToken('customer');
       setCustomer(null);
       // Nothing of this customer's stays in memory for whoever uses the device next.
       queryClient.clear();

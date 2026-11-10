@@ -25,7 +25,7 @@ import { CustomerFormDialog } from '@/features/customers/components/CustomerForm
 import { useAvailableBaskets } from '@/features/baskets/api';
 import { useServices } from '@/features/settings/api';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { errorMessage } from '@/lib/api';
+import { applyFieldErrors, errorMessage, errorStatus } from '@/lib/api';
 import { billableQuantity, kgToTenths, lineSubtotalCents } from '@/lib/billing';
 import { cn } from '@/lib/cn';
 import { toDateTimeLocal } from '@/lib/dates';
@@ -37,6 +37,7 @@ import type { BasketRefDto, CustomerDto, NewOrderInput, Service } from '@/types/
 import { useCreateOrder } from '../api';
 import { BasketPicker } from '../components/BasketPicker';
 import { CustomerCombobox } from '../components/CustomerCombobox';
+import { newOrderField, stepOfField } from '../newOrderErrors';
 
 const STEP_TITLES = ['Customer', 'Baskets', 'Services', 'Completion & payment'];
 const STEPS = STEP_TITLES.length;
@@ -310,7 +311,27 @@ export default function NewOrderPage() {
             { duration: 8000 },
           );
         },
-        onError: (error) => toast.error(errorMessage(error)),
+        onError: (error) => {
+          const fields: string[] = [];
+          const applied = applyFieldErrors(error, setError, (field) => {
+            const name = newOrderField(field, form.items.length);
+            if (name) fields.push(name);
+            return name;
+          });
+          if (applied) {
+            // On phones the field can sit on an earlier step of the wizard.
+            const firstStep = Math.min(...fields.map(stepOfField));
+            if (firstStep < step) setStep(firstStep);
+            toast.error('Check the highlighted fields.');
+            return;
+          }
+          // 409: a basket was taken by another order since it was chosen. The API names both.
+          if (errorStatus(error) === 409) {
+            setError('basket_ids', { type: 'server', message: errorMessage(error) });
+            if (step > 2) setStep(2);
+          }
+          toast.error(errorMessage(error));
+        },
       });
     },
     (formErrors) => {
@@ -550,7 +571,9 @@ export default function NewOrderPage() {
                     item &&
                     item.amount > 0 &&
                     item.amount < service.minimum_qty;
-                  const rowError = errors.items?.[index]?.amount?.message;
+                  const rowError =
+                    errors.items?.[index]?.amount?.message ??
+                    errors.items?.[index]?.service_id?.message;
                   return (
                     <li
                       key={row.id}

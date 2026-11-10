@@ -120,6 +120,8 @@ export const LEGACY_CUSTOMERS: readonly string[] = [
 const BASKET_COUNT = 70;
 /** Lost or broken baskets: kept for their history, never deleted, numbers never reused. */
 const RETIRED_BASKETS: readonly number[] = [29, 30];
+/** Big loads get a second basket only while more than this many are free. */
+const SPARE_BASKETS = 10;
 
 /** Days of history before today. With today, 120 days in all. */
 const HISTORY_DAYS = 119;
@@ -563,6 +565,7 @@ export function createSeed(now: Date): MockDb {
         name: 'Liza Ramos',
         username: 'liza.ramos',
         is_active: true,
+        must_change_password: false,
         last_login_at: iso(subMinutes(now, 150)),
         created_at: seededAt,
         updated_at: seededAt,
@@ -573,6 +576,7 @@ export function createSeed(now: Date): MockDb {
         name: 'Kevin Manalo',
         username: 'kevin.m',
         is_active: true,
+        must_change_password: false,
         last_login_at: iso(subMinutes(now, 190)),
         created_at: seededAt,
         updated_at: seededAt,
@@ -583,6 +587,7 @@ export function createSeed(now: Date): MockDb {
         name: 'Aira Dimaculangan',
         username: 'aira.d',
         is_active: true,
+        must_change_password: false,
         last_login_at: iso(subDays(now, 1)),
         created_at: seededAt,
         updated_at: seededAt,
@@ -593,6 +598,7 @@ export function createSeed(now: Date): MockDb {
         name: 'Jessa Lopez',
         username: 'jessa.l',
         is_active: false,
+        must_change_password: false,
         last_login_at: iso(subDays(now, 49)),
         created_at: seededAt,
         updated_at: seededAt,
@@ -886,8 +892,15 @@ export function createSeed(now: Date): MockDb {
   );
   let basketCursor = 0;
   /** Round-robin over the free baskets, so wear spreads and "times used" looks real. */
-  const takeBasket = (at: number): number => {
+  const takeBasket = (at: number, optional = false): number | null => {
     const ids = [...busyUntil.keys()];
+    // A big load's second basket only while plenty are free, so evening rushes never run out.
+    if (
+      optional &&
+      ids.filter((id) => (busyUntil.get(id) ?? Infinity) <= at).length <= SPARE_BASKETS
+    ) {
+      return null;
+    }
     for (let tries = 0; tries < ids.length; tries += 1) {
       const id = ids[(basketCursor + tries) % ids.length] as number;
       if ((busyUntil.get(id) ?? Infinity) <= at) {
@@ -895,7 +908,20 @@ export function createSeed(now: Date): MockDb {
         return id;
       }
     }
-    throw new Error('Seed ran out of free baskets');
+    // A second basket is a nicety: in a rush, a big load shares one.
+    if (optional) return null;
+    // A rush busier than the baskets on hand: take the one whose earlier, completed order frees it
+    // soonest. Never a basket that still holds an active order (Infinity).
+    let soonest: number | undefined;
+    for (const id of ids) {
+      const until = busyUntil.get(id) ?? Infinity;
+      if (until !== Infinity && (soonest === undefined || until < (busyUntil.get(soonest) ?? 0))) {
+        soonest = id;
+      }
+    }
+    if (soonest === undefined) throw new Error('Seed ran out of free baskets');
+    basketCursor = (ids.indexOf(soonest) + 1) % ids.length;
+    return soonest;
   };
 
   // ---------------------------------------------------------------------------------------------
@@ -1191,9 +1217,11 @@ export function createSeed(now: Date): MockDb {
       0,
     );
     const done = last.status === 6;
-    const basketCount = kilos >= 7 || plan.items.length >= 3 ? 2 : 1;
+    // Laundry still in the shop takes one basket; a big load that was handed over may have used two.
+    const basketCount = done && (kilos >= 7 || plan.items.length >= 3) ? 2 : 1;
     for (let b = 0; b < basketCount; b += 1) {
-      const basketId = takeBasket(plan.receivedAt);
+      const basketId = takeBasket(plan.receivedAt, b > 0);
+      if (basketId === null) break;
       busyUntil.set(basketId, done ? last.at : Infinity);
       db.order_baskets.push({
         id: db.order_baskets.length + 1,

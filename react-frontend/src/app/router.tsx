@@ -11,6 +11,7 @@ import { RequireCustomer } from './RequireCustomer';
 import { RequireRole } from './RequireRole';
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
+const StaffPasswordPage = lazy(() => import('@/features/auth/pages/StaffPasswordPage'));
 const AppShell = lazy(() =>
   import('@/layouts/AppShell').then((module) => ({ default: module.AppShell })),
 );
@@ -86,6 +87,11 @@ export const routes: RouteObject[] = [
       {
         element: <RequireAuth />,
         children: [
+          // Outside the app shell: while a reset password is pending, it is the only page.
+          {
+            element: <PublicLayout />,
+            children: [{ path: '/password', element: page(StaffPasswordPage) }],
+          },
           {
             element: (
               <Suspense fallback={<PageFallback />}>

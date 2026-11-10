@@ -9,17 +9,33 @@ import { PASSWORD_MIN } from '@/lib/accounts';
 import { changePasswordSchema, type ChangePasswordForm as Values } from '@/schemas/portal';
 import { useChangeMyPassword } from '../api';
 
-/** Used for the forced change after a temporary password, and on the account page. */
-export function ChangePasswordForm({
-  currentLabel = 'Current password',
-  submitLabel = 'Change password',
-  onDone,
-}: {
+interface FormProps {
   currentLabel?: string;
   submitLabel?: string;
   onDone: () => void;
-}) {
-  const change = useChangeMyPassword();
+}
+
+/** The mutation the form submits to: the customer's or the staff member's change-password call. */
+export interface PasswordChange {
+  mutate: (
+    values: Values,
+    options: { onSuccess: () => void; onError: (error: unknown) => void },
+  ) => void;
+  isPending: boolean;
+}
+
+/** The customer's form: the forced change after a temporary password, and the account page. */
+export function ChangePasswordForm(props: FormProps) {
+  return <PasswordForm {...props} change={useChangeMyPassword()} />;
+}
+
+/** The same form for any account; staff pass their own change-password mutation. */
+export function PasswordForm({
+  currentLabel = 'Current password',
+  submitLabel = 'Change password',
+  onDone,
+  change,
+}: FormProps & { change: PasswordChange }) {
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,

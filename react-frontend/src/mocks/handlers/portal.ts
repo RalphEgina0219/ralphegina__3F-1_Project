@@ -62,7 +62,8 @@ function phoneProblem(raw: unknown, ignoreCustomerId?: number): string | null {
     : 'This number is already on file. Please ask the shop to set up your account.';
 }
 
-function confirmationProblem(body: Record<string, unknown>): Record<string, string> {
+/** The new-password rules shared by registration and both change-password routes. */
+export function confirmationProblem(body: Record<string, unknown>): Record<string, string> {
   const password = typeof body.password === 'string' ? body.password : '';
   const errors: Record<string, string> = {};
   const problem = passwordProblem(password);

@@ -1,3 +1,4 @@
+import { lookup } from 'node:dns/promises';
 import fs from 'node:fs';
 import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
@@ -31,8 +32,32 @@ function dropMockWorker(): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => {
+/** Laragon's virtual host for laravel-backend/public (see laravel-backend/README.md). */
+const LARAGON_API = 'http://laundryflow.test';
+/** The fallback: `php artisan serve`. */
+const ARTISAN_API = 'http://127.0.0.1:8000';
+
+/**
+ * Where /api is proxied to: API_PROXY_TARGET when set, else Laragon's Apache when
+ * laundryflow.test resolves (it serves requests in parallel, `artisan serve` one at a time),
+ * else `php artisan serve`.
+ */
+async function apiTarget(configured: string | undefined) {
+  if (configured) return configured;
+  try {
+    await lookup(new URL(LARAGON_API).hostname);
+    return LARAGON_API;
+  } catch {
+    return ARTISAN_API;
+  }
+}
+
+export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, import.meta.dirname, 'VITE_');
+  const configured = loadEnv(mode, import.meta.dirname, '').API_PROXY_TARGET;
+  // Builds never proxy, so only the dev and preview servers look the host up.
+  const target = command === 'serve' ? await apiTarget(configured) : configured || ARTISAN_API;
+  const apiProxy = { target, changeOrigin: true };
   // One service worker per scope: with mocks on, MSW's worker owns "/" and Workbox stays out.
   const useMocks = env.VITE_USE_MOCKS === 'true';
 
@@ -169,13 +194,15 @@ export default defineConfig(({ mode }) => {
     define: { __APP_VERSION__: JSON.stringify(version) },
     resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
     // Lets a phone open the dev server through an HTTPS tunnel, which the camera requires.
-    server: { allowedHosts: ['.trycloudflare.com'] },
-    preview: { allowedHosts: ['.trycloudflare.com'] },
+    // /api goes to Laravel (Laragon or php artisan serve), so the browser sees one origin: no CORS.
+    server: { allowedHosts: ['.trycloudflare.com'], proxy: { '/api': apiProxy } },
+    preview: { allowedHosts: ['.trycloudflare.com'], proxy: { '/api': apiProxy } },
     test: {
       environment: 'jsdom',
       globals: false,
       setupFiles: ['src/test/setup.ts'],
-      env: { VITE_API_URL: '/api', TZ: 'Asia/Manila' },
+      // Unit and integration tests run against the in-memory mock API.
+      env: { VITE_API_URL: '/api', VITE_USE_MOCKS: 'true', TZ: 'Asia/Manila' },
       // Playwright owns e2e/: those specs run against built previews, not jsdom.
       exclude: [...configDefaults.exclude, 'e2e/**', 'dist-e2e/**'],
     },

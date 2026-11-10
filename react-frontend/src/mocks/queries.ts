@@ -72,6 +72,7 @@ export function toAuthUser(user: User): AuthUser {
     username: user.username,
     role,
     permissions: role === 'admin' ? db().permissions.map((p) => p.code) : staffPermissions(),
+    must_change_password: user.must_change_password === true,
   };
 }
 

@@ -14,8 +14,13 @@ interface ConfirmDialogProps {
   loading?: boolean;
   /** Adds a required text input and passes its value to onConfirm. */
   reasonLabel?: string;
+  /** The server's 422 message for the reason, shown under it. */
+  reasonError?: string | null;
   onConfirm: (reason: string) => void;
 }
+
+/** The API's limit for reasons and notes (max:255). */
+const REASON_MAX = 255;
 
 export function ConfirmDialog({
   open,
@@ -26,6 +31,7 @@ export function ConfirmDialog({
   variant = 'primary',
   loading,
   reasonLabel,
+  reasonError,
   onConfirm,
 }: ConfirmDialogProps) {
   const [reason, setReason] = useState('');
@@ -68,11 +74,12 @@ export function ConfirmDialog({
         <Field
           label={reasonLabel}
           required
-          error={touched && missing ? 'A reason is required.' : undefined}
+          error={touched && missing ? 'A reason is required.' : (reasonError ?? undefined)}
         >
           {(control) => (
             <Textarea
               {...control}
+              maxLength={REASON_MAX}
               value={reason}
               onChange={(event) => setReason(event.target.value)}
             />

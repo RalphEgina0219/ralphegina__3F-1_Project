@@ -37,6 +37,8 @@ export interface User {
   name: string;
   username: string;
   is_active: boolean;
+  /** Set when the owner resets the password: the next sign-in must choose a new one. */
+  must_change_password: boolean;
   last_login_at: string | null;
   created_at: string;
   updated_at: string;

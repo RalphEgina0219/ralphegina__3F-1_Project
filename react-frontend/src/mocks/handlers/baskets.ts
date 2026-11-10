@@ -26,7 +26,12 @@ function orderNumberOf(orderId: number) {
  * Checks basket_ids for a new order. Every basket must exist, must not be retired and must not
  * already hold an active order. Phase 2 repeats this inside the transaction with lockForUpdate().
  */
-export function validateBasketIds(raw: unknown): { error: string | null; ids: number[] } {
+export function validateBasketIds(raw: unknown): {
+  error: string | null;
+  ids: number[];
+  /** A basket that holds another order: Laravel answers 409, not 422. */
+  conflict?: string;
+} {
   const list = Array.isArray(raw) ? raw.map((value) => asNumber(value)) : [];
   if (list.length === 0) return { error: 'Add at least one basket.', ids: [] };
   if (list.some((id) => id === null || !Number.isInteger(id))) {
@@ -39,11 +44,15 @@ export function validateBasketIds(raw: unknown): { error: string | null; ids: nu
     if (basket.status === 'retired') {
       return { error: `${basket.basket_number} is retired and cannot be used.`, ids: [] };
     }
-    const active = activeAssignment(basket.id);
+  }
+  for (const id of ids) {
+    const active = activeAssignment(id);
     if (active) {
+      const basket = db().baskets.find((b) => b.id === id);
       return {
-        error: `${basket.basket_number} is in use by ${orderNumberOf(active.order_id)}.`,
+        error: null,
         ids: [],
+        conflict: `${basket?.basket_number} is in use by ${orderNumberOf(active.order_id)}.`,
       };
     }
   }

@@ -4,27 +4,44 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Staff accounts: roles (admin, staff), the permissions the owner can switch on for staff,
+ * and the users who sign in to the shop app.
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            // admin or staff
+            $table->string('name', 20)->unique();
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->id();
+            // The staff toggles: payments.record, inventory.stock_out, payments.void
+            $table->string('code', 50)->unique();
+        });
+
+        Schema::create('role_permission', function (Blueprint $table) {
+            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
+            $table->primary(['role_id', 'permission_id']);
+        });
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('role_id')->constrained()->restrictOnDelete();
+            $table->string('name');
+            // Staff sign in with a username, stored lower-case.
+            $table->string('username', 50)->unique();
+            $table->string('password');
+            // Disabled accounts cannot sign in. Users are never deleted: their names stay on history.
+            $table->boolean('is_active')->default(true);
+            $table->boolean('must_change_password')->default(false);
+            $table->timestamp('last_login_at')->nullable();
+            $table->timestamps();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -37,13 +54,12 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('role_permission');
+        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('roles');
     }
 };

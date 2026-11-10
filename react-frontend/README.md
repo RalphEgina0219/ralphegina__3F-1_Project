@@ -3,8 +3,10 @@
 A web-based laundry shop management system with basket QR tracking and customer accounts, for a
 startup laundry business in Bongabong, Oriental Mindoro.
 
-This is **Phase 1: the complete frontend**, running against an in-browser mock REST API (MSW) whose
-endpoints and JSON match the planned Laravel API. Phase 2 replaces the mock with Laravel + Sanctum.
+It runs against the **Laravel API** in [`../laravel-backend`](../laravel-backend) (JWT, the course's
+JSON:API-style responses under `/api/v1`). The in-browser mock API (MSW) from Phase 1 is kept for the
+static demo build (`npm run build:demo`) and the unit tests. To run the whole system, follow
+**"Run the whole system in 5 minutes"** in [`../laravel-backend/README.md`](../laravel-backend/README.md).
 
 **How tracking works.** Every load goes into one or more reusable **baskets**. Each basket has a
 permanent QR label that only staff scan. There is **no printed receipt** and **no public tracking
@@ -13,14 +15,18 @@ page**: every order belongs to a registered customer, who follows it in their ow
 
 ## Setup
 
-Requires Node 20 or newer.
+Requires Node 20 or newer, and the Laravel API running (Laragon's Apache at
+`http://laundryflow.test`, or `php artisan serve`).
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open <http://localhost:5173>. Mocks are on by default in development (`.env.development`).
+Open <http://localhost:5173>. Vite proxies `/api` to `http://laundryflow.test` when that name
+resolves (Laragon, fast and parallel), otherwise to `php artisan serve` at `http://127.0.0.1:8000`.
+`API_PROXY_TARGET` forces either. Without any server, `npm run build:demo && npm run preview` runs
+the app on the in-browser mock.
 
 ### Demo accounts
 
@@ -74,20 +80,21 @@ printed before it stop matching.
 
 ### Scripts
 
-| Script                | What it does                                                                            |
-| --------------------- | --------------------------------------------------------------------------------------- |
-| `npm run dev`         | Dev server with the mock API                                                            |
-| `npm run build`       | Typecheck, then the real-API production build to `dist/` (mocks off, offline app shell) |
-| `npm run build:demo`  | Typecheck, then the demo build to `dist/`: production code with the mock API            |
-| `npm run preview`     | Serve `dist/` locally                                                                   |
-| `npm run preview:pwa` | `build:demo`, then serve it on your network (`--host`) to open on a phone               |
-| `npm run lint`        | ESLint, including accessibility rules                                                   |
-| `npm run typecheck`   | TypeScript strict check                                                                 |
-| `npm test`            | Vitest: business rules, mock API, components, PWA hooks                                 |
-| `npm run test:e2e`    | Playwright on both builds: manifest, service workers, offline, updates, install UI      |
-| `npm run screenshots` | Recapture `public/screenshots/` (the install-dialog images) from the demo build         |
-| `npm run icons`       | Regenerate every app icon from `public/logo.svg` (see `pwa-assets.config.ts`)           |
-| `npm run format`      | Prettier                                                                                |
+| Script                  | What it does                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `npm run dev`           | Dev server, `/api` proxied to Laravel (see Setup)                                            |
+| `npm run build`         | Typecheck, then the real-API production build to `dist/` (mocks off, offline app shell)      |
+| `npm run build:demo`    | Typecheck, then the demo build to `dist/`: production code with the mock API                 |
+| `npm run preview`       | Serve `dist/` locally                                                                        |
+| `npm run preview:pwa`   | `build:demo`, then serve it on your network (`--host`) to open on a phone                    |
+| `npm run lint`          | ESLint, including accessibility rules                                                        |
+| `npm run typecheck`     | TypeScript strict check                                                                      |
+| `npm test`              | Vitest: business rules, mock API, components, PWA hooks                                      |
+| `npm run test:e2e`      | Playwright on both builds: manifest, service workers, offline, updates, install UI           |
+| `npm run test:contract` | Playwright against Laravel: reseeds it, then the contract, error, walkthrough and flow specs |
+| `npm run screenshots`   | Recapture `public/screenshots/` (the install-dialog images) from the demo build              |
+| `npm run icons`         | Regenerate every app icon from `public/logo.svg` (see `pwa-assets.config.ts`)                |
+| `npm run format`        | Prettier                                                                                     |
 
 `test:e2e` and `screenshots` use your installed Google Chrome (`channel: 'chrome'`), so they need no
 browser download. They build into `dist-e2e/` and serve on ports 4310 (demo) and 4311 (real API).
@@ -97,11 +104,12 @@ The scripts call each tool through `node node_modules/...` on purpose. The proje
 
 ### Environment
 
-| Variable          | Default | Meaning                                                                                  |
-| ----------------- | ------- | ---------------------------------------------------------------------------------------- |
-| `VITE_API_URL`    | `/api`  | Base URL of the REST API                                                                 |
-| `VITE_PUBLIC_URL` | (empty) | Origin encoded in basket QR labels (`/b/:token`). Empty means the current browser origin |
-| `VITE_USE_MOCKS`  | not set | `true` serves the API from the mock. Set in `.env.development`                           |
+| Variable           | Default   | Meaning                                                                                                               |
+| ------------------ | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL`     | `/api/v1` | Base URL of the REST API                                                                                              |
+| `VITE_PUBLIC_URL`  | (empty)   | Origin encoded in basket QR labels (`/b/:token`). Empty means the current browser origin                              |
+| `VITE_USE_MOCKS`   | `false`   | `true` serves the API from the mock (`.env.demo` and the unit tests only)                                             |
+| `API_PROXY_TARGET` | (empty)   | Where `dev` and `preview` proxy `/api`. Empty: `http://laundryflow.test` if it resolves, else `http://127.0.0.1:8000` |
 
 A plain `npm run build` has mocks **off** and leaves the mock code out of the bundle. For a demo build
 with mocks, use `npm run build:demo` (it reads `.env.demo`). Set `VITE_PUBLIC_URL` before printing labels for
@@ -252,30 +260,77 @@ Open the printed address on the phone. `vite.config.ts` already allows `*.tryclo
 both `dev` and `preview`. To try the offline app shell instead, run `npm run build` and then
 `npm run preview -- --host`. There is no API behind it, so only the sign-in screens work.
 
-## Moving to the Laravel API (Phase 2)
+## The Laravel API (Phase 2, connected)
 
-The `laravel-backend/` folder is a fresh Laravel 13 skeleton: none of the API exists there yet.
+`npm run dev` and `npm run build` use the Laravel API in `../laravel-backend`. Setup, demo
+accounts and deployment are in [`../laravel-backend/README.md`](../laravel-backend/README.md).
+In development, Vite proxies `/api` to Laragon (`http://laundryflow.test`) or, when that name does
+not resolve, to `php artisan serve` (`http://127.0.0.1:8000`); `API_PROXY_TARGET` overrides both.
 
-1. Set the environment and rebuild. Nothing else in the UI changes:
+```
+VITE_USE_MOCKS=false
+VITE_API_URL=/api/v1                # or https://api.example.com/api/v1 (then set FRONTEND_URL there)
+VITE_PUBLIC_URL=https://your-domain
+```
 
-   ```
-   VITE_USE_MOCKS=false
-   VITE_API_URL=https://your-domain/api
-   VITE_PUBLIC_URL=https://your-domain
-   ```
+**How the frontend talks to it.** The API follows the course "API Master Class in Laravel"
+([`../docs/COURSE_CONVENTIONS.md`](../docs/COURSE_CONVENTIONS.md)):
 
-2. Delete `src/mocks/`, `public/mockServiceWorker.js`, the `msw` dev dependency, the mock branch in
-   `src/main.tsx`, and the **Reset demo data** card in `features/settings/pages/ShopPage.tsx`. Keep
-   `removeOtherWorkers('pwa')`: it removes the MSW worker from phones that ran the demo.
-3. Serve `sw.js`, `manifest.webmanifest` and `index.html` with `Cache-Control: no-cache`, over HTTPS
-   (hashed files under `/assets/` can be cached for a year). Keep the API under paths starting with
-   `/api/` and `/sanctum/`: the service worker never caches those and never answers them with the app
-   shell.
-4. Laravel has to implement the contract below. The integration tests in `src/mocks/*.test.ts`
-   (`api`, `baskets`, `portal`, `flow`) describe the expected behaviour and are a good checklist for
-   feature tests.
+- JWT Bearer tokens, with separate tokens for staff and customers;
+- JSON:API-style resources with camelCase attributes, and request bodies of the form
+  `{ data: { attributes, relationships } }`;
+- errors as `{ errors: [{ status, message, source }] }`;
+- course-style filters (`receivedAt=from,to`);
+- PATCH for partial edits.
 
-### API contract
+One adapter, [`src/lib/apiAdapter.ts`](src/lib/apiAdapter.ts), turns all of that back into the
+screens' contract below. It is applied by the interceptors in `src/lib/api.ts`, so no component
+changed. Tokens live in `src/lib/tokens.ts`. On a 401, the client refreshes the token once
+(`/auth/refresh` or `/customer/auth/refresh`) and retries; if that fails, it signs out.
+
+**The mock stays** for `npm run build:demo` (a static demo with no server) and for the unit and
+integration tests in `src/mocks/*.test.ts`, which still speak the contract below directly. The
+removal steps (delete `src/mocks/`, `public/mockServiceWorker.js`, the `msw` dependency, the mock
+branch in `src/main.tsx` and the **Reset demo data** card) wait until the team confirms. Keep
+`removeOtherWorkers('pwa')`: it removes the MSW worker from phones that ran the demo.
+
+**Errors on screen.** `src/lib/apiAdapter.ts` turns `{ errors: [{ status, message, source }] }`
+into `{ message, errors: { field: [msg] } }`:
+
+| Status | What the user sees                                                                                                                                                                                                                                       |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 401    | One silent token refresh, then the sign-in page (`/login` or `/my/login`) with `?next=`                                                                                                                                                                  |
+| 403    | The API's message in a toast; a page the role may not open shows the 403 page. A pending password change (`Change your temporary password first.`) re-reads the account and opens the change-password page                                               |
+| 404    | "Order not found" (or the list's empty state) on detail pages; a toast for actions                                                                                                                                                                       |
+| 409    | The API's message word for word ("BSK-0007 is in use by LF-…", "This basket has no active laundry session.", "This transaction is completed.", "Orders move one stage at a time. Next is Washing."). On the new-order form it also appears under Baskets |
+| 422    | Each message under its own field (`applyFieldErrors`, with a rename step for forms whose fields differ from the body, such as the new-order form and the reason dialogs)                                                                                 |
+| 429    | The API's own wording, or "Too many attempts. Please wait a minute and try again."                                                                                                                                                                       |
+| 5xx    | Always "Something went wrong on our side. Please try again in a moment." Whatever the server sent (with `APP_DEBUG=true`, the exception text) never reaches the screen                                                                                   |
+
+**Staff password.** After the owner resets a staff password (Settings › Users & roles › Reset
+password, shown once with a copy button), that account opens only `/password` until a new one is
+saved; Sign out still works. The same page is "Change password" in the account menu (the user card
+at the bottom of the sidebar). It reuses the customer's password frame (`PortalAuthShell`) and form
+(`PasswordForm`).
+
+**Contract check:** `npm run test:contract` reseeds Laravel, starts `php artisan serve`, builds the
+real-API app and runs every `*.contract.spec.ts` plus `analytics.demo.spec.ts` against it:
+
+| Spec                           | What it covers                                                                                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contract.spec.ts`             | Sign-in, the main lists, scanning, the portal, and the staff password reset → forced change → normal access                                                                     |
+| `errors.contract.spec.ts`      | One example of each status: 401, 403, 404, 409, 422, 429 and 500                                                                                                                |
+| `walkthrough.contract.spec.ts` | Every screen as owner, staff and customer at 390 px and 1440 px: no sideways scroll, no error state, no console error                                                           |
+| `flows.contract.spec.ts`       | Counter to pickup with the customer watching; self-registration; permissions; every dashboard preset and report; settings and baskets; the installed app and its service worker |
+| `analytics.demo.spec.ts`       | The dashboard and reports against Laravel's numbers                                                                                                                             |
+
+While iterating, `CONTRACT_REUSE=1 npm run test:contract` reuses servers you already started
+(reseed by hand with `php artisan migrate:fresh --seed` first).
+
+Serve `sw.js`, `manifest.webmanifest` and `index.html` with `Cache-Control: no-cache`, over HTTPS.
+The service worker never caches `/api/` and never answers it with the app shell.
+
+### Screens' contract (what the adapter produces)
 
 Everything in `src/types/api.ts`, with these conventions: snake_case JSON, ISO-8601 timestamps, money as
 integer centavos (`*_cents`), lists as `{ data, meta: { current_page, per_page, total, last_page } }`,
@@ -434,6 +489,11 @@ Indexes these queries need:
 
 ### Phase 2 checklist
 
+The plan the Laravel API was built from, kept for reference. Where the build differs, the build
+wins: authentication is **JWT** with two guards (`api` for staff, `customer`), not Sanctum or
+sessions; a basket that holds another order answers **409**, decided under the basket lock with the
+day's order sequence locked first. See `../laravel-backend/README.md` and `../docs/API_INVENTORY.md`.
+
 **Tables and migrations**
 
 - `customers.contact_number`: normalize to `09XXXXXXXXX`, then `UNIQUE`. The seed has no duplicates;
@@ -466,8 +526,8 @@ as each assignment and release. The `UNIQUE(basket_id, active_flag)` index is th
   re-check each is not retired and has no open `order_baskets` row, then create the order (status
   Received), items with `unit_price_cents` copied from the service, the `order_baskets` rows, the
   first `order_status_history` row, the audit log, the optional payment and the
-  `order_received` customer notification. Catch the unique-index violation as a 422 on
-  `basket_ids`.
+  `order_received` customer notification. Catch the unique-index violation as a 409 (built: "One of the baskets was just taken by another
+  order. Choose again.").
 - `POST /orders/{id}/status`: lock the order row; run the same `checkTransition` rules; write
   history, audit and the customer notification; on `released`, set `orders.released_at`, set
   `released_at` on its open `order_baskets` rows and their baskets to `available`, all in one

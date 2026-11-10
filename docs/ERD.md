@@ -1,0 +1,255 @@
+# LaundryFlow ERD
+
+Generated from the final migrations in `laravel-backend/database/migrations/`, and checked column by
+column and index by index against the migrated database (`information_schema`). Money is unsigned
+integer centavos (`*_cents`). Timestamps are stored with the session time zone at +08:00, so
+`DATE(column)` is the Manila day. Foreign keys restrict deletes on every financial and history
+table, and none of those tables has a DELETE route.
+
+```mermaid
+erDiagram
+    roles ||--o{ users : "has"
+    roles ||--o{ role_permission : ""
+    permissions ||--o{ role_permission : ""
+    barangays ||--o{ customers : "lives in"
+    customers ||--o| customer_accounts : "signs in with"
+    customers ||--o{ orders : "places"
+    users ||--o{ orders : "received_by"
+    order_statuses ||--o{ orders : "current_status_id"
+    orders ||--|{ order_items : "has"
+    services ||--o{ order_items : "priced by"
+    orders ||--|{ order_status_history : "moves through"
+    order_statuses ||--o{ order_status_history : "from / to"
+    users ||--o{ order_status_history : "changed_by"
+    orders ||--|{ order_baskets : "held in"
+    baskets ||--o{ order_baskets : "holds"
+    users ||--o{ order_baskets : "assigned_by"
+    users ||--o{ baskets : "created_by"
+    orders ||--o{ payments : "paid by"
+    payment_methods ||--o{ payments : "method"
+    users ||--o{ payments : "received_by / voided_by"
+    units ||--o{ inventory_items : "measured in"
+    inventory_items ||--o{ inventory_movements : "moves"
+    users ||--o{ inventory_movements : "recorded by"
+    customers ||--o{ notifications : "customer notices"
+    orders ||--o{ notifications : "about"
+    users ||--o{ audit_logs : "did"
+
+    roles {
+        bigint id PK
+        varchar name UK "admin | staff"
+    }
+    permissions {
+        bigint id PK
+        varchar code UK "payments.record | inventory.stock_out | payments.void"
+    }
+    role_permission {
+        bigint role_id PK,FK
+        bigint permission_id PK,FK
+    }
+    users {
+        bigint id PK
+        bigint role_id FK
+        varchar name
+        varchar username UK
+        varchar password "bcrypt hash"
+        boolean is_active
+        boolean must_change_password
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    barangays {
+        bigint id PK
+        varchar name UK
+    }
+    customers {
+        bigint id PK
+        varchar full_name "indexed"
+        char contact_number UK "09XXXXXXXXX"
+        bigint barangay_id FK
+        varchar street_address
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+    customer_accounts {
+        bigint id PK
+        bigint customer_id FK,UK "1:1"
+        varchar email UK "lower-case"
+        varchar password "bcrypt hash"
+        boolean is_active
+        boolean must_change_password
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    services {
+        bigint id PK
+        varchar name
+        varchar description
+        enum pricing_type "per_kg | per_piece | flat"
+        int rate_cents
+        decimal minimum_qty "6,1"
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+    order_statuses {
+        bigint id PK
+        varchar code UK "received … released"
+        varchar label "released = Completed"
+        tinyint sort_order UK
+    }
+    order_sequences {
+        date sequence_date PK "Manila day"
+        int last_number "LF-YYMMDD-NNNN"
+    }
+    receipt_sequences {
+        tinyint id PK "single row"
+        int last_number "OR-NNNNNN"
+    }
+    orders {
+        bigint id PK
+        varchar order_number UK
+        bigint customer_id FK
+        bigint current_status_id FK "indexed"
+        bigint received_by FK
+        timestamp received_at "indexed"
+        timestamp promised_at
+        timestamp released_at
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint service_id FK
+        decimal weight_kg "6,1"
+        int quantity
+        int unit_price_cents "frozen"
+        int subtotal_cents "frozen"
+    }
+    order_status_history {
+        bigint id PK
+        bigint order_id FK
+        bigint from_status_id FK
+        bigint to_status_id FK
+        bigint changed_by FK
+        varchar note
+        timestamp changed_at "index (order_id, changed_at)"
+    }
+    baskets {
+        bigint id PK
+        varchar basket_number UK "BSK-0001"
+        char qr_token UK "32 chars, permanent"
+        varchar label
+        enum status "available | in_use | retired"
+        varchar notes
+        bigint created_by FK
+        timestamp created_at
+        timestamp updated_at
+    }
+    order_baskets {
+        bigint id PK
+        bigint order_id FK
+        bigint basket_id FK
+        timestamp assigned_at
+        bigint assigned_by FK
+        timestamp released_at
+        tinyint active_flag "STORED: IF(released_at IS NULL, 1, NULL); UNIQUE(basket_id, active_flag)"
+    }
+    payment_methods {
+        bigint id PK
+        varchar code UK "cash | gcash"
+        varchar label
+    }
+    payments {
+        bigint id PK
+        bigint order_id FK
+        bigint payment_method_id FK
+        int amount_cents
+        varchar reference_number "GCash"
+        varchar receipt_number UK "OR number"
+        bigint received_by FK
+        timestamp paid_at "index (paid_at, voided_at)"
+        timestamp voided_at
+        bigint voided_by FK
+        varchar void_reason
+    }
+    units {
+        bigint id PK
+        varchar code UK
+        varchar label
+    }
+    inventory_items {
+        bigint id PK
+        varchar name
+        bigint unit_id FK
+        decimal reorder_level
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+    inventory_movements {
+        bigint id PK
+        bigint item_id FK
+        bigint user_id FK
+        enum type "in | out | adjust"
+        decimal quantity "on hand = signed sum"
+        varchar remarks
+        timestamp moved_at
+    }
+    notifications {
+        bigint id PK
+        enum recipient_type "staff | customer"
+        bigint customer_id FK
+        bigint order_id FK
+        varchar type
+        varchar channel "in_app"
+        varchar message
+        varchar status "recorded"
+        timestamp sent_at
+        timestamp read_at
+    }
+    shop_settings {
+        tinyint id PK "CHECK id = 1"
+        varchar name
+        varchar address
+        varchar contact_number
+        varchar opening_hours
+        varchar receipt_footer
+        smallint claim_policy_days
+        timestamp created_at
+        timestamp updated_at
+    }
+    audit_logs {
+        bigint id PK
+        bigint user_id FK "null for customers / system"
+        varchar action
+        varchar auditable_type
+        bigint auditable_id
+        json old_values
+        json new_values
+        timestamp created_at
+    }
+```
+
+## Indexes the lists and reports use
+
+| Table | Index |
+| --- | --- |
+| `orders` | `received_at`; `current_status_id`; `(customer_id, received_at)`; `(current_status_id, promised_at)`; `(received_by, received_at)`; `order_number` unique |
+| `order_items` | `(order_id, service_id)` |
+| `order_status_history` | `(order_id, changed_at)`; `(order_id, to_status_id, changed_at)`; `(changed_by, changed_at)` |
+| `order_baskets` | `order_id`; `UNIQUE(basket_id, active_flag)`: at most one open assignment per basket |
+| `payments` | `(paid_at, voided_at)`; `(received_by, paid_at)`; `order_id` (FK); `receipt_number` unique |
+| `customers` | `contact_number` unique; `full_name` |
+| `inventory_movements` | `(item_id, moved_at)`; `moved_at` |
+| `notifications` | `(recipient_type, sent_at)`; `(customer_id, read_at)` |
+| `audit_logs` | `created_at`; `(auditable_type, auditable_id)`; `(user_id, created_at)` |
+
+Not created, as the enhancement removed them: `orders.qr_token` and the public tracking columns.
+`personal_access_tokens` exists because `php artisan install:api` (course L3) creates it. It stays
+empty: authentication is JWT.

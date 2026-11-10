@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { chromium, type Page } from '@playwright/test';
+import { chromium, test, type Page } from '@playwright/test';
 
 /** What Chrome DevTools › Application › Manifest lists under "Installability". */
 export async function installabilityErrors(page: Page) {
@@ -102,11 +102,35 @@ export async function emulateStandalone(page: Page) {
   });
 }
 
-/** Signs the mock API in as the shop owner (liza.ramos) without the form. Demo build only. */
-export async function asOwner(page: Page) {
+/** The contract project runs the same specs against the Laravel API instead of the mock. */
+export const againstRealApi = () => test.info().project.name === 'contract';
+
+/**
+ * Signs in without the form. Against the mock: its session key. Against Laravel: a real JWT from
+ * POST /api/v1/auth/login, stored where the app keeps it.
+ */
+async function signInAs(page: Page, username: string, mockId: string) {
   await page.goto('/login');
-  await page.evaluate(() => localStorage.setItem('laundryflow.mock.session', '1'));
+  if (!againstRealApi()) {
+    await page.evaluate((id) => localStorage.setItem('laundryflow.mock.session', id), mockId);
+    return;
+  }
+  const response = await page.request.post('/api/v1/auth/login', {
+    data: { username, password: 'password123' },
+    headers: { Accept: 'application/json' },
+  });
+  const { data } = (await response.json()) as { data: { access_token: string } };
+  await page.evaluate(
+    (token) => localStorage.setItem('laundryflow.token.staff', token),
+    data.access_token,
+  );
 }
+
+/** The shop owner (liza.ramos). */
+export const asOwner = (page: Page) => signInAs(page, 'liza.ramos', '1');
+
+/** A staff member (kevin.m). */
+export const asStaffMember = (page: Page) => signInAs(page, 'kevin.m', '2');
 
 /** Width and height from a PNG's IHDR header. */
 export function pngSize(bytes: Buffer) {

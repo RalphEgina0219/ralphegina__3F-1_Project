@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { asOwner } from './helpers';
+import { asOwner, asStaffMember } from './helpers';
 
 const card = (page: Page, title: string) =>
   page
@@ -106,8 +106,7 @@ test.describe('admin dashboard', () => {
 });
 
 test('staff see five work charts and no peso amounts', async ({ page }) => {
-  await page.goto('/login');
-  await page.evaluate(() => localStorage.setItem('laundryflow.mock.session', '2'));
+  await asStaffMember(page);
   await page.goto('/');
   await expect(page.locator('.chart-card')).toHaveCount(5);
   await settle(page);

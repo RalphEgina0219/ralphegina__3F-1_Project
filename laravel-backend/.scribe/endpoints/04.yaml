@@ -1,0 +1,171 @@
+name: Reports
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/reports/{kind}'
+    metadata:
+      custom: []
+      groupName: Reports
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'A report'
+      description: |-
+        One of seven reports (owner only): sales, orders, payments, services, customers, inventory or
+        staff. Same envelope as the dashboard analytics, plus a full table. For the same range the
+        sales total equals the dashboard KPI and GET /payments meta.collectedCents.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      kind:
+        custom: []
+        name: kind
+        description: 'sales, orders, payments, services, customers, inventory or staff.'
+        required: true
+        example: sales
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      kind: sales
+    queryParameters:
+      from:
+        custom: []
+        name: from
+        description: 'First Manila day (Y-m-d).'
+        required: false
+        example: '2026-10-10'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      to:
+        custom: []
+        name: to
+        description: 'Last Manila day, inclusive.'
+        required: false
+        example: '2026-11-08'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      compare:
+        custom: []
+        name: compare
+        description: 'previous (default) or none.'
+        required: false
+        example: previous
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      service:
+        custom: []
+        name: service
+        description: 'One service (payments split by allocation).'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      method:
+        custom: []
+        name: method
+        description: 'cash or gcash.'
+        required: false
+        example: gcash
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: 'One status code.'
+        required: false
+        example: ready_for_pickup
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      staff:
+        custom: []
+        name: staff
+        description: 'One staff member.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      barangay:
+        custom: []
+        name: barangay
+        description: 'One barangay by name.'
+        required: false
+        example: Poblacion
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      item:
+        custom: []
+        name: item
+        description: 'One supply item.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      from: '2026-10-10'
+      to: '2026-11-08'
+      compare: previous
+      service: 1
+      method: gcash
+      status: ready_for_pickup
+      staff: 2
+      barangay: Poblacion
+      item: 1
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"range":{"from":"2026-10-10","to":"2026-11-08"},"compare_range":{"from":"2026-09-10","to":"2026-10-09"},"generated_at":"2026-11-10T12:57:04.453Z","kpis":[{"key":"sales","label":"Sales","format":"money","value":0,"previous":0,"delta_pct":null,"spark":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hint":"Payments collected"},{"key":"orders","label":"Orders","format":"count","value":1,"previous":0,"delta_pct":null,"spark":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]},{"key":"aov","label":"Average order value","format":"money","value":25900,"previous":null,"delta_pct":null,"hint":"Billed per order"},{"key":"kilos","label":"Kilos processed","format":"kg","value":7.4,"previous":0,"delta_pct":null,"spark":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7.4,0,0,0,0,0,0,0,0,0,0]}],"series":{"sales":[{"date":"2026-10-10","value":0,"previous":0},{"date":"2026-10-11","value":0,"previous":0},{"date":"2026-10-12","value":0,"previous":0},{"date":"2026-10-13","value":0,"previous":0},{"date":"2026-10-14","value":0,"previous":0},{"date":"2026-10-15","value":0,"previous":0},{"date":"2026-10-16","value":0,"previous":0},{"date":"2026-10-17","value":0,"previous":0},{"date":"2026-10-18","value":0,"previous":0},{"date":"2026-10-19","value":0,"previous":0},{"date":"2026-10-20","value":0,"previous":0},{"date":"2026-10-21","value":0,"previous":0},{"date":"2026-10-22","value":0,"previous":0},{"date":"2026-10-23","value":0,"previous":0},{"date":"2026-10-24","value":0,"previous":0},{"date":"2026-10-25","value":0,"previous":0},{"date":"2026-10-26","value":0,"previous":0},{"date":"2026-10-27","value":0,"previous":0},{"date":"2026-10-28","value":0,"previous":0},{"date":"2026-10-29","value":0,"previous":0},{"date":"2026-10-30","value":0,"previous":0},{"date":"2026-10-31","value":0,"previous":0},{"date":"2026-11-01","value":0,"previous":0},{"date":"2026-11-02","value":0,"previous":0},{"date":"2026-11-03","value":0,"previous":0},{"date":"2026-11-04","value":0,"previous":0},{"date":"2026-11-05","value":0,"previous":0},{"date":"2026-11-06","value":0,"previous":0},{"date":"2026-11-07","value":0,"previous":0},{"date":"2026-11-08","value":0,"previous":0}],"revenue_by_service":[],"payment_mix":[{"key":"cash","label":"Cash","value":0,"share":0,"extra":{"count":0}},{"key":"gcash","label":"GCash","value":0,"share":0,"extra":{"count":0}}]},"table":{"columns":[{"key":"date","label":"Date","format":"date"},{"key":"orders","label":"Orders","format":"count"},{"key":"kilos","label":"Kilos","format":"kg"},{"key":"cash","label":"Cash","format":"money","optional":true},{"key":"gcash","label":"GCash","format":"money","optional":true},{"key":"sales","label":"Sales","format":"money"}],"rows":[{"date":"2026-11-08","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-07","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-06","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-05","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-04","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-03","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-02","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-11-01","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-31","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-30","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-29","orders":1,"kilos":7.4,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-28","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-27","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-26","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-25","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-24","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-23","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-22","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-21","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-20","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-19","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-18","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-17","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-16","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-15","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-14","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-13","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-12","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-11","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0},{"date":"2026-10-10","orders":0,"kilos":0,"cash":0,"gcash":0,"sales":0}],"totals":{"date":"Total","orders":1,"kilos":7.4,"cash":0,"gcash":0,"sales":0}},"insights":[]},"message":"Report","status":200}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null

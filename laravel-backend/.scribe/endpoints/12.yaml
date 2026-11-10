@@ -1,0 +1,101 @@
+name: Notifications
+description: |-
+
+  The staff bell: orders ready for pickup and low stock.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/notifications
+    metadata:
+      custom: []
+      groupName: Notifications
+      groupDescription: |-
+
+        The staff bell: orders ready for pickup and low stock.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List staff notifications'
+      description: 'Newest first. `meta.unread` counts the unread ones.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"type":"notification","id":139,"attributes":{"type":"low_stock","message":"Detergent powder is critically low (2 kg left).","sentAt":"2026-11-10T12:15:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":141,"attributes":{"type":"low_stock","message":"Plastic laundry bags are below their reorder level (40 pcs left).","sentAt":"2026-11-09T12:55:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":87,"attributes":{"type":"ready_for_pickup","message":"LF-261109-0019 is ready for pickup (Joy Mendoza).","sentAt":"2026-11-09T12:25:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1640}}}},{"type":"notification","id":57,"attributes":{"type":"ready_for_pickup","message":"LF-261109-0013 is ready for pickup (Carmela Aquino).","sentAt":"2026-11-09T11:36:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1634}}}},{"type":"notification","id":140,"attributes":{"type":"low_stock","message":"Fabric conditioner is below its reorder level (3.5 L left).","sentAt":"2026-11-08T12:55:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":2,"attributes":{"type":"ready_for_pickup","message":"LF-261107-0013 is ready for pickup (Lorna Dela Cruz).","sentAt":"2026-11-07T10:40:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1594}}}},{"type":"notification","id":1,"attributes":{"type":"ready_for_pickup","message":"LF-261106-0009 is ready for pickup (Arnel Pascual).","sentAt":"2026-11-06T06:28:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1574}}}}],"links":{"first":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","last":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"http:\/\/laundryflow.test\/api\/v1\/notifications","per_page":20,"to":7,"total":7,"unread":7}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/notifications/{notification_id}/read'
+    metadata:
+      custom: []
+      groupName: Notifications
+      groupDescription: |-
+
+        The staff bell: orders ready for pickup and low stock.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mark a notification as read'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      notification_id:
+        custom: []
+        name: notification_id
+        description: 'The ID of the notification.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      notification_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null

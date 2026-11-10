@@ -1,0 +1,376 @@
+name: 'Customer portal: authentication'
+description: |-
+
+  The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+  every staff route, and a staff token by every customer route.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/register
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: Register
+      description: 'Creates the customer profile and its account in one transaction and signs the customer in.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      full_name:
+        custom: []
+        name: full_name
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Juan Dela Cruz'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      contact_number:
+        custom: []
+        name: contact_number
+        description: 'A PH mobile number. Must match the regex /^09\d{9}$/.'
+        required: true
+        example: '0917 555 0101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: juan.delacruz@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'At least 8 characters, with a letter and a number.'
+        required: true
+        example: laundry123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password_confirmation:
+        custom: []
+        name: password_confirmation
+        description: 'The value and <code>password</code> must match.'
+        required: true
+        example: laundry123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      barangay_id:
+        custom: []
+        name: barangay_id
+        description: 'Must match an existing stored value.'
+        required: true
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      street_address:
+        custom: []
+        name: street_address
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'Purok 3'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      full_name: 'Juan Dela Cruz'
+      contact_number: '0917 555 0101'
+      email: juan.delacruz@example.com
+      password: laundry123
+      password_confirmation: laundry123
+      barangay_id: 28
+      street_address: 'Purok 3'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/login
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Log in'
+      description: 'Five failed attempts a minute for the same email and IP answer 429.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        custom: []
+        name: email
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: maria.santos@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: ''
+        required: true
+        example: password123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      email: maria.santos@example.com
+      password: password123
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/refresh
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Refresh the token'
+      description: 'An expired token is accepted within JWT_REFRESH_TTL.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/customer/auth/me
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Current customer'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"customer":{"type":"customerAccount","id":1,"attributes":{"fullName":"Maria Santos","email":"maria.santos@example.com","contactNumber":"09178452210","barangayId":28,"barangayName":"Poblacion","streetAddress":null,"mustChangePassword":false},"links":{"self":"http://laundryflow.test/api/v1/customer/auth/me"}}},"message":"Customer retrieved","status":200}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/logout
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Log out'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/customer/account/password
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Change my password'
+      description: 'Allowed while a password change is pending; clears must_change_password.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      current_password:
+        custom: []
+        name: current_password
+        description: 'The current password, or the temporary one the owner or shop gave.'
+        required: true
+        example: k7m2p9qx4t
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'At least 8 characters, with a letter and a number, different from the current one.'
+        required: true
+        example: laundry2026
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password_confirmation:
+        custom: []
+        name: password_confirmation
+        description: 'The new password again. The value and <code>password</code> must match.'
+        required: true
+        example: laundry2026
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      current_password: k7m2p9qx4t
+      password: laundry2026
+      password_confirmation: laundry2026
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer {YOUR_AUTH_KEY}'
+    controller: null
+    method: null
+    route: null

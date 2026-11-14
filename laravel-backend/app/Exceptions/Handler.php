@@ -78,8 +78,9 @@ class Handler extends ExceptionHandler
         $message = 'The resource cannot be found.';
 
         // When binding failed, the original exception tells us which model is missing.
-        if ($exception->getPrevious() instanceof ModelNotFoundException) {
-            $source = $exception->getPrevious()->getModel();
+        $previous = $exception->getPrevious();
+        if ($previous instanceof ModelNotFoundException) {
+            $source = $previous->getModel();
         } elseif ($exception->getMessage() !== '' && ! str_contains($exception->getMessage(), 'could not be found')) {
             // A deliberate abort(404, '...') from a controller keeps its own message.
             $message = $exception->getMessage();
@@ -143,8 +144,9 @@ class Handler extends ExceptionHandler
         }
 
         // Anything else: use the exception's own status (for example 405 or 429), or 500.
-        $isHttp = $exception instanceof HttpExceptionInterface;
-        $status = $isHttp ? $exception->getStatusCode() : 500;
+        $httpException = $exception instanceof HttpExceptionInterface ? $exception : null;
+        $isHttp = $httpException !== null;
+        $status = $httpException?->getStatusCode() ?? 500;
 
         // Only a crash reveals its file and line, and only while APP_DEBUG is true. A deliberate
         // answer (abort(409, '…'), 405, 429) reads the same in every environment: its location
@@ -171,8 +173,8 @@ class Handler extends ExceptionHandler
         ]);
 
         // Keep Retry-After and similar headers (429).
-        if ($isHttp) {
-            $response->headers->add($exception->getHeaders());
+        if ($httpException !== null) {
+            $response->headers->add($httpException->getHeaders());
         }
 
         return $response;

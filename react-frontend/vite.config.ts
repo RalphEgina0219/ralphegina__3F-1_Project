@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin, type PreviewServer, type ViteDevServer } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { configDefaults } from 'vitest/config';
 
@@ -32,32 +32,99 @@ function dropMockWorker(): Plugin {
   };
 }
 
+/** The Docker backend (compose.yaml), and also `php artisan serve`: both answer on port 8000. */
+const DOCKER_API = 'http://localhost:8000';
 /** Laragon's virtual host for laravel-backend/public (see laravel-backend/README.md). */
 const LARAGON_API = 'http://laundryflow.test';
-/** The fallback: `php artisan serve`. */
-const ARTISAN_API = 'http://127.0.0.1:8000';
+
+interface ApiTarget {
+  url: string;
+  /** Which backend that is, for the startup line. */
+  label: string;
+  /** Whether GET /api/v1/health answered at startup. */
+  healthy: boolean;
+}
+
+/** One GET /api/v1/health, given at most 1.5 seconds. Never throws. */
+async function isHealthy(origin: string) {
+  try {
+    const response = await fetch(`${origin}/api/v1/health`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(1500),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
 
 /**
- * Where /api is proxied to: API_PROXY_TARGET when set, else Laragon's Apache when
- * laundryflow.test resolves (it serves requests in parallel, `artisan serve` one at a time),
- * else `php artisan serve`.
+ * Where /api is proxied to:
+ * 1. VITE_API_PROXY_TARGET (or the older API_PROXY_TARGET) when set;
+ * 2. else port 8000 when it answers (Docker, or `php artisan serve`);
+ * 3. else Laragon's laundryflow.test when that name resolves and answers;
+ * 4. else port 8000 anyway: the Docker default, with a hint to start it.
  */
-async function apiTarget(configured: string | undefined) {
-  if (configured) return configured;
+async function apiTarget(configured: string | undefined): Promise<ApiTarget> {
+  if (configured) {
+    return {
+      url: configured,
+      label: 'VITE_API_PROXY_TARGET',
+      healthy: await isHealthy(configured),
+    };
+  }
+  if (await isHealthy(DOCKER_API)) {
+    return { url: DOCKER_API, label: 'Docker or php artisan serve', healthy: true };
+  }
   try {
     await lookup(new URL(LARAGON_API).hostname);
-    return LARAGON_API;
+    if (await isHealthy(LARAGON_API)) {
+      return { url: LARAGON_API, label: 'Laragon', healthy: true };
+    }
   } catch {
-    return ARTISAN_API;
+    // No hosts entry for laundryflow.test: not a Laragon setup.
   }
+  return { url: DOCKER_API, label: 'Docker', healthy: false };
+}
+
+/** Says once, under Vite's own URLs, which backend /api goes to, or how to start one. */
+function apiStatus(target: ApiTarget): Plugin {
+  const report = (server: ViteDevServer | PreviewServer) => {
+    server.httpServer?.once('listening', () => {
+      // After Vite has printed its "Local:" line.
+      setTimeout(() => {
+        const { logger } = server.config;
+        if (target.healthy) {
+          logger.info(`  ➜  API:     ${target.url} (${target.label}) is up`);
+          return;
+        }
+        logger.warn(
+          [
+            `  ⚠  Backend not running at ${target.url}.`,
+            '     Start Docker Desktop, then run: docker compose up -d   (or: npm run backend:up)',
+            '     Laragon or php artisan serve instead? See docs/DOCKER.md. Restart npm run dev after.',
+          ].join('\n'),
+        );
+      }, 100);
+    });
+  };
+  return {
+    name: 'laundryflow:api-status',
+    configureServer: report,
+    configurePreviewServer: report,
+  };
 }
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, import.meta.dirname, 'VITE_');
-  const configured = loadEnv(mode, import.meta.dirname, '').API_PROXY_TARGET;
-  // Builds never proxy, so only the dev and preview servers look the host up.
-  const target = command === 'serve' ? await apiTarget(configured) : configured || ARTISAN_API;
-  const apiProxy = { target, changeOrigin: true };
+  const allEnv = loadEnv(mode, import.meta.dirname, '');
+  const configured = allEnv.VITE_API_PROXY_TARGET || allEnv.API_PROXY_TARGET || undefined;
+  // Only the dev and preview servers proxy, so builds and Vitest never probe the network.
+  const probe = command === 'serve' && !process.env.VITEST;
+  const target: ApiTarget = probe
+    ? await apiTarget(configured)
+    : { url: configured ?? DOCKER_API, label: 'not checked', healthy: true };
+  const apiProxy = { target: target.url, changeOrigin: true };
   // One service worker per scope: with mocks on, MSW's worker owns "/" and Workbox stays out.
   const useMocks = env.VITE_USE_MOCKS === 'true';
 
@@ -65,6 +132,7 @@ export default defineConfig(async ({ mode, command }) => {
     plugins: [
       react(),
       tailwindcss(),
+      ...(probe ? [apiStatus(target)] : []),
       VitePWA({
         // src/main.tsx decides which worker registers, so the plugin never injects a register script.
         injectRegister: false,

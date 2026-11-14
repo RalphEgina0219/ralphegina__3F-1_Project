@@ -1,5 +1,31 @@
 # LaundryFlow API (Laravel)
 
+## Quick start with Docker (recommended)
+
+The backend runs in Docker and starts by itself. Only the frontend needs a terminal. Full guide:
+[`../docs/DOCKER.md`](../docs/DOCKER.md).
+
+1. Install **Docker Desktop** (WSL2 backend) and **Node.js 20+**. In Docker Desktop, turn on
+   "Start Docker Desktop when you sign in".
+2. **Once**, in the project root (next to `compose.yaml`):
+
+   ```powershell
+   docker compose up -d        # builds, migrates and loads the demo data; then: docker compose ps
+   ```
+
+3. **Every day**: start Docker Desktop, then:
+
+   ```powershell
+   cd react-frontend
+   npm install                 # the first time only
+   npm run dev                 # http://localhost:5173
+   ```
+
+Sign in as `liza.ramos` / `password123` (owner) or, at `/my/login`, as
+`maria.santos@example.com` / `password123`. The API is at <http://localhost:8000/api/v1>, its docs
+at <http://localhost:8000/docs>. Laragon (below) still works as an alternative, with its own
+database.
+
 The REST API behind LaundryFlow, the laundry shop management and QR basket tracking system.
 The React frontend in `../react-frontend` talks to it.
 
@@ -64,9 +90,9 @@ differs.
 5. **Sign in** at <http://localhost:5173/login> as `liza.ramos` / `password123` (the owner), or as
    a customer at `/my/login` with `maria.santos@example.com` / `password123`.
 
-No Apache or no hosts entry? `php artisan serve` still works: Vite falls back to
-`http://127.0.0.1:8000` by itself when `laundryflow.test` does not resolve (set
-`API_PROXY_TARGET` in `react-frontend/.env.development.local` to force one or the other).
+No Apache or no hosts entry? `php artisan serve` still works: Vite uses port 8000 by itself when
+it answers (set `VITE_API_PROXY_TARGET` in `react-frontend/.env.development.local` to force one or
+the other). Stop Docker first, or move its API port: both use 8000.
 
 ## Setup (Laragon or XAMPP)
 
@@ -112,8 +138,10 @@ cd laravel-backend && php artisan serve              # http://127.0.0.1:8000
 cd react-frontend && npm run dev
 ```
 
-Vite proxies `/api` to `http://laundryflow.test` when that name resolves, otherwise to
-`http://127.0.0.1:8000` (`API_PROXY_TARGET` overrides both). The browser sees one origin, so CORS
+Vite proxies `/api` to `http://localhost:8000` when it answers (Docker or `php artisan serve`),
+else to `http://laundryflow.test` when that name resolves and answers, else to
+`http://localhost:8000` with a hint to start Docker (`VITE_API_PROXY_TARGET` overrides all three;
+see [`../docs/DOCKER.md`](../docs/DOCKER.md#docker-or-laragon)). The browser sees one origin, so CORS
 is not involved in development. `npm run dev` and `npm run build` use this API. Only
 `npm run build:demo` and the frontend's unit tests still use the in-browser mock.
 

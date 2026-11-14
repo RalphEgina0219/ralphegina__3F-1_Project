@@ -24,6 +24,12 @@ answer the same way for the demo build. Paths are relative to the versioned base
   **403 "Change your temporary password first."** (`source: "mustChangePassword"`), except `me`,
   `logout`, `refresh` and the change-password route.
 
+## Health
+
+| Method | Path | Auth | Ability | Request (validation) | Response | Codes |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/health` | public | — | — | `{ data: { status: "ok", database: "ok" }, message: "OK" }`; no data from the database. For Docker's health check and the dev server's startup check (`docs/DOCKER.md`) | 200, 503 database unreachable |
+
 ## Staff authentication (`mocks/handlers/auth.ts`)
 
 | Method | Path | Auth | Ability | Request (validation) | Response | Codes |

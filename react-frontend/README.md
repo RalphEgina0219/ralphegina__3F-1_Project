@@ -104,12 +104,12 @@ The scripts call each tool through `node node_modules/...` on purpose. The proje
 
 ### Environment
 
-| Variable           | Default   | Meaning                                                                                                               |
-| ------------------ | --------- | --------------------------------------------------------------------------------------------------------------------- |
-| `VITE_API_URL`     | `/api/v1` | Base URL of the REST API                                                                                              |
-| `VITE_PUBLIC_URL`  | (empty)   | Origin encoded in basket QR labels (`/b/:token`). Empty means the current browser origin                              |
-| `VITE_USE_MOCKS`   | `false`   | `true` serves the API from the mock (`.env.demo` and the unit tests only)                                             |
-| `API_PROXY_TARGET` | (empty)   | Where `dev` and `preview` proxy `/api`. Empty: `http://laundryflow.test` if it resolves, else `http://127.0.0.1:8000` |
+| Variable                | Default   | Meaning                                                                                                                                                                                                                                                                                                                       |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL`          | `/api/v1` | Base URL of the REST API                                                                                                                                                                                                                                                                                                      |
+| `VITE_PUBLIC_URL`       | (empty)   | Origin encoded in basket QR labels (`/b/:token`). Empty means the current browser origin                                                                                                                                                                                                                                      |
+| `VITE_USE_MOCKS`        | `false`   | `true` serves the API from the mock (`.env.demo` and the unit tests only)                                                                                                                                                                                                                                                     |
+| `VITE_API_PROXY_TARGET` | (empty)   | Where `dev` and `preview` proxy `/api`. Empty: `http://localhost:8000` if its `/api/v1/health` answers (Docker or `php artisan serve`), else `http://laundryflow.test` if it resolves and answers (Laragon), else `http://localhost:8000` with a hint. The older name `API_PROXY_TARGET` still works. See `../docs/DOCKER.md` |
 
 A plain `npm run build` has mocks **off** and leaves the mock code out of the bundle. For a demo build
 with mocks, use `npm run build:demo` (it reads `.env.demo`). Set `VITE_PUBLIC_URL` before printing labels for

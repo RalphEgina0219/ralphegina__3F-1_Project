@@ -1,0 +1,146 @@
+# LaundryFlow backend in Docker: MySQL + PHP-FPM (Laravel) + nginx, and phpMyAdmin on request.
+# Guide: docs/DOCKER.md. Once: `docker compose up -d`. After that it starts with Docker Desktop.
+# Ports and ids can be changed in a root .env (copy .env.example); the defaults need no .env.
+name: laundryflow
+
+x-db-env: &db-env
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: "3306"
+  DB_DATABASE: laundryflow
+  DB_USERNAME: laundryflow
+  DB_PASSWORD: laundryflow
+  DB_TIMEZONE: "+08:00"
+
+services:
+  db:
+    image: mysql:8.0.46
+    container_name: laundryflow-db
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MYSQL_ROOT_PASSWORD: laundryflow-root
+      MYSQL_DATABASE: laundryflow
+      MYSQL_USER: laundryflow
+      MYSQL_PASSWORD: laundryflow
+      TZ: Asia/Manila
+    volumes:
+      - db_data:/var/lib/mysql
+      # Runs once, on an empty data volume: creates laundryflow_test for `composer test`.
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      # 3307 on the host, so it never clashes with Laragon's MySQL on 3306.
+      - "127.0.0.1:${LAUNDRYFLOW_DB_PORT:-3307}:3306"
+    healthcheck:
+      # TCP on purpose: MySQL's first-run setup server only listens on the socket.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+      start_interval: 2s
+    networks: [laundryflow]
+
+  app:
+    build:
+      context: ./laravel-backend
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: ${LAUNDRYFLOW_UID:-1000}
+        GID: ${LAUNDRYFLOW_GID:-1000}
+    image: laundryflow-php:dev
+    container_name: laundryflow-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      <<: *db-env
+      # Real environment variables beat .env, so Laragon's .env still works unchanged.
+      APP_URL: http://localhost:${LAUNDRYFLOW_API_PORT:-8000}
+      FRONTEND_URL: http://localhost:5173,http://localhost:4173
+      LAUNDRYFLOW_API_PORT: ${LAUNDRYFLOW_API_PORT:-8000}
+      TZ: Asia/Manila
+    volumes:
+      # The code, live: edits show on the next request.
+      - ./laravel-backend:/var/www/html
+      # vendor/ in a volume: much faster than a Windows folder, and the host's vendor/ is untouched.
+      - vendor:/var/www/html/vendor
+      # Composer's download cache: a later reinstall of vendor/ needs no downloads.
+      - composer_cache:/home/laundryflow/.composer/cache
+    healthcheck:
+      # php-fpm answers its ping page. Passes only after the entrypoint has finished its setup.
+      test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      # The first start runs composer install and seeds the database: give it time.
+      start_period: 600s
+      start_interval: 3s
+    networks: [laundryflow]
+
+  web:
+    image: nginx:1.27.5-alpine
+    container_name: laundryflow-web
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # Static files (the /docs page's assets); PHP requests go to the app container.
+      - ./laravel-backend/public:/var/www/html/public:ro
+    ports:
+      - "127.0.0.1:${LAUNDRYFLOW_API_PORT:-8000}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+      start_interval: 2s
+    networks: [laundryflow]
+
+  # Optional database viewer: `docker compose --profile tools up -d phpmyadmin` (npm run db:admin).
+  phpmyadmin:
+    image: phpmyadmin:5.2.3
+    container_name: laundryflow-phpmyadmin
+    profiles: [tools]
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_USER: laundryflow
+      PMA_PASSWORD: laundryflow
+    ports:
+      - "127.0.0.1:${LAUNDRYFLOW_PMA_PORT:-8080}:80"
+    networks: [laundryflow]
+
+  # No scheduler service: the project has no scheduled tasks (routes/console.php schedules nothing).
+  # If one is added, uncomment this; it runs `php artisan schedule:run` every minute.
+  # scheduler:
+  #   image: laundryflow-php:dev
+  #   container_name: laundryflow-scheduler
+  #   restart: unless-stopped
+  #   depends_on:
+  #     app:
+  #       condition: service_healthy
+  #   environment:
+  #     <<: *db-env
+  #   volumes:
+  #     - ./laravel-backend:/var/www/html
+  #     - vendor:/var/www/html/vendor
+  #   entrypoint: []
+  #   command: ["php", "artisan", "schedule:work"]
+  #   networks: [laundryflow]
+
+volumes:
+  db_data:
+  vendor:
+  composer_cache:
+
+networks:
+  laundryflow:
+    name: laundryflow

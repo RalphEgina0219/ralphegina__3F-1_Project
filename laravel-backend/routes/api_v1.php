@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\CustomerAccountController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\CustomerOrdersController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InventoryItemController;
 use App\Http\Controllers\Api\V1\InventoryMovementController;
 use App\Http\Controllers\Api\V1\InventoryUnitController;
@@ -42,6 +43,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public routes: no token needed ---------------------------------------------------------------
+
+// For Docker's health check and the dev server's startup check: "OK" plus a database check.
+Route::get('health', [HealthController::class, 'show'])->name('health');
 
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');

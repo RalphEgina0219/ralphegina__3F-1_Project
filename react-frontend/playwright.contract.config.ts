@@ -37,7 +37,7 @@ export default defineConfig({
       command: `${VITE} build --outDir dist-e2e/contract && ${VITE} preview --outDir dist-e2e/contract --port ${CONTRACT_PORT} --strictPort`,
       url: `http://localhost:${CONTRACT_PORT}`,
       // Always the php artisan serve started above, whatever laundryflow.test points at.
-      env: { API_PROXY_TARGET: 'http://127.0.0.1:8000' },
+      env: { VITE_API_PROXY_TARGET: 'http://127.0.0.1:8000' },
       reuseExistingServer: Boolean(process.env.CONTRACT_REUSE),
       timeout: 240_000,
     },

@@ -24,7 +24,11 @@
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="mysql"/>
-        <env name="DB_DATABASE" value="laundryflow_test"/>
+        <!-- Docker sets DB_DATABASE=laundryflow as a real environment variable. Laravel reads
+             $_SERVER first, then $_ENV and getenv(), so all three are set here: otherwise the tests
+             would refresh the demo database instead of laundryflow_test. -->
+        <server name="DB_DATABASE" value="laundryflow_test"/>
+        <env name="DB_DATABASE" value="laundryflow_test" force="true"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

@@ -1,0 +1,17 @@
+{
+  "name": "laundryflow",
+  "private": true,
+  "description": "LaundryFlow: Docker backend helpers and the frontend dev server, from the project root (docs/DOCKER.md).",
+  "scripts": {
+    "backend:up": "node scripts/backend.mjs up",
+    "backend:down": "node scripts/backend.mjs down",
+    "backend:logs": "node scripts/backend.mjs logs",
+    "backend:reset": "node scripts/backend.mjs reset",
+    "backend:test": "node scripts/backend.mjs test",
+    "backend:shell": "node scripts/backend.mjs shell",
+    "backend:status": "node scripts/backend.mjs status",
+    "db:admin": "node scripts/backend.mjs db-admin",
+    "test:contract": "node scripts/backend.mjs contract",
+    "dev": "npm --prefix react-frontend run dev"
+  }
+}

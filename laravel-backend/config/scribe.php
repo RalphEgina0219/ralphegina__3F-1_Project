@@ -7,6 +7,13 @@ use Knuckles\Scribe\Extracting\Strategies;
 use function Knuckles\Scribe\Config\configureStrategy;
 use function Knuckles\Scribe\Config\removeStrategies;
 
+// Scribe is a dev dependency: a server installs with composer install --no-dev, which leaves it
+// out. Laravel still loads every config file, so without this guard the AuthIn and Defaults
+// references below would stop every request and every artisan command (docs/HOSTINGER.md).
+if (! class_exists(Defaults::class)) {
+    return [];
+}
+
 // Only the most common configs are shown. See the https://scribe.knuckles.wtf/laravel/reference/config for all.
 
 return [

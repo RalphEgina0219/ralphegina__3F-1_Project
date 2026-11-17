@@ -28,6 +28,7 @@ use App\Policies\V1\UserPolicy;
 use App\Support\Iso;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Date;
@@ -51,6 +52,9 @@ class AppServiceProvider extends ServiceProvider
 
         // In production every link the API writes (links.self, pagination) is https://.
         URL::forceHttps($this->app->isProduction());
+
+        // Behind a CDN, trust its X-Forwarded-* headers so rate limits see the visitor's address.
+        $this->trustConfiguredProxies();
 
         // Policies live in a versioned folder, so they are registered explicitly (course L19, L23).
         Gate::policy(Customer::class, CustomerPolicy::class);
@@ -77,5 +81,20 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('customer-register', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('scan', fn (Request $request) => Limit::perMinute(120)->by(($request->user()?->getAuthIdentifier() ?? 'guest').'|'.$request->ip()));
         RateLimiter::for('token-refresh', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+    }
+
+    /**
+     * TRUSTED_PROXIES (config app.trusted_proxies): "*" trusts any proxy, otherwise a comma
+     * separated list of addresses or CIDR ranges. Empty leaves the framework default (none).
+     */
+    private function trustConfiguredProxies(): void
+    {
+        $proxies = trim((string) config('app.trusted_proxies'));
+
+        if ($proxies === '') {
+            return;
+        }
+
+        TrustProxies::at($proxies === '*' ? '*' : array_values(array_filter(array_map('trim', explode(',', $proxies)))));
     }
 }

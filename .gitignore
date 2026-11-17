@@ -1,3 +1,5 @@
 # Docker Compose settings (copy of .env.example): local only.
 .env
 node_modules/
+# The Hostinger upload (npm run build:hostinger, docs/HOSTINGER.md).
+build/

@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Empty (the default): the client's address is the connection's, and X-Forwarded-* headers
+    | are ignored. Behind a CDN or load balancer (Hostinger CDN, Cloudflare), set the proxies'
+    | addresses, comma separated, or "*" for any: otherwise every visitor shares the proxy's
+    | address and the per-IP sign-in and registration limits count them all together.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

@@ -5,8 +5,11 @@ namespace Tests;
 use App\Models\Basket;
 use App\Models\Customer;
 use App\Models\CustomerAccount;
+use App\Models\InventoryItem;
+use App\Models\InventoryMovement;
 use App\Models\OrderStatus;
 use App\Models\User;
+use App\Models\WashType;
 use Database\Seeders\DemoSeeder;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -171,6 +174,40 @@ abstract class TestCase extends BaseTestCase
         $response->assertCreated();
 
         return (int) $response->json('data.id');
+    }
+
+    /** An inventory item (unit ids: 1 kg, 2 L, 3 pcs) with `$stock` recorded as a stock-in. */
+    protected function soap(string $name, int $unitId, float $stock, float $reorder = 1): InventoryItem
+    {
+        $item = InventoryItem::query()->create(['name' => $name, 'unit_id' => $unitId, 'reorder_level' => $reorder, 'is_active' => true]);
+        if ($stock > 0) {
+            InventoryMovement::query()->create(['item_id' => $item->id, 'user_id' => 1, 'type' => 'in', 'quantity' => $stock, 'remarks' => 'Opening stock', 'moved_at' => now()]);
+        }
+
+        return $item;
+    }
+
+    protected function washType(string $name): WashType
+    {
+        return WashType::query()->where('name', $name)->firstOrFail();
+    }
+
+    /** PATCH /wash-types/{id}, as the owner unless said otherwise. */
+    protected function saveWashType(WashType $washType, array $attributes, string $as = 'liza.ramos'): TestResponse
+    {
+        return $this->asStaff($as)->patchJson("/api/v1/wash-types/{$washType->id}", ['data' => ['attributes' => $attributes]]);
+    }
+
+    /** POST /orders with a wash type (the default one when null). */
+    protected function orderWith(?WashType $washType, array $items, ?array $payment = null, string $as = 'kevin.m', ?Customer $customer = null): TestResponse
+    {
+        $customer ??= $this->customerWithAccount();
+        $body = $this->orderBody($customer->getKey(), $this->baskets(), $items, $payment);
+        if ($washType) {
+            $body['data']['relationships']['washType'] = ['data' => ['id' => $washType->id]];
+        }
+
+        return $this->asStaff($as)->postJson('/api/v1/orders', $body);
     }
 
     /** POST /orders/{id}/status */

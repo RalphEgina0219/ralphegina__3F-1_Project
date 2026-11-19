@@ -59,11 +59,12 @@ export function oldUnpaid(aging: readonly CategoryValue[]): string | null {
   return `Unpaid balances older than 30 days: ${formatPeso(old.value)} across ${orders} ${orders === 1 ? 'order' : 'orders'}.`;
 }
 
-/** "GCash was 31% of collections." */
+/** "GCash and Maya were 31% of collections." */
 export function digitalShare(mix: readonly CategoryValue[]): string | null {
-  const gcash = mix.find((m) => m.key === 'gcash');
-  if (!gcash || mix.every((m) => m.value === 0)) return null;
-  return `GCash was ${pct(gcash.share)} of collections; the rest was cash.`;
+  const digital = mix.filter((m) => m.key === 'gcash' || m.key === 'maya');
+  if (digital.length === 0 || mix.every((m) => m.value === 0)) return null;
+  const share = digital.reduce((sum, m) => sum + m.share, 0);
+  return `GCash and Maya were ${pct(share)} of collections; the rest was cash.`;
 }
 
 /** "Most drop-offs come in on Saturday at 8 AM." From the heatmap. */

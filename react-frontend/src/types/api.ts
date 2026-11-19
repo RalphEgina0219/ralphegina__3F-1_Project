@@ -21,6 +21,7 @@ import type {
   ShopSettings,
   StatusCode,
   User,
+  WashType,
 } from './entities';
 
 export interface PageMeta {
@@ -97,6 +98,24 @@ export type ServiceInput = Pick<
   'name' | 'description' | 'pricing_type' | 'rate_cents' | 'minimum_qty' | 'is_active'
 >;
 
+/** The wash type on an order (its name as it is now; the charge is the frozen one on the order). */
+export interface WashTypeRefDto {
+  id: number;
+  name: string;
+}
+
+/** The soap an order deducted. Staff only: a customer never sees soap quantities. */
+export interface SoapUsageDto {
+  item_name: string;
+  unit_code: string;
+  /** Deducted from stock. */
+  quantity: number;
+  /** What the order needed (more than quantity when the stock was short). */
+  required_quantity: number;
+  /** "Detergent powder 163 g" */
+  label: string;
+}
+
 export interface OrderItemDto extends OrderItem {
   service_name: string;
   pricing_type: PricingType;
@@ -134,6 +153,13 @@ export interface OrderDto {
   customer: OrderCustomerDto;
   /** Baskets that hold (or held) this order's laundry. */
   baskets: BasketRefDto[];
+  wash_type: WashTypeRefDto;
+  /** Frozen on the order. */
+  wash_surcharge_per_kg_cents: number;
+  /** The surcharge: per kg × the per-kg weight. Part of total_cents. */
+  wash_surcharge_cents: number;
+  /** The weight of the per-kg lines, which the wash type applies to. */
+  per_kg_weight_kg: number;
   status: StatusCode;
   status_label: string;
   status_since: string;
@@ -190,6 +216,8 @@ export interface OrderDetailDto extends OrderDto {
   payments: PaymentDto[];
   status_history: StatusHistoryDto[];
   basket_history: BasketAssignmentDto[];
+  /** Soap deducted for the order; empty for orders from before wash types. */
+  soap_usage: SoapUsageDto[];
   shop: ShopInfoDto;
 }
 
@@ -214,6 +242,13 @@ export interface OrderSummaryData {
   customer: { full_name: string; contact_number: string };
   baskets: BasketRefDto[];
   items: OrderItemDto[];
+  /** The wash type: staff orders carry wash_type, a customer's order wash_type_name. */
+  wash_type?: WashTypeRefDto;
+  wash_type_name?: string | null;
+  /** The charge, as frozen on the order. */
+  wash_surcharge_per_kg_cents: number;
+  wash_surcharge_cents: number;
+  per_kg_weight_kg: number;
   total_cents: number;
   paid_cents: number;
   balance_cents: number;
@@ -257,6 +292,8 @@ export interface NewOrderItemInput {
 
 export interface NewOrderInput {
   customer_id: number;
+  /** Defaults to the first active wash type on the server. */
+  wash_type_id?: number;
   /** At least one available basket. */
   basket_ids: number[];
   items: NewOrderItemInput[];
@@ -269,6 +306,7 @@ export interface PaymentsMeta {
   collected_cents: number;
   cash_cents: number;
   gcash_cents: number;
+  maya_cents: number;
   count: number;
 }
 
@@ -315,10 +353,48 @@ export interface InventoryMovementDto {
   unit_code: string;
   type: InventoryMovementType;
   quantity: number;
+  required_quantity: number | null;
+  /** Set on usage movements: the order that used the soap. */
+  order_id: number | null;
+  order_number: string | null;
   signed_quantity: number;
   remarks: string | null;
   user: UserRef;
   moved_at: string;
+}
+
+/** A soap of a wash type, with its stock so the order form can warn about shortages. */
+export interface WashTypeSupplyDto {
+  id: number;
+  inventory_item_id: number;
+  item_name: string;
+  unit_code: string;
+  is_item_active: boolean;
+  /** Per kilo of laundry in g (kg items), mL (L items) or pieces (pcs items). */
+  usage_per_kg_small_unit: number;
+  usage_label: string;
+  on_hand: number;
+}
+
+export interface WashTypeDto extends Pick<
+  WashType,
+  'id' | 'name' | 'description' | 'surcharge_per_kg_cents' | 'sort_order' | 'is_active'
+> {
+  supplies: WashTypeSupplyDto[];
+}
+
+export interface WashTypesMeta {
+  block_orders_on_low_soap: boolean;
+}
+
+export interface WashTypeInput {
+  name?: string;
+  description?: string | null;
+  surcharge_per_kg_cents?: number;
+  sort_order?: number;
+  is_active?: boolean;
+  /** Replaces the whole list of soaps. */
+  supplies?: { inventory_item_id: number; usage_per_kg_small_unit: number }[];
 }
 
 export interface UnitDto {
@@ -351,6 +427,7 @@ export interface DashboardSummary {
     sales_today_cents?: number;
     sales_today_cash_cents?: number;
     sales_today_gcash_cents?: number;
+    sales_today_maya_cents?: number;
   };
   flow_counts: Record<StatusCode, number> & { released_today: number };
   recent_orders: OrderDto[];
@@ -452,6 +529,11 @@ export interface PortalOrderDto {
   status_label: string;
   baskets: BasketRefDto[];
   items: OrderItemDto[];
+  /** The wash type and its charge. Never soap quantities. */
+  wash_type_name: string | null;
+  wash_surcharge_per_kg_cents: number;
+  wash_surcharge_cents: number;
+  per_kg_weight_kg: number;
   total_cents: number;
   paid_cents: number;
   balance_cents: number;

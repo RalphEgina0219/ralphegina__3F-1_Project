@@ -28,7 +28,10 @@ import {
   salesByDay,
   salesTotal,
   serviceOrdersByWeek,
+  ordersByWashType,
   serviceStats,
+  soapUsage,
+  type SoapUsageSeries,
   staffActivity,
   statusDistribution,
   statusPipeline,
@@ -70,6 +73,10 @@ import type {
   TimePoint,
   ValueFormat,
 } from './types';
+
+/** The pseudo service under which wash type surcharges are reported (Facts::SURCHARGE_ID in PHP). */
+export const SURCHARGE_SERVICE_ID = 0;
+export const SURCHARGE_SERVICE_NAME = 'Wash type surcharges';
 
 export interface AnalyticsFacts {
   orders: OrderFact[];
@@ -323,7 +330,7 @@ export type ReportKind = (typeof REPORT_KINDS)[number];
 
 export interface ReportFilters {
   service?: number;
-  method?: 'cash' | 'gcash';
+  method?: 'cash' | 'gcash' | 'maya';
   status?: StatusCode;
   staff?: number;
   barangay?: string;
@@ -352,7 +359,8 @@ function paymentsForService(
 /** Applies the filters every report understands. Unknown or empty ones are ignored. */
 export function filterFacts(facts: AnalyticsFacts, filters: ReportFilters): AnalyticsFacts {
   let { orders, payments, changes, movements, items } = facts;
-  if (filters.service) {
+  if (filters.service !== undefined) {
+    // 0 is the wash type surcharge category.
     const id = filters.service;
     payments = paymentsForService(orders, payments, id);
     orders = orders.filter((o) => o.lines.some((line) => line.service_id === id));
@@ -409,6 +417,12 @@ function salesReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
     (p) => p.paid_at,
     (p) => p.amount_cents,
   );
+  const maya = sumByDay(
+    live.filter((p) => p.method === 'maya'),
+    range,
+    (p) => p.paid_at,
+    (p) => p.amount_cents,
+  );
 
   const kpis = [
     kpi('sales', 'Sales', 'money', salesNow, maybe(compare, salesBefore), {
@@ -446,6 +460,7 @@ function salesReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
     kilos: kilos[index]?.value ?? 0,
     cash: cash[index]?.value ?? 0,
     gcash: gcash[index]?.value ?? 0,
+    maya: maya[index]?.value ?? 0,
     sales: point.value,
   }));
   const table: ReportTable = {
@@ -455,6 +470,7 @@ function salesReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       { key: 'kilos', label: 'Kilos', format: 'kg' },
       { key: 'cash', label: 'Cash', format: 'money', optional: true },
       { key: 'gcash', label: 'GCash', format: 'money', optional: true },
+      { key: 'maya', label: 'Maya', format: 'money', optional: true },
       { key: 'sales', label: 'Sales', format: 'money' },
     ],
     rows: [...rows].reverse(),
@@ -464,6 +480,7 @@ function salesReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       kilos: Math.round(total(kilos) * 10) / 10,
       cash: total(cash),
       gcash: total(gcash),
+      maya: total(maya),
       sales: salesNow,
     },
   };
@@ -486,6 +503,7 @@ export interface OrdersReportSeries {
   turnaround: AveragePoint[];
   turnaround_target: number;
   express: TimePoint[];
+  by_wash_type: CategoryValue[];
 }
 
 function ordersReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
@@ -540,6 +558,7 @@ function ordersReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       { key: 'received_at', label: 'Received', format: 'datetime' },
       { key: 'status', label: 'Status', format: 'text' },
       { key: 'services', label: 'Services', format: 'text', optional: true },
+      { key: 'wash_type', label: 'Wash type', format: 'text', optional: true },
       { key: 'kilos', label: 'Kilos', format: 'kg' },
       { key: 'turnaround', label: 'Turnaround', format: 'hours', optional: true },
       { key: 'total', label: 'Total', format: 'money' },
@@ -552,7 +571,11 @@ function ordersReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
         customer: o.customer_name,
         received_at: o.received_at,
         status: STATUS_META[o.status].label,
-        services: o.lines.map((l) => l.service_name).join(', '),
+        services: o.lines
+          .filter((l) => !l.surcharge)
+          .map((l) => l.service_name)
+          .join(', '),
+        wash_type: o.wash_type,
         kilos: o.kilos,
         turnaround:
           turnaroundHours(o) === null ? null : Math.round((turnaroundHours(o) as number) * 10) / 10,
@@ -575,6 +598,7 @@ function ordersReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       range,
       (o) => o.received_at,
     ),
+    by_wash_type: ordersByWashType(orders, range),
   };
   return envelope(query, kpis, series, table, [
     rule.busiestWeekday(daily),
@@ -611,6 +635,12 @@ function paymentsReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
   );
   const gcash = sumByDay(
     live.filter((p) => p.method === 'gcash'),
+    range,
+    (p) => p.paid_at,
+    (p) => p.amount_cents,
+  );
+  const maya = sumByDay(
+    live.filter((p) => p.method === 'maya'),
     range,
     (p) => p.paid_at,
     (p) => p.amount_cents,
@@ -679,7 +709,11 @@ function paymentsReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
     collections: days.map((date, index) => ({
       key: date,
       label: date,
-      values: { cash: cash[index]?.value ?? 0, gcash: gcash[index]?.value ?? 0 },
+      values: {
+        cash: cash[index]?.value ?? 0,
+        gcash: gcash[index]?.value ?? 0,
+        maya: maya[index]?.value ?? 0,
+      },
     })),
     collected: split,
     unpaid_aging: aging,
@@ -730,7 +764,13 @@ function servicesReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       maybe(compare, total(revenueByService(orders, payments, before))),
       { hint: 'Payments collected' },
     ),
-    kpi('services', 'Services used', 'count', stats.filter((s) => s.orders > 0).length, null),
+    kpi(
+      'services',
+      'Services used',
+      'count',
+      stats.filter((s) => s.orders > 0 && s.id !== SURCHARGE_SERVICE_ID).length,
+      null,
+    ),
     kpi(
       'kilos',
       'Kilos processed',
@@ -915,12 +955,17 @@ export interface InventoryReportSeries {
     status: ItemFact['stock_status'];
   }[];
   usage: { item_id: number; label: string; unit: string; points: TimePoint[] }[];
+  soap_by_wash_type: SoapUsageSeries['by_wash_type'];
+  soap_by_source: SoapUsageSeries['by_source'];
+  top_soaps: SoapUsageSeries['top'];
 }
 
 function inventoryReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
-  const { items, movements, staff } = facts;
+  const { items, movements, staff, orders } = facts;
   const { range, compare } = query;
   const before = previousRange(range);
+  const soap = soapUsage(movements, items, orders, range);
+  const orderNumbers = new Map(orders.map((o) => [o.id, o.order_number]));
   const usage = stockUsageByDay(movements, items, range);
   const usageBefore = stockUsageByDay(movements, items, before);
   const inside = movements.filter((m) => inRange(m.moved_at, range));
@@ -958,6 +1003,22 @@ function inventoryReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       ),
       { hint: 'Deliveries recorded' },
     ),
+    kpi(
+      'used_by_orders',
+      'Used by orders',
+      'count',
+      inside.filter((m) => m.type === 'usage').length,
+      null,
+      { hint: 'Soap deducted per order' },
+    ),
+    kpi(
+      'manual_out',
+      'Manual stock-outs',
+      'count',
+      inside.filter((m) => m.type === 'out').length,
+      null,
+      { hint: 'Recorded by hand' },
+    ),
   ];
   const table: ReportTable = {
     columns: [
@@ -965,22 +1026,30 @@ function inventoryReport(facts: AnalyticsFacts, query: AnalyticsQuery) {
       { key: 'item', label: 'Item', format: 'text' },
       { key: 'type', label: 'Movement', format: 'text' },
       { key: 'quantity', label: 'Quantity', format: 'number' },
+      { key: 'order_number', label: 'Order', format: 'order', optional: true },
       { key: 'unit', label: 'Unit', format: 'text', optional: true },
       { key: 'by', label: 'Recorded by', format: 'text', optional: true },
     ],
     rows: [...inside]
       .sort((a, b) => b.moved_at.localeCompare(a.moved_at))
       .map((m) => ({
+        id: m.order_id,
         moved_at: m.moved_at,
         item: itemById.get(m.item_id)?.name ?? '',
-        type: m.type === 'in' ? 'Stock in' : m.type === 'out' ? 'Used' : 'Adjustment',
-        quantity: m.type === 'out' ? -m.quantity : m.quantity,
+        type: { in: 'Stock in', out: 'Stock-out', usage: 'Used by order', adjust: 'Adjustment' }[
+          m.type
+        ],
+        quantity: m.type === 'out' || m.type === 'usage' ? -m.quantity : m.quantity,
+        order_number: m.order_id === null ? null : (orderNumbers.get(m.order_id) ?? null),
         unit: itemById.get(m.item_id)?.unit ?? '',
         by: names.get(m.user_id) ?? '',
       })),
     totals: { moved_at: `${inside.length} movements` },
   };
   const series: InventoryReportSeries = {
+    soap_by_wash_type: soap.by_wash_type,
+    soap_by_source: soap.by_source,
+    top_soaps: soap.top,
     levels: items.map((i) => ({
       key: String(i.id),
       label: i.name,

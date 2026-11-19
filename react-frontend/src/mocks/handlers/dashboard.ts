@@ -58,6 +58,7 @@ export const dashboardHandlers = [
       summary.kpis.sales_today_cents = sum(todayPayments);
       summary.kpis.sales_today_cash_cents = sum(todayPayments.filter((p) => p.method === 'cash'));
       summary.kpis.sales_today_gcash_cents = sum(todayPayments.filter((p) => p.method === 'gcash'));
+      summary.kpis.sales_today_maya_cents = sum(todayPayments.filter((p) => p.method === 'maya'));
       summary.weekly_sales = Array.from({ length: 7 }, (_, index) => {
         const day = subDays(now, 6 - index);
         return {

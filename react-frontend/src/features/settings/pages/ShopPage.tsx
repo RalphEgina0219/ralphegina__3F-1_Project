@@ -103,7 +103,11 @@ export default function ShopPage() {
 
   const onSubmit = handleSubmit((form) => {
     update.mutate(
-      { ...form, claim_policy_days: Number(form.claim_policy_days) },
+      {
+        ...form,
+        claim_policy_days: Number(form.claim_policy_days),
+        block_orders_on_low_soap: query.data?.block_orders_on_low_soap ?? false,
+      },
       {
         onSuccess: () => toast.success('Shop profile saved'),
         onError: (error) => {

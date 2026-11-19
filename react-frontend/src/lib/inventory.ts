@@ -20,7 +20,11 @@ export const STOCK_META: Record<
 const round = (value: number) => Math.round(value * 1000) / 1000;
 
 export function signedQuantity(type: InventoryMovementType, quantity: number): number {
-  return type === 'out' ? -Math.abs(quantity) : type === 'in' ? Math.abs(quantity) : quantity;
+  return type === 'out' || type === 'usage'
+    ? -Math.abs(quantity)
+    : type === 'in'
+      ? Math.abs(quantity)
+      : quantity;
 }
 
 export function onHand(

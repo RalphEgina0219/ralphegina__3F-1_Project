@@ -113,8 +113,7 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const url = config?.url ?? '';
   if (
     error.response?.status === 403 &&
-    (error.response.data as Partial<ApiErrorBody> | undefined)?.message ===
-      PASSWORD_PENDING_MESSAGE
+    (error.response.data as Partial<ApiErrorBody> | undefined)?.message === PASSWORD_PENDING_MESSAGE
   ) {
     onPasswordPending?.(tokenKindOf(url));
     return Promise.reject(error);

@@ -213,7 +213,18 @@ export default function OrdersPage() {
         </div>
       ),
     },
-    { key: 'services', header: 'Services', cell: (order) => servicesSummary(order.items) },
+    {
+      key: 'services',
+      header: 'Services',
+      cell: (order) => (
+        <>
+          {servicesSummary(order.items)}
+          <span className="block text-xs text-muted" data-testid="order-wash-type">
+            {order.wash_type.name}
+          </span>
+        </>
+      ),
+    },
     {
       key: 'load',
       header: 'Load',

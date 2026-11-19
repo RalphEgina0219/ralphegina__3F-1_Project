@@ -169,7 +169,7 @@ export function adaptError(body: unknown, status: number | undefined): unknown {
   return { message, errors };
 }
 
-const LIST_INCLUDES = 'customer,baskets,items,receivedBy';
+const LIST_INCLUDES = 'customer,baskets,items,receivedBy,washType';
 
 /**
  * Query parameters in the course's style: camelCase names, date ranges as `column=from,to`,
@@ -211,6 +211,7 @@ export function adaptParams(url: string, params: unknown): Record<string, unknow
 /** PUT replaces a whole resource in the course (L17); the screens' partial edits are PATCH (L18). */
 const FULL_REPLACE = [
   /^\/settings\/shop$/,
+  /^\/settings\/stock-rule$/,
   /^\/roles\/staff\/permissions$/,
   /^\/customer\/account\/password$/,
   /^\/auth\/password$/,

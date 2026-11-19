@@ -77,6 +77,7 @@ function useFilterOptions(): Record<ReportFilterKey, Option[]> {
     method: [
       { value: 'cash', label: 'Cash' },
       { value: 'gcash', label: 'GCash' },
+      { value: 'maya', label: 'Maya' },
     ],
     status: STATUS_ORDER.map((code) => ({ value: code, label: STATUS_META[code].label })),
     staff: (users.data ?? []).map((u) => ({ value: String(u.id), label: u.name })),
@@ -426,7 +427,9 @@ export default function ReportsPage() {
                 ? 'lg:grid-cols-3'
                 : data.kpis.length === 5
                   ? 'lg:grid-cols-5'
-                  : 'lg:grid-cols-4',
+                  : data.kpis.length === 6
+                    ? 'lg:grid-cols-3 xl:grid-cols-6'
+                    : 'lg:grid-cols-4',
             )}
           >
             {data.kpis.map((kpi) => (

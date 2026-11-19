@@ -9,6 +9,9 @@ import type {
   ShopSettings,
   UserDto,
   UserInput,
+  WashTypeDto,
+  WashTypeInput,
+  WashTypesMeta,
 } from '@/types/api';
 import type { PermissionCode } from '@/types/entities';
 
@@ -49,6 +52,55 @@ export function useSaveService() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['services'] });
+      void queryClient.invalidateQueries({ queryKey: ['activity'] });
+    },
+  });
+}
+
+/** Wash types with their soaps and stock. Staff read them to take orders; only the owner edits. */
+export function useWashTypes(params: { active?: boolean } = {}) {
+  return useQuery({
+    queryKey: ['wash-types', params],
+    queryFn: async () => {
+      const { data } = await api.get<{ data: WashTypeDto[]; meta: WashTypesMeta }>('/wash-types', {
+        params: params.active === undefined ? {} : { active: params.active ? 1 : 0 },
+      });
+      return data;
+    },
+  });
+}
+
+export function useSaveWashType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...input }: WashTypeInput & { id?: number }) => {
+      const { data } = id
+        ? await api.put<WashTypeDto>(`/wash-types/${id}`, input)
+        : await api.post<WashTypeDto>('/wash-types', input);
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['wash-types'] });
+      void queryClient.invalidateQueries({ queryKey: ['activity'] });
+    },
+  });
+}
+
+/** "Block new orders when soap stock is insufficient". */
+export function useSaveStockRule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (block_orders_on_low_soap: boolean) => {
+      const { data } = await api.put<{ block_orders_on_low_soap: boolean }>(
+        '/settings/stock-rule',
+        {
+          block_orders_on_low_soap,
+        },
+      );
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['wash-types'] });
       void queryClient.invalidateQueries({ queryKey: ['activity'] });
     },
   });

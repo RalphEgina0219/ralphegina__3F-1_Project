@@ -13,7 +13,7 @@ import { formatDate, formatRelativeDay } from '@/lib/dates';
 import { loadSummary, servicesSummary } from '@/lib/format';
 import type { PortalOrderDto } from '@/types/api';
 import { useMyOrders, type OrderScope } from '../api';
-import { basketList, LastUpdated } from '../components/PortalParts';
+import { basketList, LastUpdated, washTypeText } from '../components/PortalParts';
 
 const COLUMNS: Column<PortalOrderDto>[] = [
   {
@@ -41,7 +41,16 @@ const COLUMNS: Column<PortalOrderDto>[] = [
     cell: (o) => <Mono className="text-[13px]">{basketList(o)}</Mono>,
   },
   { key: 'received', header: 'Received', cell: (o) => formatDate(o.received_at) },
-  { key: 'service', header: 'Service', cell: (o) => servicesSummary(o.items) },
+  {
+    key: 'service',
+    header: 'Service',
+    cell: (o) => (
+      <>
+        {servicesSummary(o.items)}
+        <span className="block text-xs text-muted">{washTypeText(o)}</span>
+      </>
+    ),
+  },
   { key: 'weight', header: 'Weight', cell: (o) => loadSummary(o.items) },
   {
     key: 'total',

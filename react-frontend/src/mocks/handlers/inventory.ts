@@ -91,6 +91,8 @@ export const inventoryHandlers = [
         user_id: user.id,
         type,
         quantity,
+        order_id: null,
+        required_quantity: null,
         remarks,
         moved_at: new Date().toISOString(),
       };
@@ -117,8 +119,10 @@ export const inventoryHandlers = [
 
   route('get', '/inventory/movements', 'inventory.view', ({ query }) => {
     const itemId = Number(query.get('item_id')) || null;
+    const type = query.get('type');
     const rows = db()
       .inventory_movements.filter((m) => !itemId || m.item_id === itemId)
+      .filter((m) => !type || m.type === type)
       .sort((a, b) => b.moved_at.localeCompare(a.moved_at) || b.id - a.id)
       .map(toMovementDto);
     return ok(paginate(rows, query, {}, 8));

@@ -101,6 +101,20 @@ function OrderPanel({
         </div>
       </div>
 
+      {/* The person washing reads this first: which wash, and which soap in what amount. */}
+      <div
+        className="mt-3 rounded-control border border-flow-line bg-flow-soft p-3"
+        data-testid="scan-wash-type"
+      >
+        <p className="text-xs font-semibold tracking-wide text-flow-hover uppercase">Wash type</p>
+        <p className="text-xl font-extrabold text-ink">{order.wash_type.name}</p>
+        {order.soap_usage.length > 0 && (
+          <p className="mt-1 text-sm font-semibold" data-testid="scan-soap">
+            Use: {order.soap_usage.map((soap) => soap.label).join(', ')}
+          </p>
+        )}
+      </div>
+
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[13px]">
         <div className="col-span-2 min-w-0">
           <dt className="text-muted">Items</dt>

@@ -86,7 +86,7 @@ describe('analytics endpoints', () => {
       const { status, data } = await http.get(`/reports/${kind}`, { params: presetRange('30d') });
       expect(status, kind).toBe(200);
       expect(data.kpis.length, kind).toBeGreaterThanOrEqual(3);
-      expect(data.kpis.length, kind).toBeLessThanOrEqual(5);
+      expect(data.kpis.length, kind).toBeLessThanOrEqual(6);
       expect(data.table.columns.length, kind).toBeGreaterThan(2);
       expect(data.table.rows.length, kind).toBeGreaterThan(0);
       expect(data.insights.length, kind).toBeGreaterThan(0);

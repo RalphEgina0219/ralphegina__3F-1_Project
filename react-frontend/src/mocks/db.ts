@@ -22,6 +22,8 @@ import type {
   ShopSettings,
   Unit,
   User,
+  WashType,
+  WashTypeSupply,
 } from '@/types/entities';
 import { createSeed } from './seed';
 
@@ -39,6 +41,8 @@ export interface MockDb {
   /** Mock-only stand-in for customer_accounts.password_hash, keyed by account id. */
   customer_credentials: Record<number, string>;
   services: Service[];
+  wash_types: WashType[];
+  wash_type_supplies: WashTypeSupply[];
   order_statuses: OrderStatus[];
   orders: Order[];
   baskets: Basket[];
@@ -56,9 +60,9 @@ export interface MockDb {
   audit_logs: AuditLog[];
 }
 
-// v2 added customer accounts and baskets; v3 holds 120 days of history in a packed format.
-// Older saved demo data is simply reseeded.
-const DB_KEY = 'laundryflow.mock.db.v3';
+// v2 added customer accounts and baskets; v3 holds 120 days of history in a packed format;
+// v4 adds wash types, soap usage and Maya. Older saved demo data is simply reseeded.
+const DB_KEY = 'laundryflow.mock.db.v4';
 const SESSION_KEY = 'laundryflow.mock.session';
 /** A separate key, like the separate Sanctum guard in Phase 2: the two sessions never mix. */
 const CUSTOMER_SESSION_KEY = 'laundryflow.mock.customer-session';

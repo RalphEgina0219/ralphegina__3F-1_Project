@@ -160,13 +160,13 @@ function withShares(list: Omit<CategoryValue, 'share'>[]): CategoryValue[] {
     .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
 }
 
-export const METHOD_LABELS = { cash: 'Cash', gcash: 'GCash' } as const;
+export const METHOD_LABELS = { cash: 'Cash', gcash: 'GCash', maya: 'Maya' } as const;
 
-/** Cash vs GCash collected. Both always present, in that order. */
+/** Cash, GCash and Maya collected. All always present, in that order. */
 export function paymentMix(payments: readonly PaymentFact[], range: DateRange): CategoryValue[] {
   const live = livePayments(payments, range);
   const sum = live.reduce((s, p) => s + p.amount_cents, 0);
-  return (['cash', 'gcash'] as const).map((method) => {
+  return (['cash', 'gcash', 'maya'] as const).map((method) => {
     const value = live.filter((p) => p.method === method).reduce((s, p) => s + p.amount_cents, 0);
     return {
       key: method,
@@ -628,6 +628,104 @@ export function serviceOrdersByWeek(
   return [...weeks.values()];
 }
 
+/** Orders received in the range, per wash type, most used first (with each one's share). */
+export function ordersByWashType(orders: readonly OrderFact[], range: DateRange): CategoryValue[] {
+  const by = new Map<string, number>();
+  for (const order of receivedIn(orders, range)) {
+    by.set(order.wash_type, (by.get(order.wash_type) ?? 0) + 1);
+  }
+  return withShares([...by.entries()].map(([label, value]) => ({ key: label, label, value })));
+}
+
+export interface SoapUsageSeries {
+  by_wash_type: {
+    item_id: number;
+    label: string;
+    unit: string;
+    total: number;
+    points: CategoryValue[];
+  }[];
+  by_source: { item_id: number; label: string; unit: string; orders: number; manual: number }[];
+  top: { key: string; label: string; unit: string; value: number; amount: number }[];
+}
+
+/**
+ * Soap used by orders in the range. Per item: the amount by wash type (one chart per item, so every
+ * bar shares a unit), the amount used by orders against manual stock-outs, and how many orders used
+ * it (the top soaps).
+ */
+export function soapUsage(
+  movements: readonly MovementFact[],
+  items: readonly ItemFact[],
+  orders: readonly OrderFact[],
+  range: DateRange,
+): SoapUsageSeries {
+  const round3 = (value: number) => Math.round(value * 1000) / 1000;
+  const orderById = new Map(orders.map((o) => [o.id, o]));
+  const bySource = new Map(
+    items.map((i) => [i.id, { item_id: i.id, label: i.name, unit: i.unit, orders: 0, manual: 0 }]),
+  );
+  const byWash = new Map<number, Map<string, number>>();
+  const top = new Map<number, { amount: number; orders: Set<number> }>();
+
+  for (const m of movements) {
+    if (!inRange(m.moved_at, range)) continue;
+    const source = bySource.get(m.item_id);
+    if (!source) continue;
+    if (m.type === 'out') source.manual += m.quantity;
+    else if (m.type === 'usage') {
+      source.orders += m.quantity;
+      const wash = orderById.get(m.order_id ?? 0)?.wash_type ?? 'Unknown';
+      const perWash = byWash.get(m.item_id) ?? new Map<string, number>();
+      perWash.set(wash, (perWash.get(wash) ?? 0) + m.quantity);
+      byWash.set(m.item_id, perWash);
+      const entry = top.get(m.item_id) ?? { amount: 0, orders: new Set<number>() };
+      entry.amount += m.quantity;
+      if (m.order_id !== null) entry.orders.add(m.order_id);
+      top.set(m.item_id, entry);
+    }
+  }
+
+  const itemById = new Map(items.map((i) => [i.id, i]));
+  return {
+    by_wash_type: [...byWash.entries()].map(([itemId, perWash]) => {
+      const item = itemById.get(itemId) as ItemFact;
+      const points = withShares(
+        [...perWash.entries()].map(([label, value]) => ({
+          key: label,
+          label,
+          value: round3(value),
+        })),
+      );
+      return {
+        item_id: itemId,
+        label: item.name,
+        unit: item.unit,
+        total: round3(points.reduce((sum, p) => sum + p.value, 0)),
+        points,
+      };
+    }),
+    by_source: [...bySource.values()].map((row) => ({
+      ...row,
+      orders: round3(row.orders),
+      manual: round3(row.manual),
+    })),
+    top: [...top.entries()]
+      .map(([itemId, entry]) => {
+        const item = itemById.get(itemId) as ItemFact;
+        return {
+          key: String(itemId),
+          label: item.name,
+          unit: item.unit,
+          value: entry.orders.size,
+          amount: round3(entry.amount),
+        };
+      })
+      .sort((a, b) => b.value - a.value || b.amount - a.amount || a.label.localeCompare(b.label))
+      .slice(0, 5),
+  };
+}
+
 // ---------------------------------------------------------------------------------------------
 // Staff and stock
 
@@ -657,7 +755,7 @@ export function staffActivity(
     .sort((a, b) => b.status_updates - a.status_updates || a.name.localeCompare(b.name));
 }
 
-/** Units of each item used per day (stock-out movements), zero-filled. */
+/** Units of each item used per day (stock-outs and soap used by orders), zero-filled. */
 export function stockUsageByDay(
   movements: readonly MovementFact[],
   items: readonly ItemFact[],
@@ -667,11 +765,11 @@ export function stockUsageByDay(
     items.map((item) => [
       item.id,
       sumByDay(
-        movements.filter((m) => m.item_id === item.id && m.type === 'out'),
+        movements.filter((m) => m.item_id === item.id && (m.type === 'out' || m.type === 'usage')),
         range,
         (m) => m.moved_at,
         (m) => m.quantity,
-      ).map((p) => ({ ...p, value: round1(p.value) })),
+      ).map((p) => ({ ...p, value: Math.round(p.value * 1000) / 1000 })),
     ]),
   );
 }

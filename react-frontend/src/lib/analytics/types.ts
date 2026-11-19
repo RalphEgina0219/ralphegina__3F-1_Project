@@ -11,6 +11,8 @@ export interface OrderLineFact {
   subtotal_cents: number;
   kilos: number;
   pieces: number;
+  /** The wash type surcharge, reported as its own revenue category so totals still reconcile. */
+  surcharge?: boolean;
 }
 
 export interface OrderFact {
@@ -19,6 +21,8 @@ export interface OrderFact {
   customer_id: number;
   customer_name: string;
   barangay: string;
+  wash_type_id: number;
+  wash_type: string;
   received_at: string;
   received_by: number;
   promised_at: string;
@@ -56,7 +60,9 @@ export interface StatusChangeFact {
 
 export interface MovementFact {
   item_id: number;
-  type: 'in' | 'out' | 'adjust';
+  /** Set on usage movements: the order that used the soap. */
+  order_id: number | null;
+  type: 'in' | 'out' | 'adjust' | 'usage';
   quantity: number;
   moved_at: string;
   user_id: number;

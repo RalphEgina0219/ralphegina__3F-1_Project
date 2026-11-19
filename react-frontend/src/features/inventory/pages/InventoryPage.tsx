@@ -1,6 +1,6 @@
 import { AlertTriangle, Boxes, Clock, Hexagon, Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { StockChip } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -12,6 +12,7 @@ import { useCan } from '@/features/auth/store';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/dates';
 import { STOCK_META } from '@/lib/inventory';
+import { formatAmount } from '@/lib/wash';
 import type { InventoryItemDto, InventoryMovementDto } from '@/types/api';
 import { useInventoryItems, useInventoryMovements } from '../api';
 import { InventoryItemDialog } from '../components/InventoryItemDialog';
@@ -62,11 +63,28 @@ function Movement({ movement }: { movement: InventoryMovementDto }) {
           {formatDate(movement.moved_at)} · {movement.user.name}
           {movement.type === 'adjust' && ' · Adjustment'}
         </p>
+        {movement.type === 'usage' && (
+          <p className="text-[13px] text-muted" data-testid="usage-movement">
+            Used by order{' '}
+            {movement.order_id ? (
+              <Link
+                to={`/orders/${movement.order_id}`}
+                className="font-mono font-semibold text-flow underline underline-offset-2"
+              >
+                {movement.order_number}
+              </Link>
+            ) : (
+              movement.order_number
+            )}
+          </p>
+        )}
         {movement.remarks && <p className="text-[13px] text-muted">{movement.remarks}</p>}
       </div>
       <p className={cn('shrink-0 font-bold', positive ? 'text-ok' : 'text-danger')}>
         {positive ? '+' : '−'}
-        {Math.abs(movement.signed_quantity)} {movement.unit_code}
+        {movement.type === 'usage'
+          ? formatAmount(movement.unit_code, Math.abs(movement.signed_quantity))
+          : `${Math.abs(movement.signed_quantity)} ${movement.unit_code}`}
       </p>
     </li>
   );
@@ -145,7 +163,7 @@ export default function InventoryPage() {
     <>
       <PageHeader
         title="Inventory"
-        subtitle="Laundry supplies. Alerts are based on recorded stock, not automatic usage."
+        subtitle="Laundry supplies. Orders deduct their soap automatically; alerts follow the recorded stock."
         actions={
           canManage && (
             <Button

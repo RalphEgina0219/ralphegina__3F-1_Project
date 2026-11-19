@@ -3,6 +3,7 @@ import { manilaDay } from '@/lib/analytics/time';
 import { kgToTenths, lineSubtotalCents } from '@/lib/billing';
 import { can } from '@/lib/permissions';
 import { checkTransition, STATUS_ORDER, type TransitionErrorCode } from '@/lib/status';
+import { perKgTenths, washSurchargeCents } from '@/lib/wash';
 import type { OrderDto } from '@/types/api';
 import type { Order, OrderItem, StatusCode } from '@/types/entities';
 import { db, nextId } from '../db';
@@ -22,6 +23,7 @@ import {
 } from '../queries';
 import { assignBaskets, releaseBaskets, validateBasketIds } from './baskets';
 import { digitsOnly } from './customers';
+import { blockedMessage, deductSoap, planSoap } from '../soap';
 import { createPayment, validatePayment } from './payments';
 
 function findOrder(id: string | undefined) {
@@ -197,6 +199,15 @@ export const orderHandlers = [
     const baskets = validateBasketIds(body.basket_ids);
     if (baskets.error) errors.basket_ids = baskets.error;
 
+    // One wash type per order, required: the first active one when none is sent.
+    const requestedWash = asNumber(body.wash_type_id);
+    const washType = requestedWash
+      ? db().wash_types.find((w) => w.id === requestedWash && w.is_active)
+      : [...db().wash_types]
+          .filter((w) => w.is_active)
+          .sort((a, b) => a.sort_order - b.sort_order || a.id - b.id)[0];
+    if (!washType) errors.wash_type_id = 'Choose an active wash type.';
+
     const { errors: itemErrors, lines } = buildItems(body.items);
     Object.assign(errors, itemErrors);
 
@@ -208,7 +219,17 @@ export const orderHandlers = [
       errors.promised_at = 'Estimated completion cannot be in the past.';
     }
 
-    const total = lines.reduce((sum, line) => sum + line.subtotal_cents, 0);
+    // Only per-kg lines carry a weight: the wash type's surcharge and soap apply to it.
+    const weighedTenths = perKgTenths(
+      lines.map((line) => ({
+        pricing_type: line.weight_kg === null ? 'flat' : 'per_kg',
+        weight_kg: line.weight_kg,
+      })),
+    );
+    const surchargePerKg = washType?.surcharge_per_kg_cents ?? 0;
+    const total =
+      lines.reduce((sum, line) => sum + line.subtotal_cents, 0) +
+      washSurchargeCents(weighedTenths, surchargePerKg);
     const rawPayment = body.payment as Record<string, unknown> | undefined | null;
     let payment: ReturnType<typeof validatePayment>['values'] | null = null;
     if (rawPayment) {
@@ -223,9 +244,13 @@ export const orderHandlers = [
       }
     }
 
-    if (Object.keys(errors).length > 0 || !customer) return invalid(errors);
-    // As in Laravel: the input is valid, but a basket's state refuses the order.
+    if (Object.keys(errors).length > 0 || !customer || !washType) return invalid(errors);
+    // As in Laravel: the input is valid, but a basket's state refuses the order ...
     if (baskets.conflict) return fail(409, baskets.conflict);
+    // ... and so does a soap shortage when the shop blocks orders on one.
+    const soapNeeds = planSoap(washType.id, weighedTenths);
+    const blocked = blockedMessage(soapNeeds);
+    if (blocked) return fail(409, blocked);
 
     // Everything below is one transaction: order, items, baskets, history, audit, payment, notice.
     const now = new Date();
@@ -236,6 +261,8 @@ export const orderHandlers = [
       customer_id: customer.id,
       current_status_id: statusId('received'),
       received_by: user.id,
+      wash_type_id: washType.id,
+      wash_surcharge_per_kg_cents: surchargePerKg,
       received_at: isoNow,
       promised_at: promisedDate.toISOString(),
       released_at: null,
@@ -257,11 +284,13 @@ export const orderHandlers = [
       changed_at: isoNow,
     });
     assignBaskets(order, baskets.ids, user.id, isoNow);
+    deductSoap(order, washType, weighedTenths, soapNeeds, user.id);
     if (payment) createPayment(order, payment, user.id);
     notifyCustomer(order, 'received');
     audit(user.id, 'order.created', 'order', order.id, {
       order_number: order.order_number,
       basket_ids: baskets.ids,
+      wash_type: washType.name,
     });
     return ok(toOrderDetailDto(order), 201);
   }),

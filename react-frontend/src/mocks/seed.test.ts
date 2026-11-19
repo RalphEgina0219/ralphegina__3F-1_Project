@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { manilaDay, manilaHour, weekdayOf } from '@/lib/analytics/time';
 import { onHand } from '@/lib/inventory';
+import { perKgTenths, washSurchargeCents } from '@/lib/wash';
 import { createSeed } from './seed';
 
 // A fixed "now": Saturday Nov 7, 2026, 3:41 PM in Manila.
@@ -78,7 +79,18 @@ describe('demo seed', () => {
     const total = (orderId: number) =>
       seed.order_items
         .filter((i) => i.order_id === orderId)
-        .reduce((s, i) => s + i.subtotal_cents, 0);
+        .reduce((s, i) => s + i.subtotal_cents, 0) +
+      washSurchargeCents(
+        perKgTenths(
+          seed.order_items
+            .filter((i) => i.order_id === orderId)
+            .map((i) => ({
+              pricing_type: i.weight_kg === null ? 'flat' : 'per_kg',
+              weight_kg: i.weight_kg,
+            })),
+        ),
+        seed.orders.find((o) => o.id === orderId)?.wash_surcharge_per_kg_cents ?? 0,
+      );
     for (const order of seed.orders.filter((o) => o.released_at)) {
       expect(paid(order.id)).toBe(total(order.id));
     }
@@ -141,7 +153,8 @@ describe('demo seed', () => {
     const levels = seed.inventory_items.map((item) =>
       onHand(seed.inventory_movements.filter((m) => m.item_id === item.id)),
     );
-    expect(levels).toEqual([2, 3.5, 40, 12, 6, 120, 9, 310]);
+    // The eight shop supplies land on the mockup figures; the three demo soaps follow.
+    expect(levels).toEqual([2, 3.5, 40, 12, 6, 120, 9, 310, 9, 8, 120]);
     const restocks = seed.inventory_movements.filter(
       (m) => m.remarks === 'Supplier delivery, Calapan',
     );

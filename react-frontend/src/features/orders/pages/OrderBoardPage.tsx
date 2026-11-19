@@ -37,6 +37,12 @@ function BoardCard({ order }: { order: OrderDto }) {
         <p className="text-[13px] text-muted">
           {servicesSummary(order.items)} · {loadSummary(order.items)}
         </p>
+        <p
+          className="mt-0.5 text-[13px] font-semibold text-flow-hover"
+          data-testid="board-wash-type"
+        >
+          {order.wash_type.name}
+        </p>
         {(order.is_overdue || (isReady && order.balance_cents > 0)) && (
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {order.is_overdue && <Badge tone="danger">Overdue</Badge>}

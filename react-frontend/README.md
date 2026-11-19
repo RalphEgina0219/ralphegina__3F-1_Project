@@ -61,7 +61,7 @@ same. In Asia/Manila time it has:
 - weekends about 35% busier than weekdays, drop-off peaks at 7–10 AM and 4–6 PM, nothing outside
   7 AM–7 PM, and steady growth over the four months;
 - about 60% Wash-Dry-Fold, 15% Wash only, 10% Comforter, 10% Ironing, Express on 20% of orders;
-- 70% cash and 30% GCash, most orders paid at pickup, 25% with a deposit, a few balances still open
+- 70% cash, about 20% GCash and 10% Maya, most orders paid at pickup ("Pay at pickup"), 25% with a deposit, a few balances still open
   (two loads were never claimed: one over 30 days, one over a week);
 - about 45% of drop-offs from returning customers;
 - 18–30 hours from Received to Ready (4–8 hours for Express), with each status change attributed to
@@ -344,7 +344,7 @@ Additions to the original endpoint list, all needed by the screens:
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `POST /auth/login`               | Accepts `remember: boolean`                                                                                                                                |
 | `GET /orders`                    | `per_page`, `customer_id`; `status` accepts a comma list; `search` also matches basket numbers; `meta` adds `status_counts`, `month_total`, `active_total` |
-| `GET /payments`                  | `search` (reference no., order, customer); `meta` adds `collected_cents`, `cash_cents`, `gcash_cents`, `count`                                             |
+| `GET /payments`                  | `search` (reference no., order, customer); `meta` adds `collected_cents`, `cash_cents`, `gcash_cents`, `maya_cents`, `count`                                             |
 | `GET /balances`                  | `meta` adds `outstanding_cents`, `orders_count`, `ready_count`                                                                                             |
 | `GET /customers`                 | `per_page`; `search` also matches email; rows add `has_account`, `account`; `meta` adds `with_balance`                                                     |
 | `GET /inventory/units`           | New. The list of units for the supply item form                                                                                                            |

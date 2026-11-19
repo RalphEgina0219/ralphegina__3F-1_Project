@@ -3,7 +3,7 @@
 The REST API of LaundryFlow, the laundry shop management and QR basket tracking system: staff (JWT, api guard) and the customer portal (JWT, customer guard). Built following the course API Master Class in Laravel: versioned at /api/v1, JSON:API-style resources, course error format.
 
 <aside>
-    <strong>Base URL</strong>: <code>http://laundryflow.test</code>
+    <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 
     This documentation aims to provide all the information you need to work with our API.

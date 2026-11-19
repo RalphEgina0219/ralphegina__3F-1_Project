@@ -25,6 +25,10 @@ erDiagram
     baskets ||--o{ order_baskets : "holds"
     users ||--o{ order_baskets : "assigned_by"
     users ||--o{ baskets : "created_by"
+    wash_types ||--o{ orders : "wash_type_id"
+    wash_types ||--o{ wash_type_supplies : "uses"
+    inventory_items ||--o{ wash_type_supplies : "used by"
+    orders ||--o{ inventory_movements : "soap used (usage)"
     orders ||--o{ payments : "paid by"
     payment_methods ||--o{ payments : "method"
     users ||--o{ payments : "received_by / voided_by"
@@ -115,6 +119,8 @@ erDiagram
         bigint customer_id FK
         bigint current_status_id FK "indexed"
         bigint received_by FK
+        bigint wash_type_id FK "NOT NULL, restrict; old orders backfilled to Regular washing"
+        int wash_surcharge_per_kg_cents "frozen at order time, default 0"
         timestamp received_at "indexed"
         timestamp promised_at
         timestamp released_at
@@ -162,7 +168,7 @@ erDiagram
     }
     payment_methods {
         bigint id PK
-        varchar code UK "cash | gcash"
+        varchar code UK "cash | gcash | maya"
         varchar label
     }
     payments {
@@ -170,7 +176,7 @@ erDiagram
         bigint order_id FK
         bigint payment_method_id FK
         int amount_cents
-        varchar reference_number "GCash"
+        varchar reference_number "GCash or Maya"
         varchar receipt_number UK "OR number"
         bigint received_by FK
         timestamp paid_at "index (paid_at, voided_at)"
@@ -192,12 +198,32 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    wash_types {
+        bigint id PK
+        varchar name UK
+        varchar description
+        int surcharge_per_kg_cents "default 0 = no extra charge"
+        smallint sort_order
+        boolean is_active "inactive stay on old orders"
+        timestamp created_at
+        timestamp updated_at
+    }
+    wash_type_supplies {
+        bigint id PK
+        bigint wash_type_id FK
+        bigint inventory_item_id FK
+        decimal usage_per_kg_small_unit "g/kg (kg items), mL/kg (L items), pieces/kg (pcs); UNIQUE(wash_type_id, inventory_item_id)"
+        timestamp created_at
+        timestamp updated_at
+    }
     inventory_movements {
         bigint id PK
         bigint item_id FK
-        bigint user_id FK
-        enum type "in | out | adjust"
-        decimal quantity "on hand = signed sum"
+        bigint user_id FK "the staff member who took the order, for usage"
+        bigint order_id FK "set on usage movements"
+        enum type "in | out | adjust | usage"
+        decimal quantity "on hand = signed sum; usage counts as out"
+        decimal required_quantity "usage: what the order needed (quantity is what was deducted)"
         varchar remarks
         timestamp moved_at
     }
@@ -221,6 +247,7 @@ erDiagram
         varchar opening_hours
         varchar receipt_footer
         smallint claim_policy_days
+        boolean block_orders_on_low_soap "default 0 = warn and clamp, 1 = refuse with 409"
         timestamp created_at
         timestamp updated_at
     }
@@ -246,9 +273,31 @@ erDiagram
 | `order_baskets` | `order_id`; `UNIQUE(basket_id, active_flag)`: at most one open assignment per basket |
 | `payments` | `(paid_at, voided_at)`; `(received_by, paid_at)`; `order_id` (FK); `receipt_number` unique |
 | `customers` | `contact_number` unique; `full_name` |
-| `inventory_movements` | `(item_id, moved_at)`; `moved_at` |
+| `inventory_movements` | `(item_id, moved_at)`; `moved_at`; `order_id` (FK) |
+| `wash_types` | `name` unique |
+| `wash_type_supplies` | `UNIQUE(wash_type_id, inventory_item_id)`; `inventory_item_id` (FK) |
+| `orders` (wash type) | `wash_type_id` (FK) |
 | `notifications` | `(recipient_type, sent_at)`; `(customer_id, read_at)` |
 | `audit_logs` | `created_at`; `(auditable_type, auditable_id)`; `(user_id, created_at)` |
+
+## Wash types and soap usage (migrations of 2026-11-20)
+
+All additive, safe on a live database with `php artisan migrate --force`:
+
+1. `create_wash_types`: the two new tables; inserts the five wash types (by name) and, on an existing
+   install, the Maya payment method and the units L, kg and pcs (by code). Never touches a row that
+   exists.
+2. `add_wash_type_to_orders`: `orders.wash_type_id` (added nullable, every existing order set to
+   "Regular washing" with `wash_surcharge_per_kg_cents = 0`, then made NOT NULL) and
+   `wash_surcharge_per_kg_cents`.
+3. `add_soap_usage_to_inventory`: `inventory_movements.order_id` and `required_quantity`, the `usage`
+   value appended to the type enum, and `shop_settings.block_orders_on_low_soap` (default off).
+
+No total is stored. An order's total is `SUM(order_items.subtotal_cents) +
+ROUND(SUM(order_items.weight_kg) * orders.wash_surcharge_per_kg_cents)`: only per-kg lines carry a
+weight, so the surcharge applies to the per-kg weight. The charge is a column of the order rather
+than an order line because `order_items.service_id` is required and a wash type is not a service;
+the reports show it as its own category, "Wash type surcharges".
 
 Not created, as the enhancement removed them: `orders.qr_token` and the public tracking columns.
 `personal_access_tokens` exists because `php artisan install:api` (course L3) creates it. It stays

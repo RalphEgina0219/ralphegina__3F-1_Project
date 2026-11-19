@@ -112,7 +112,9 @@ test('a staff password reset forces a new password at the next sign-in', async (
   await page.getByRole('textbox', { name: 'Confirm new password', exact: true }).fill('different1');
   await page.getByRole('button', { name: 'Save my password' }).click();
   await expect(page.getByText('The passwords do not match.')).toBeVisible();
-  await page.getByRole('textbox', { name: 'Confirm new password', exact: true }).fill('fresh-pass1');
+  await page
+    .getByRole('textbox', { name: 'Confirm new password', exact: true })
+    .fill('fresh-pass1');
   await page.getByRole('button', { name: 'Save my password' }).click();
 
   await expect(page).not.toHaveURL(/\/password$/);

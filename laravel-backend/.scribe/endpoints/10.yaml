@@ -1,582 +1,23 @@
-name: Users
+name: Payments
 description: |-
 
-  Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-  their name on the history they made.
+  The payment log and voiding. Sales are the payments collected, voided ones excluded.
 endpoints:
   -
     custom: []
     httpMethods:
-      - GET
-    uri: api/v1/users
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'List staff users'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":[{"type":"user","id":1,"attributes":{"name":"Liza Ramos","username":"liza.ramos","role":"admin","permissions":["payments.record","inventory.stock_out","payments.void"],"isActive":true,"mustChangePassword":false,"lastLoginAt":"2026-11-10T12:55:34.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-11-10T12:55:34.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/1"}},{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff","permissions":["payments.record","inventory.stock_out"],"isActive":true,"mustChangePassword":false,"lastLoginAt":"2026-11-10T09:45:29.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}},{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff","permissions":["payments.record","inventory.stock_out"],"isActive":true,"mustChangePassword":false,"lastLoginAt":"2026-11-09T12:55:29.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}},{"type":"user","id":4,"attributes":{"name":"Jessa Lopez","username":"jessa.l","role":"staff","permissions":["payments.record","inventory.stock_out"],"isActive":false,"mustChangePassword":false,"lastLoginAt":"2026-09-22T12:55:29.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/4"}}]}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
       - POST
-    uri: api/v1/users
+    uri: 'api/v1/orders/{order_id}/payments'
     metadata:
       custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+      groupName: Payments
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Add a staff user'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      data:
-        custom: []
-        name: data
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes:
-        custom: []
-        name: data.attributes
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.name:
-        custom: []
-        name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
-        required: true
-        example: 'Rico Santos'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.username:
-        custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
-        required: true
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: true
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: true
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.isActive:
-        custom: []
-        name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      data:
-        attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
-          isActive: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/v1/users/{id}'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Show a staff user'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        custom: []
-        name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"type":"user","id":1,"attributes":{"name":"Liza Ramos","username":"liza.ramos","role":"admin","permissions":["payments.record","inventory.stock_out","payments.void"],"isActive":true,"mustChangePassword":false,"lastLoginAt":"2026-11-10T12:55:34.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-11-10T12:55:34.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/1"}}}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PUT
-    uri: 'api/v1/users/{user_id}'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Replace a staff user (name, username and role)'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      data:
-        custom: []
-        name: data
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes:
-        custom: []
-        name: data.attributes
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.name:
-        custom: []
-        name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
-        required: true
-        example: 'Rico Santos'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.username:
-        custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
-        required: true
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: true
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: false
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.isActive:
-        custom: []
-        name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      data:
-        attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
-          isActive: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PATCH
-    uri: 'api/v1/users/{id}'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Update a staff user (fields sent; isActive true re-enables)'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      id:
-        custom: []
-        name: id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      data:
-        custom: []
-        name: data
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes:
-        custom: []
-        name: data.attributes
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.name:
-        custom: []
-        name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
-        required: false
-        example: 'Rico Santos'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.username:
-        custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
-        required: false
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: false
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: false
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.isActive:
-        custom: []
-        name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
-        required: false
-        example: true
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      data:
-        attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
-          isActive: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/users/{user_id}/disable'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Disable a staff user'
-      description: 'The account can no longer sign in, and its tokens stop working at once. Not your own account.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/users/{user_id}/reset-password'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: "Reset a staff user's password"
+      title: 'Record a payment on an order'
       description: |-
-        Returns a temporary password, once. Only its hash is stored. The user must choose a new
-        password at their next sign-in: until then every route but `me`, `logout`, `refresh` and
-        `PUT /auth/password` answers 403.
+        The amount cannot exceed the balance; GCash needs its reference number. Answers with the
+        whole order, so the page shows the new balance at once.
       authenticated: true
       deprecated: false
     headers:
@@ -584,10 +25,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      user_id:
+      order_id:
         custom: []
-        name: user_id
-        description: 'The ID of the user.'
+        name: order_id
+        description: 'The ID of the order.'
         required: true
         example: 1
         type: integer
@@ -596,18 +37,42 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      user_id: 1
+      order_id: 1
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes: []
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -615,66 +80,20 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/roles/permissions
+    uri: api/v1/payments
     metadata:
       custom: []
-      groupName: Users
+      groupName: Payments
       groupDescription: |-
 
-        The permissions the owner can switch on for all staff.
+        The payment log and voiding. Sales are the payments collected, voided ones excluded.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Staff permissions'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"available":[{"code":"payments.record","label":"Record payments"},{"code":"inventory.stock_out","label":"Record stock-out of supplies"},{"code":"payments.void","label":"Void or edit a saved payment"}],"staff":["payments.record","inventory.stock_out"]},"message":"Permissions retrieved","status":200}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PUT
-    uri: api/v1/roles/staff/permissions
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        The permissions the owner can switch on for all staff.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Replace the staff permissions'
+      title: 'List payments'
       description: |-
-        The whole set at once (PUT). Unknown codes are ignored. Turning one off takes effect
-        immediately; a newly granted one arrives with each staff member's next sign-in or refresh.
+        Newest first. `meta` sums the payments that match the filters, voided ones excluded:
+        collectedCents, cashCents, gcashCents, mayaCents and count. For the same range it equals the sales
+        figure on the dashboard and in the reports.
       authenticated: true
       deprecated: false
     headers:
@@ -683,30 +102,328 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      data.attributes.permissions:
+    queryParameters:
+      paidAt:
         custom: []
-        name: data.attributes.permissions
-        description: 'The codes to switch on.'
-        required: true
-        example:
-          - payments.record
-          - inventory.stock_out
-        type: 'string[]'
+        name: paidAt
+        description: 'A Manila day, or from,to.'
+        required: false
+        example: '2026-11-01,2026-11-08'
+        type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
+      method:
+        custom: []
+        name: method
+        description: 'cash, gcash or maya.'
+        required: false
+        example: maya
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      search:
+        custom: []
+        name: search
+        description: 'Receipt number, order number or customer name.'
+        required: false
+        example: OR-0002
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      voided:
+        custom: []
+        name: voided
+        description: 'Only voided (true) or valid (false) payments.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'paidAt, amountCents or receiptNumber; - for descending.'
+        required: false
+        example: '-paidAt'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'The page number.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      paidAt: '2026-11-01,2026-11-08'
+      method: maya
+      search: OR-0002
+      voided: false
+      sort: '-paidAt'
+      page: 1
+    bodyParameters: []
     cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/payments/{id}'
+    metadata:
+      custom: []
+      groupName: Payments
+      groupDescription: |-
+
+        The payment log and voiding. Sales are the payments collected, voided ones excluded.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Show a payment'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the payment.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/payments/{payment_id}/void'
+    metadata:
+      custom: []
+      groupName: Payments
+      groupDescription: |-
+
+        The payment log and voiding. Sales are the payments collected, voided ones excluded.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Void a payment'
+      description: |-
+        Needs a reason. The payment stays on record and no longer counts; the balance re-opens.
+        Answers 409 on a completed order.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      payment_id:
+        custom: []
+        name: payment_id
+        description: 'The ID of the payment.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      payment_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.reason:
+        custom: []
+        name: data.attributes.reason
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: 'Wrong amount keyed in at the counter'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          reason: 'Wrong amount keyed in at the counter'
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/balances
+    metadata:
+      custom: []
+      groupName: Payments
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List unpaid balances'
+      description: |-
+        Orders that still owe, Ready for pickup first, then oldest first. `meta` has the total
+        outstanding, the number of orders and how many are ready.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      search:
+        custom: []
+        name: search
+        description: 'Order number or customer name.'
+        required: false
+        example: santos
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      include:
+        custom: []
+        name: include
+        description: 'As on GET /orders.'
+        required: false
+        example: 'customer,baskets,items,receivedBy'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'The page number.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      search: santos
+      include: 'customer,baskets,items,receivedBy'
+      page: 1
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null

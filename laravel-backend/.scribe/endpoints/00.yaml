@@ -1,179 +1,25 @@
-name: Authentication
-description: |-
-
-  Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-  Staff accounts are created by the owner in Settings, so there is no public registration.
+name: Health
+description: ''
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/login
+      - GET
+    uri: api/v1/health
     metadata:
       custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
+      groupName: Health
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Log in'
+      title: 'Check the API'
       description: |-
-        Returns an access token. Send it as a Bearer token on every other request. Five failed
-        attempts a minute for the same username and IP answer 429.
+        Answers 200 when the API runs and its database accepts queries, and 503 when the database
+        cannot be reached. It never returns data from the database. Docker's health check and the
+        frontend's dev server call it.
       authenticated: false
       deprecated: false
     headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      username:
-        custom: []
-        name: username
-        description: 'The staff username. Must not be greater than 50 characters.'
-        required: true
-        example: liza.ramos
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: 'The password.'
-        required: true
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      remember:
-        custom: []
-        name: remember
-        description: 'Kept for the sign-in form; tokens are refreshed instead.'
-        required: false
-        example: false
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      username: liza.ramos
-      password: password123
-      remember: false
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/refresh
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Refresh the token'
-      description: |-
-        Blacklists the current token (an expired one is accepted within JWT_REFRESH_TTL) and returns
-        a new one carrying the user's current abilities.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/logout
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Log out'
-      description: 'Blacklists the current token so it can never be used again.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: api/v1/auth/me
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Current user'
-      description: 'Returns the staff member who owns the Bearer token, with their role and permissions.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
     urlParameters: []
@@ -187,92 +33,17 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"user":{"type":"user","id":1,"attributes":{"name":"Liza Ramos","username":"liza.ramos","role":"admin","permissions":["payments.record","inventory.stock_out","payments.void"],"isActive":true,"mustChangePassword":false,"lastLoginAt":"2026-11-10T12:55:34.000Z","createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-11-10T12:55:34.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/1"}}},"message":"User retrieved","status":200}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
+        content: '{"data": {"status": "ok", "database": "ok"}, "message": "OK", "status": 200}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 503
+        content: '{"errors": [{"status": 503, "message": "The database is not reachable.", "source": "database"}]}'
+        headers: []
+        description: ''
     responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - PUT
-    uri: api/v1/auth/password
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Change my password'
-      description: 'Also allowed while a password change is pending.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      current_password:
-        custom: []
-        name: current_password
-        description: 'The current password, or the temporary one the owner or shop gave.'
-        required: true
-        example: k7m2p9qx4t
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: 'At least 8 characters, with a letter and a number, different from the current one.'
-        required: true
-        example: laundry2026
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password_confirmation:
-        custom: []
-        name: password_confirmation
-        description: 'The new password again. The value and <code>password</code> must match.'
-        required: true
-        example: laundry2026
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      current_password: k7m2p9qx4t
-      password: laundry2026
-      password_confirmation: laundry2026
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+    auth: []
     controller: null
     method: null
     route: null

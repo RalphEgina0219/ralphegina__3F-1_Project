@@ -1,24 +1,70 @@
-name: 'Customer portal'
+name: Settings
 description: |-
 
-  The signed-in customer's own orders. Every query is scoped to that customer: another
-  customer's order answers 404, exactly like one that does not exist, so numbers cannot be probed.
+  The shop profile: a single record, replaced as a whole (PUT).
 endpoints:
   -
     custom: []
     httpMethods:
-      - PATCH
-    uri: api/v1/customer/account
+      - GET
+    uri: api/v1/settings/shop
     metadata:
       custom: []
-      groupName: 'Customer portal'
-      groupDescription: ''
+      groupName: Settings
+      groupDescription: |-
+
+        The shop profile: a single record, replaced as a whole (PUT).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update my details'
-      description: |-
-        Only the phone number, barangay and street address. The name, email and the shop's notes
-        stay with the shop.
+      title: 'Shop profile'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/settings/shop
+    metadata:
+      custom: []
+      groupName: Settings
+      groupDescription: |-
+
+        The shop profile: a single record, replaced as a whole (PUT).
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Replace the shop profile'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -30,26 +76,26 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      data.attributes:
+      data.attributes.name:
         custom: []
-        name: data.attributes
+        name: data.attributes.name
         description: ''
-        required: false
-        example: []
-        type: object
+        required: true
+        example: LaundryFlow
+        type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      data:
+      data.attributes.address:
         custom: []
-        name: data
+        name: data.attributes.address
         description: ''
-        required: false
-        example: []
-        type: object
+        required: true
+        example: 'Brgy. Poblacion, Bongabong, Oriental Mindoro'
+        type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
       data.attributes.contactNumber:
@@ -57,83 +103,102 @@ endpoints:
         name: data.attributes.contactNumber
         description: ''
         required: false
-        example: '0917 845 2210'
+        example: '0917 555 0101'
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      data.attributes.streetAddress:
+      data.attributes.openingHours:
         custom: []
-        name: data.attributes.streetAddress
+        name: data.attributes.openingHours
         description: ''
         required: false
-        example: 'Purok 2'
+        example: 'Open daily 7:00 AM – 7:00 PM'
         type: string
         enumValues: []
         exampleWasSpecified: true
-        nullable: true
-        deprecated: false
-      data.relationships.barangay.data:
-        custom: []
-        name: data.relationships.barangay.data
-        description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.relationships.barangay:
+      data.attributes.receiptFooter:
         custom: []
-        name: data.relationships.barangay
-        description: ''
+        name: data.attributes.receiptFooter
+        description: 'The closing note of every order summary.'
         required: false
-        example: []
-        type: object
+        example: 'Salamat po!'
+        type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      data.relationships:
+      data.attributes.claimPolicyDays:
         custom: []
-        name: data.relationships
+        name: data.attributes.claimPolicyDays
         description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.relationships.barangay.data.id:
-        custom: []
-        name: data.relationships.barangay.data.id
-        description: ''
-        required: false
-        example: 28
+        required: true
+        example: 30
         type: integer
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-    cleanBodyParameters:
-      data:
-        attributes:
-          contactNumber: '0917 845 2210'
-          streetAddress: 'Purok 2'
-        relationships:
-          barangay:
-            data:
-              id: 28
+    cleanBodyParameters: []
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/settings/stock-rule
+    metadata:
+      custom: []
+      groupName: Settings
+      groupDescription: |-
+
+        The soap stock rule: whether an order is refused (409) when its wash type needs more soap than
+        the stock records show. Off by default: the order is saved and the stock is clamped at zero.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Set the soap stock rule'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes.blockOrdersOnLowSoap:
+        custom: []
+        name: data.attributes.blockOrdersOnLowSoap
+        description: ''
+        required: true
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -141,18 +206,15 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/customer/orders
+    uri: api/v1/activity-logs
     metadata:
       custom: []
-      groupName: 'Customer portal'
-      groupDescription: |-
-
-        The signed-in customer's own orders. Every query is scoped to that customer: another
-        customer's order answers 404, exactly like one that does not exist, so numbers cannot be probed.
+      groupName: Settings
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'My orders'
-      description: "Newest first. `meta.active` and `meta.completed` count the customer's orders."
+      title: 'Activity log'
+      description: 'Who did what, newest first, with a readable summary and the values before and after.'
       authenticated: true
       deprecated: false
     headers:
@@ -162,186 +224,74 @@ endpoints:
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
-      status:
+      user:
         custom: []
-        name: status
-        description: 'active or completed.'
+        name: user
+        description: 'One staff member.'
         required: false
-        example: active
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      entity:
+        custom: []
+        name: entity
+        description: 'order, payment, customer, basket, service, inventory_item, user, role, shop_settings.'
+        required: false
+        example: order
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      action:
+        custom: []
+        name: action
+        description: 'Text in the action or its values.'
+        required: false
+        example: LF-26
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      createdAt:
+        custom: []
+        name: createdAt
+        description: 'A Manila day, or from,to.'
+        required: false
+        example: '2026-11-01,2026-11-08'
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanQueryParameters:
-      status: active
+      user: 2
+      entity: order
+      action: LF-26
+      createdAt: '2026-11-01,2026-11-08'
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":[{"type":"portalOrder","id":"LF-261110-0009","attributes":{"orderNumber":"LF-261110-0009","receivedAt":"2026-11-10T01:20:00.000Z","promisedAt":"2026-11-11T02:00:00.000Z","releasedAt":null,"status":"washing","statusLabel":"Washing","totalCents":36750,"paidCents":20000,"balanceCents":16750,"paymentStatus":"partial"},"links":{"self":"http://laundryflow.test/api/v1/customer/orders/LF-261110-0009"},"includes":{"baskets":[{"type":"basket","id":20,"attributes":{"basketNumber":"BSK-0020"}}],"items":[{"type":"orderItem","id":2170,"attributes":{"weightKg":6.5,"quantity":null,"unitPriceCents":3500,"subtotalCents":22750,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"}}]}}],"links":{"first":"http://laundryflow.test/api/v1/customer/orders?page=1","last":"http://laundryflow.test/api/v1/customer/orders?page=4","prev":null,"next":"http://laundryflow.test/api/v1/customer/orders?page=2"},"meta":{"current_page":1,"last_page":4,"per_page":1,"total":4,"active":1,"completed":3}}'
-        headers: []
-        description: ''
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/v1/customer/orders/{orderNumber}'
-    metadata:
-      custom: []
-      groupName: 'Customer portal'
-      groupDescription: |-
-
-        The signed-in customer's own orders. Every query is scoped to that customer: another
-        customer's order answers 404, exactly like one that does not exist, so numbers cannot be probed.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'One of my orders'
-      description: |-
-        By its order number. No staff names, notes or voided payments. Another customer's order
-        number answers 404, exactly like one that does not exist.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      orderNumber:
-        custom: []
-        name: orderNumber
-        description: ''
-        required: true
-        example: LF-261110-0009
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      orderNumber: LF-261110-0009
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"type":"portalOrder","id":"LF-261110-0009","attributes":{"orderNumber":"LF-261110-0009","receivedAt":"2026-11-10T01:20:00.000Z","promisedAt":"2026-11-11T02:00:00.000Z","releasedAt":null,"status":"washing","statusLabel":"Washing","totalCents":36750,"paidCents":20000,"balanceCents":16750,"paymentStatus":"partial","customer":{"fullName":"Maria Santos","contactNumber":"09178452210"},"timeline":[{"status":"received","label":"Received","at":"2026-11-10T01:20:00.000Z"},{"status":"washing","label":"Washing","at":"2026-11-10T02:54:00.000Z"},{"status":"drying","label":"Drying","at":null},{"status":"folding","label":"Folding","at":null},{"status":"ready_for_pickup","label":"Ready for Pickup","at":null},{"status":"released","label":"Completed","at":null}]},"links":{"self":"http://laundryflow.test/api/v1/customer/orders/LF-261110-0009"},"includes":{"baskets":[{"type":"basket","id":20,"attributes":{"basketNumber":"BSK-0020"}}],"items":[{"type":"orderItem","id":2170,"attributes":{"weightKg":6.5,"quantity":null,"unitPriceCents":3500,"subtotalCents":22750,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"}}],"payments":[{"type":"payment","id":2010,"attributes":{"paidAt":"2026-11-10T01:22:00.000Z","methodLabel":"Cash","amountCents":20000,"referenceNumber":null,"receiptNumber":"OR-002210"}}],"shop":{"type":"shopSettings","id":1,"attributes":{"name":"LaundryFlow","address":"Brgy. Poblacion, Bongabong, Oriental Mindoro"}}}}}'
-        headers: []
-        description: ''
-      -
-        custom: []
-        status: 404
-        content: '{"errors":[{"status":404,"message":"The resource cannot be found.","source":"Order"}]}'
-        headers: []
-        description: ''
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: api/v1/customer/notifications
-    metadata:
-      custom: []
-      groupName: 'Customer portal'
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'My notifications'
-      description: "The customer's own notices, newest first, each with its order number. `meta.unread` counts the unread ones."
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":[{"type":"notification","id":119,"attributes":{"type":"status_changed","message":"Order LF-261110-0009 is now Washing","sentAt":"2026-11-10T02:54:00.000Z","readAt":null,"orderNumber":"LF-261110-0009"},"relationships":{"order":{"data":{"type":"order","id":1652}},"customer":{"data":{"type":"customer","id":1}}}}],"links":{"first":"http://laundryflow.test/api/v1/customer/notifications?page=1","last":"http://laundryflow.test/api/v1/customer/notifications?page=1","prev":null,"next":null},"meta":{"current_page":1,"last_page":1,"per_page":20,"total":2,"unread":1}}'
-        headers: []
-        description: ''
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/customer/notifications/{notification}/read'
-    metadata:
-      custom: []
-      groupName: 'Customer portal'
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Mark one of my notifications as read'
-      description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      notification:
-        custom: []
-        name: notification
-        description: 'The notification.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      notification: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null

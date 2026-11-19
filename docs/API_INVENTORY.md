@@ -46,7 +46,7 @@ answer the same way for the demo build. Paths are relative to the versioned base
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/dashboard/summary` | staff | `dashboard.view` | — | `DashboardSummary`: `kpis`, `flow_counts`, `recent_orders[]`, `low_stock[]`, `needs_action[]`; `sales_today_*` and `weekly_sales` only with `sales.view` | 200, 401, 403 |
 | GET | `/analytics/dashboard` | staff | `dashboard.view` | `from`, `to` (`Y-m-d`, default the last 30 Manila days), `compare=previous\|none` | `AnalyticsEnvelope<AdminDashboardSeries>` with `sales.view`, otherwise `AnalyticsEnvelope<StaffDashboardSeries>` (no peso fields) | 200, 401, 403, 422 |
-| GET | `/reports/{kind}` | admin | `reports.view` | `kind` ∈ sales, orders, payments, services, customers, inventory, staff; `from`, `to`, `compare`; filters `service`, `method` (cash/gcash), `status`, `staff`, `barangay`, `item` | `AnalyticsEnvelope<ReportSeries[kind]>` with `table` | 200, 401, 403, 404 unknown kind |
+| GET | `/reports/{kind}` | admin | `reports.view` | `kind` ∈ sales, orders, payments, services, customers, inventory, staff; `from`, `to`, `compare`; filters `service` (0 = the wash type surcharges), `method` (cash/gcash/maya), `status`, `staff`, `barangay`, `item` | `AnalyticsEnvelope<ReportSeries[kind]>` with `table` | 200, 401, 403, 404 unknown kind |
 
 ## Customers and accounts (`customers.ts`)
 
@@ -71,6 +71,24 @@ answer the same way for the demo build. Paths are relative to the versioned base
 | GET | `/services/{id}` | staff | `orders.manage` | — | `Service` | 200, 404 |
 | PUT / PATCH | `/services/{id}` | admin | `settings.manage` | as above (PATCH: only sent fields, e.g. `{ is_active }` from the Active switch) | `Service`; a rate change is audited with old → new | 200, 404, 422 |
 
+## Wash types and Pricing & Usage (`washTypes.ts`)
+
+A wash type is how the laundry is washed (not a service). One per order; the optional surcharge per kilo
+and the soaps it uses are set by the owner in Settings > Pricing & Usage. Rates and the Express fee
+there are the same `services` records as Services & rates.
+
+| Method | Path | Auth | Ability | Request (validation) | Response | Codes |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/wash-types` | staff | `orders.manage` | `active=1\|0` optional | `{ data: WashTypeDto[], meta: { block_orders_on_low_soap } }` in display order; each with `supplies[]` (`inventory_item_id`, `item_name`, `unit_code`, `usage_per_kg_small_unit`, `usage_label`, `on_hand`) so the order form can preview the soap and warn about shortages | 200, 401, 403 |
+| POST | `/wash-types` | admin | `settings.manage` | `name` required, unique, max 100; `description` nullable; `surcharge_per_kg_cents` integer ≥ 0; `is_active`; `supplies[]`: `inventory_item_id` an active item counted in L, kg or pcs, once per wash type; `usage_per_kg_small_unit` > 0, at most 3 decimals (g or mL per kilo, pieces for pcs) | `WashTypeDto`; one audit entry per change | 201, 403, 422 |
+| GET | `/wash-types/{id}` | staff | `orders.manage` | — | `WashTypeDto` | 200, 404 |
+| PUT / PATCH | `/wash-types/{id}` | admin | `settings.manage` | as above, only the fields sent; `supplies`, when sent, replaces the whole list; the last active wash type cannot be deactivated | `WashTypeDto`; audit entries such as `Regular washing · Detergent powder: 25 g/kg → 50 g/kg` | 200, 403, 404, 422 |
+| PUT | `/settings/stock-rule` | admin | `settings.manage` | `block_orders_on_low_soap` required boolean | `{ block_orders_on_low_soap }`; audited | 200, 403, 422 |
+
+Orders carry `wash_type` (id, name), the frozen `wash_surcharge_per_kg_cents`, the computed
+`wash_surcharge_cents` (part of `total_cents`) and `per_kg_weight_kg`; `OrderDetailDto` adds `soap_usage[]`
+(staff only). A customer's order has `wash_type_name`, the charge and never soap quantities.
+
 ## Baskets and scanning (`baskets.ts`)
 
 | Method | Path | Auth | Ability | Request (validation) | Response | Codes |
@@ -89,7 +107,7 @@ answer the same way for the demo build. Paths are relative to the versioned base
 | Method | Path | Auth | Ability | Request (validation) | Response | Codes |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/orders` | staff | `orders.manage` | `search` (order no., basket no., customer name, 3+ phone digits); `status` comma list; `payment_status`; `from`/`to` (Manila days of `received_at`); `customer_id`; `waiting_min`, `waiting_max` (days in the current status); `due` (`Y-m-d` or `overdue`); `page`, `per_page` (default 8, max 500) | paginated `OrderDto`, newest first; `meta.status_counts` (per status + `all`, before the status filter), `meta.month_total`, `meta.active_total` | 200 |
-| POST | `/orders` | staff | `orders.manage` (+`payments.record` if `payment` is sent) | `customer_id` exists and **has an account**; `basket_ids[]` 1+, each exists and not retired (422); `items[]` 1+: `service_id` active, `weight_kg` > 0 in 0.1 steps (per_kg), `quantity` integer ≥ 1 (per_piece), a flat service once; `promised_at` date, not in the past; `notes` nullable; `payment` optional: `amount_cents` integer > 0 and ≤ total, `payment_method` cash/gcash, `reference_number` required for GCash | `OrderDetailDto`; one transaction: the day's sequence row locked first, then the baskets (`lockForUpdate()`), the order number `LF-YYMMDD-NNNN` drawn only after every check, items with frozen prices, assignments, history, payment, customer notification, audit. Retried on a deadlock. | 201, 403, 409 "BSK-0007 is in use by LF-…" (a basket holds an open order, checked under the lock), 422 |
+| POST | `/orders` | staff | `orders.manage` (+`payments.record` if `payment` is sent) | `customer_id` exists and **has an account**; `basket_ids[]` 1+, each exists and not retired (422); `items[]` 1+: `service_id` active, `weight_kg` > 0 in 0.1 steps (per_kg), `quantity` integer ≥ 1 (per_piece), a flat service once; `promised_at` date, not in the past; `notes` nullable; `payment` optional: `amount_cents` integer > 0 and ≤ total, `payment_method` cash/gcash/maya, `reference_number` required for GCash and Maya | `OrderDetailDto`; one transaction: the soap of the wash type checked and locked, then the day's sequence row, then then the baskets (`lockForUpdate()`), the order number `LF-YYMMDD-NNNN` drawn only after every check, items with frozen prices, assignments, history, payment, customer notification, audit. Retried on a deadlock. | 201, 403, 409 "BSK-0007 is in use by LF-…" (a basket holds an open order, checked under the lock) or "Not enough soap in stock. …" (only with the stock rule on), 422 |
 | GET | `/payments/{id}` | staff | `payments.view` | — | `PaymentDto` | 200, 404 |
 | GET | `/orders/{id}` | staff | `orders.manage` | — | `OrderDetailDto` (+`payments`, `status_history`, `basket_history`, `shop`) | 200, 404 |
 | PUT / PATCH | `/orders/{id}` | staff | `orders.manage` | `notes` nullable; `promised_at` valid date | `OrderDetailDto` | 200, 404, 409 completed, 422 |
@@ -99,9 +117,9 @@ answer the same way for the demo build. Paths are relative to the versioned base
 
 | Method | Path | Auth | Ability | Request (validation) | Response | Codes |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/orders/{id}/payments` | staff | `payments.record` | `amount_cents` integer > 0, ≤ balance; `payment_method` cash/gcash; `reference_number` required for GCash | `OrderDetailDto`; OR number `OR-000201…` | 201, 404, 409 fully paid or completed, 422 |
+| POST | `/orders/{id}/payments` | staff | `payments.record` | `amount_cents` integer > 0, ≤ balance; `payment_method` cash/gcash/maya; `reference_number` required for GCash and Maya | `OrderDetailDto`; OR number `OR-000201…` | 201, 404, 409 fully paid or completed, 422 |
 | POST | `/payments/{id}/void` | staff | `payments.void` | `reason` required | `PaymentDto` | 200, 404, 409 completed order or already voided, 422 |
-| GET | `/payments` | staff | `payments.view` | `from`/`to` (Manila days of `paid_at`), `method`, `search` (OR no., order no., customer), `page` (15) | paginated `PaymentDto`, newest first; `meta.collected_cents`, `cash_cents`, `gcash_cents`, `count` (voided excluded) | 200 |
+| GET | `/payments` | staff | `payments.view` | `from`/`to` (Manila days of `paid_at`), `method`, `search` (OR no., order no., customer), `page` (15) | paginated `PaymentDto`, newest first; `meta.collected_cents`, `cash_cents`, `gcash_cents`, `maya_cents`, `count` (voided excluded) | 200 |
 | GET | `/balances` | staff | `payments.view` | `search`, `page` (15) | paginated `OrderDto` with a balance, Ready first then oldest; `meta.outstanding_cents`, `orders_count`, `ready_count` | 200 |
 
 ## Inventory (`inventory.ts`)
@@ -113,7 +131,7 @@ answer the same way for the demo build. Paths are relative to the versioned base
 | POST | `/inventory/items` | admin | `inventory.manage` | `name` 2+; `unit_id` exists; `reorder_level` ≥ 0 | `InventoryItemDto` | 201, 422 |
 | GET | `/inventory/items/{id}` | staff | `inventory.view` | — | `InventoryItemDto` | 200, 404 |
 | PUT / PATCH | `/inventory/items/{id}` | admin | `inventory.manage` | as above, plus `is_active` | `InventoryItemDto` | 200, 404, 422 |
-| GET | `/inventory/movements` | staff | `inventory.view` | `item_id`, `page` (8) | paginated `InventoryMovementDto`, newest first | 200 |
+| GET | `/inventory/movements` | staff | `inventory.view` | `item_id`, `type` (in/out/adjust/usage), `page` (8) | paginated `InventoryMovementDto`, newest first; usage rows carry `order_id`, `order_number` and `required_quantity` ("Used by order LF-…") | 200 |
 | POST | `/inventory/movements` | staff | `inventory.manage`, or `inventory.stock_out` for type `out` only | `item_id` active; `type` in/out/adjust; `quantity` number (> 0 for in/out, ≠ 0 for adjust); out ≤ on hand; an adjust cannot go below 0 and needs `remarks` | `InventoryMovementDto`; a low-stock notification when the level drops into Low or Critical | 201, 403, 422 |
 
 ## Staff users, roles, settings, activity, notifications (`admin.ts`)

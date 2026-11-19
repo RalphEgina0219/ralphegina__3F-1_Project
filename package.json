@@ -13,6 +13,7 @@
     "db:admin": "node scripts/backend.mjs db-admin",
     "test:contract": "node scripts/backend.mjs contract",
     "dev": "npm --prefix react-frontend run dev",
-    "build:hostinger": "node scripts/build-hostinger.mjs"
+    "build:hostinger": "node scripts/build-hostinger.mjs",
+    "release": "node scripts/build-hostinger.mjs --release"
   }
 }

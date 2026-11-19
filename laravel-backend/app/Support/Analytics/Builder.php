@@ -182,7 +182,8 @@ final class Builder
     {
         ['orders' => $orders, 'payments' => $payments, 'changes' => $changes, 'movements' => $movements, 'items' => $items] = $facts;
 
-        if (! empty($filters['service'])) {
+        // Service 0 is the wash type surcharge category.
+        if (isset($filters['service'])) {
             $id = $filters['service'];
             $lines = array_column($orders, 'lines', 'id');
             $narrowed = [];
@@ -218,7 +219,7 @@ final class Builder
             $items = array_values(array_filter($items, fn ($i) => $i['id'] === $filters['item']));
             $movements = array_values(array_filter($movements, fn ($m) => $m['item_id'] === $filters['item']));
         }
-        if (! empty($filters['status']) || ! empty($filters['barangay']) || ! empty($filters['service'])) {
+        if (! empty($filters['status']) || ! empty($filters['barangay']) || isset($filters['service'])) {
             $ids = array_flip(array_column($orders, 'id'));
             $payments = array_values(array_filter($payments, fn ($p) => isset($ids[$p['order_id']])));
             $changes = array_values(array_filter($changes, fn ($c) => isset($ids[$c['order_id']])));
@@ -677,6 +678,7 @@ final class Builder
                 ['key' => 'by', 'label' => 'Recorded by', 'format' => 'text', 'optional' => true],
             ],
             'rows' => array_map(fn ($m) => [
+                'id' => $m['order_id'],
                 'moved_at' => $m['moved_at_iso'],
                 'item' => $itemById[$m['item_id']]['name'] ?? '',
                 'type' => ['in' => 'Stock in', 'out' => 'Stock-out', 'usage' => 'Used by order', 'adjust' => 'Adjustment'][$m['type']],

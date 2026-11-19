@@ -54,7 +54,7 @@ class ReportController extends APIController
         $barangay = $request->query('barangay');
 
         return [
-            'service' => $positive($request->query('service')),
+            'service' => is_numeric($request->query('service')) && (int) $request->query('service') >= 0 ? (int) $request->query('service') : null,
             'method' => in_array($method, ['cash', 'gcash', 'maya'], true) ? $method : null,
             'status' => in_array($status, StatusRules::ORDER, true) ? $status : null,
             'staff' => $positive($request->query('staff')),

@@ -3,6 +3,9 @@
 // real API and assembles what goes into Hostinger's public_html:
 //   build/hostinger/public_html/       the folder (React build + .htaccess + laravel.php)
 //   build/hostinger/public_html.zip    the same, for hPanel's File Manager (upload, then Extract)
+// With --release (npm run release, in react-frontend or at the root) it also writes a zip whose name
+// says what it is, react-frontend/release/laundryflow-frontend-v<version>-<date>-<commit>.zip, for
+// laravel-backend/scripts/install-frontend.sh on the server (docs/RELEASE_NOTES_wash-types.md).
 // Plain Node, no packages. It calls node directly: the "&" in this folder name breaks npm's shims.
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -71,3 +74,26 @@ if (zipped) {
   console.log('[laundryflow] No zip (tar could not write one): upload the folder contents instead.');
 }
 console.log('[laundryflow] Includes the hidden .htaccess: keep it when uploading.');
+
+if (process.argv.includes('--release')) {
+  if (!zipped) {
+    console.error('[laundryflow] --release needs the zip, and tar could not write one.');
+    process.exit(1);
+  }
+  const { version } = JSON.parse(fs.readFileSync(path.join(frontend, 'package.json'), 'utf8'));
+  const sha =
+    spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout?.trim() ||
+    'nogit';
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const releaseDir = path.join(frontend, 'release');
+  const name = `laundryflow-frontend-v${version}-${stamp}-${sha}.zip`;
+  fs.mkdirSync(releaseDir, { recursive: true });
+  fs.copyFileSync(zip, path.join(releaseDir, name));
+  console.log('');
+  console.log(`[laundryflow] Release zip: ${name}`);
+  console.log(`[laundryflow] Path:        ${path.join(releaseDir, name)}`);
+  console.log('[laundryflow] Upload it to domains/<your-domain>/ with hPanel File Manager, then on the server:');
+  console.log(`[laundryflow]   bash scripts/install-frontend.sh ${name}`);
+}

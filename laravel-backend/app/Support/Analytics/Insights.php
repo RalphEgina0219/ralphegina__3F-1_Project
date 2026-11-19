@@ -106,19 +106,21 @@ final class Insights
 
     public static function digitalShare(array $mix): ?string
     {
-        $gcash = null;
+        $digital = 0;
+        $found = false;
         $any = false;
         foreach ($mix as $m) {
-            if ($m['key'] === 'gcash') {
-                $gcash = $m;
+            if (in_array($m['key'], ['gcash', 'maya'], true)) {
+                $digital += $m['share'];
+                $found = true;
             }
             $any = $any || $m['value'] != 0;
         }
-        if (! $gcash || ! $any) {
+        if (! $found || ! $any) {
             return null;
         }
 
-        return 'GCash was '.self::pct($gcash['share']).' of collections; the rest was cash.';
+        return 'GCash and Maya were '.self::pct($digital).' of collections; the rest was cash.';
     }
 
     public static function peakHour(array $heatmap): ?string

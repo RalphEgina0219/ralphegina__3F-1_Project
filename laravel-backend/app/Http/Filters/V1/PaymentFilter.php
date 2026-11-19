@@ -25,7 +25,7 @@ class PaymentFilter extends QueryFilter
         return $this->builder;
     }
 
-    /** ?method=cash|gcash */
+    /** ?method=cash|gcash|maya */
     public function method($value)
     {
         $ids = PaymentMethod::query()->whereIn('code', $this->list($value))->pluck('id');

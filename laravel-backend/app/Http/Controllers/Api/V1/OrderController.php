@@ -86,8 +86,9 @@ class OrderController extends APIController
     /**
      * Take in an order
      *
-     * One transaction: locked baskets, the day's order number, items with frozen prices, the first
-     * history row, the optional payment, the customer's notice and the audit log.
+     * One transaction: locked baskets, the day's order number, items with frozen prices, the wash
+     * type with its frozen surcharge and the soap it deducts from stock (409 when the shop blocks
+     * orders on a soap shortage), the first history row, the optional payment, the customer's notice and the audit log.
      */
     public function store(StoreOrderRequest $request, CreateOrder $createOrder)
     {
@@ -102,6 +103,8 @@ class OrderController extends APIController
             'customer_id' => $request->relationshipId('customer'),
             'basket_ids' => $request->relationshipIds('baskets'),
             'lines' => $request->lines(),
+            'wash_type_id' => $request->washTypeId(),
+            'wash_surcharge_per_kg_cents' => $request->washSurchargePerKgCents(),
             'promised_at' => $request->input('data.attributes.promisedAt'),
             'notes' => $request->nullableText('data.attributes.notes'),
             'payment' => $request->payment(),

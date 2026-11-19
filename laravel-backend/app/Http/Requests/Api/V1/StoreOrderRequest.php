@@ -5,8 +5,10 @@ namespace App\Http\Requests\Api\V1;
 use App\Models\Basket;
 use App\Models\Customer;
 use App\Models\Service;
+use App\Models\WashType;
 use App\Support\Billing;
 use App\Support\PaymentRules;
+use App\Support\WashRules;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\Validator;
 
@@ -25,6 +27,9 @@ class StoreOrderRequest extends BaseApiRequest
 {
     /** The priced lines, worked out while validating (service id, weight, quantity, price, subtotal). */
     private array $lines = [];
+
+    /** The chosen wash type (the first active one when none is sent), and its surcharge at this moment. */
+    private ?WashType $washType = null;
 
     protected function attributeMap(): array
     {
@@ -66,6 +71,7 @@ class StoreOrderRequest extends BaseApiRequest
             $errors = array_merge(
                 $this->customerErrors(),
                 $this->basketErrors(),
+                $this->washTypeErrors(),
                 $this->itemErrors(),
                 $this->promiseErrors(),
                 $this->paymentErrors(),
@@ -119,6 +125,21 @@ class StoreOrderRequest extends BaseApiRequest
             // A basket that holds another order is a conflict of state (409), not invalid input:
             // CreateOrder checks it under the basket lock, where two counters cannot both pass.
         }
+
+        return [];
+    }
+
+    /** @return array<string, string> */
+    private function washTypeErrors(): array
+    {
+        $key = 'data.relationships.washType.data.id';
+        $id = $this->relationshipId('washType') ?? WashType::defaultId();
+        $washType = $id ? WashType::query()->find($id) : null;
+
+        if (! $washType || ! $washType->is_active) {
+            return [$key => 'Choose an active wash type.'];
+        }
+        $this->washType = $washType;
 
         return [];
     }
@@ -228,13 +249,35 @@ class StoreOrderRequest extends BaseApiRequest
             return [];
         }
 
-        $total = array_sum(array_column($this->lines, 'subtotal_cents'));
+        $total = $this->totalCents();
         $errors = [];
         foreach (PaymentRules::check($payment, $total)['errors'] as $field => $message) {
             $errors["data.attributes.payment.{$field}"] = $message;
         }
 
         return $errors;
+    }
+
+    /** The wash type's surcharge per kilo, frozen on the order. */
+    public function washSurchargePerKgCents(): int
+    {
+        return (int) ($this->washType?->surcharge_per_kg_cents ?? 0);
+    }
+
+    public function washTypeId(): int
+    {
+        return (int) $this->washType?->id;
+    }
+
+    /** The lines plus the wash type surcharge. */
+    public function totalCents(): int
+    {
+        $perKgTenths = WashRules::perKgTenths(array_map(fn ($line) => [
+            'pricing_type' => $line['weight_kg'] === null ? 'other' : 'per_kg',
+            'weight_kg' => $line['weight_kg'],
+        ], $this->lines));
+
+        return array_sum(array_column($this->lines, 'subtotal_cents')) + WashRules::surchargeCents($perKgTenths, $this->washSurchargePerKgCents());
     }
 
     /** Whether a payment came with the order (it needs payments.record). */
@@ -255,7 +298,7 @@ class StoreOrderRequest extends BaseApiRequest
         $payment = $this->input('data.attributes.payment');
 
         return is_array($payment)
-            ? PaymentRules::check($payment, array_sum(array_column($this->lines, 'subtotal_cents')))['values']
+            ? PaymentRules::check($payment, $this->totalCents())['values']
             : null;
     }
 
@@ -267,6 +310,7 @@ class StoreOrderRequest extends BaseApiRequest
             'data.attributes.notes' => ['description' => 'Notes for the shop.', 'example' => 'Separate white uniforms.'],
             'data.attributes.payment' => ['description' => 'Optional payment at drop-off (needs payments.record).', 'example' => ['amountCents' => 20000, 'paymentMethod' => 'cash']],
             'data.relationships.customer.data.id' => ['description' => 'The customer (must have an account).', 'example' => 1],
+            'data.relationships.washType.data.id' => ['description' => 'The wash type. Optional: the first active one when left out. Applies to the per-kg laundry.', 'example' => 1],
             'data.relationships.baskets.data' => ['description' => 'One or more available baskets.', 'example' => [['id' => 7]]],
         ];
     }

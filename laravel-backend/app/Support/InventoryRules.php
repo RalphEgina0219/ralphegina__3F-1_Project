@@ -17,7 +17,7 @@ final class InventoryRules
     public static function signedQuantity(string $type, float|int $quantity): float
     {
         return match ($type) {
-            'out' => -abs((float) $quantity),
+            'out', 'usage' => -abs((float) $quantity),
             'in' => abs((float) $quantity),
             default => (float) $quantity,
         };

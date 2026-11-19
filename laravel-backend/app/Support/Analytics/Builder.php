@@ -264,6 +264,7 @@ final class Builder
         $mix = Series::paymentMix($payments, $range);
         $cash = $this->dailyByMethod($payments, $range, 'cash');
         $gcash = $this->dailyByMethod($payments, $range, 'gcash');
+        $maya = $this->dailyByMethod($payments, $range, 'maya');
 
         $kpis = [
             self::kpi('sales', 'Sales', 'money', $salesNow, $this->maybe($salesBefore), ['spark' => Series::values($sales), 'hint' => 'Payments collected']),
@@ -280,6 +281,7 @@ final class Builder
                 'kilos' => $kilos[$index]['value'] ?? 0,
                 'cash' => $cash[$index]['value'] ?? 0,
                 'gcash' => $gcash[$index]['value'] ?? 0,
+                'maya' => $maya[$index]['value'] ?? 0,
                 'sales' => $point['value'],
             ];
         }
@@ -290,6 +292,7 @@ final class Builder
                 ['key' => 'kilos', 'label' => 'Kilos', 'format' => 'kg'],
                 ['key' => 'cash', 'label' => 'Cash', 'format' => 'money', 'optional' => true],
                 ['key' => 'gcash', 'label' => 'GCash', 'format' => 'money', 'optional' => true],
+                ['key' => 'maya', 'label' => 'Maya', 'format' => 'money', 'optional' => true],
                 ['key' => 'sales', 'label' => 'Sales', 'format' => 'money'],
             ],
             'rows' => array_reverse($rows),
@@ -299,6 +302,7 @@ final class Builder
                 'kilos' => self::round1Total($kilos),
                 'cash' => Series::total($cash),
                 'gcash' => Series::total($gcash),
+                'maya' => Series::total($maya),
                 'sales' => $salesNow,
             ],
         ];
@@ -347,6 +351,7 @@ final class Builder
                 ['key' => 'received_at', 'label' => 'Received', 'format' => 'datetime'],
                 ['key' => 'status', 'label' => 'Status', 'format' => 'text'],
                 ['key' => 'services', 'label' => 'Services', 'format' => 'text', 'optional' => true],
+                ['key' => 'wash_type', 'label' => 'Wash type', 'format' => 'text', 'optional' => true],
                 ['key' => 'kilos', 'label' => 'Kilos', 'format' => 'kg'],
                 ['key' => 'turnaround', 'label' => 'Turnaround', 'format' => 'hours', 'optional' => true],
                 ['key' => 'total', 'label' => 'Total', 'format' => 'money'],
@@ -360,7 +365,8 @@ final class Builder
                     'customer' => $o['customer_name'],
                     'received_at' => $o['received_at_iso'],
                     'status' => StatusRules::label($o['status']),
-                    'services' => implode(', ', array_column($o['lines'], 'service_name')),
+                    'services' => implode(', ', array_column(array_filter($o['lines'], fn ($l) => empty($l['surcharge'])), 'service_name')),
+                    'wash_type' => $o['wash_type'],
                     'kilos' => $o['kilos'],
                     'turnaround' => $hours === null ? null : Js::roundTo($hours, 1),
                     'total' => $o['total_cents'],
@@ -379,6 +385,7 @@ final class Builder
             'turnaround' => Series::turnaroundByDay($orders, $range),
             'turnaround_target' => self::TURNAROUND_TARGET_HOURS,
             'express' => Series::sumByDay(array_filter($orders, fn ($o) => $o['express']), $range, fn ($o) => $o['received_at']),
+            'by_wash_type' => Series::ordersByWashType($orders, $range),
         ];
 
         return $this->envelope($kpis, $series, $table, [
@@ -407,6 +414,7 @@ final class Builder
         $mix = Series::paymentMix($payments, $range);
         $cash = $this->dailyByMethod($payments, $range, 'cash');
         $gcash = $this->dailyByMethod($payments, $range, 'gcash');
+        $maya = $this->dailyByMethod($payments, $range, 'maya');
         $inRangePayments = array_filter($payments, fn ($p) => ManilaTime::inRange($p['paid_at'], $range));
         $split = Series::collectedVsOutstanding($orders, $range);
         $liveInRange = count(array_filter($live, fn ($p) => ManilaTime::inRange($p['paid_at'], $range)));
@@ -456,7 +464,7 @@ final class Builder
             'collections' => array_map(fn ($date, $index) => [
                 'key' => $date,
                 'label' => $date,
-                'values' => ['cash' => $cash[$index]['value'] ?? 0, 'gcash' => $gcash[$index]['value'] ?? 0],
+                'values' => ['cash' => $cash[$index]['value'] ?? 0, 'gcash' => $gcash[$index]['value'] ?? 0, 'maya' => $maya[$index]['value'] ?? 0],
             ], ManilaTime::eachDay($range), array_keys(ManilaTime::eachDay($range))),
             'collected' => $split,
             'unpaid_aging' => $aging,
@@ -496,7 +504,7 @@ final class Builder
 
         $kpis = [
             self::kpi('revenue', 'Revenue', 'money', $revenueTotal, $this->maybe(Series::total(Series::revenueByService($orders, $payments, $before))), ['hint' => 'Payments collected']),
-            self::kpi('services', 'Services used', 'count', count(array_filter($stats, fn ($s) => $s['orders'] > 0)), null),
+            self::kpi('services', 'Services used', 'count', count(array_filter($stats, fn ($s) => $s['orders'] > 0 && $s['id'] !== Facts::SURCHARGE_ID)), null),
             self::kpi('kilos', 'Kilos processed', 'kg', Js::roundTo($totalKilos, 1), $this->maybe(Js::roundTo(array_sum(array_column($statsBefore, 'kilos')), 1))),
             self::kpi('pieces', 'Pieces processed', 'count', $totalPieces, $this->maybe(array_sum(array_column($statsBefore, 'pieces'))), ['hint' => 'Comforters and ironing']),
         ];
@@ -628,13 +636,17 @@ final class Builder
 
     private function inventoryReport(): array
     {
-        ['items' => $items, 'movements' => $movements, 'staff' => $staff] = $this->facts;
+        ['items' => $items, 'movements' => $movements, 'staff' => $staff, 'orders' => $orders] = $this->facts;
         $range = $this->query['range'];
         $before = ManilaTime::previousRange($range);
         $usage = Series::stockUsageByDay($movements, $items, $range);
         $usageBefore = Series::stockUsageByDay($movements, $items, $before);
         $inside = array_values(array_filter($movements, fn ($m) => ManilaTime::inRange($m['moved_at'], $range)));
         $restocks = count(array_filter($inside, fn ($m) => $m['type'] === 'in'));
+        $orderNumbers = array_column($orders, 'order_number', 'id');
+        $soap = Series::soapUsage($movements, $items, $orders, $range);
+        $byOrders = count(array_filter($inside, fn ($m) => $m['type'] === 'usage'));
+        $manual = count(array_filter($inside, fn ($m) => $m['type'] === 'out'));
         $daysLeft = [];
         foreach ($items as $item) {
             $daysLeft[$item['id']] = Series::daysOfStockLeft($item, $usage[$item['id']] ?? []);
@@ -648,6 +660,8 @@ final class Builder
             self::kpi('critical', 'Critical', 'count', $critical, null, ['tone' => $critical > 0 ? 'warn' : 'default', 'inverse' => true]),
             self::kpi('low', 'Low', 'count', count(array_filter($items, fn ($i) => $i['stock_status'] === 'low')), null, ['inverse' => true]),
             self::kpi('restocks', 'Restocks', 'count', $restocks, $this->maybe(count(array_filter($movements, fn ($m) => $m['type'] === 'in' && ManilaTime::inRange($m['moved_at'], $before)))), ['hint' => 'Deliveries recorded']),
+            self::kpi('used_by_orders', 'Used by orders', 'count', $byOrders, null, ['hint' => 'Soap deducted per order']),
+            self::kpi('manual_out', 'Manual stock-outs', 'count', $manual, null, ['hint' => 'Recorded by hand']),
         ];
 
         $sorted = $inside;
@@ -658,20 +672,25 @@ final class Builder
                 ['key' => 'item', 'label' => 'Item', 'format' => 'text'],
                 ['key' => 'type', 'label' => 'Movement', 'format' => 'text'],
                 ['key' => 'quantity', 'label' => 'Quantity', 'format' => 'number'],
+                ['key' => 'order_number', 'label' => 'Order', 'format' => 'order', 'optional' => true],
                 ['key' => 'unit', 'label' => 'Unit', 'format' => 'text', 'optional' => true],
                 ['key' => 'by', 'label' => 'Recorded by', 'format' => 'text', 'optional' => true],
             ],
             'rows' => array_map(fn ($m) => [
                 'moved_at' => $m['moved_at_iso'],
                 'item' => $itemById[$m['item_id']]['name'] ?? '',
-                'type' => $m['type'] === 'in' ? 'Stock in' : ($m['type'] === 'out' ? 'Used' : 'Adjustment'),
-                'quantity' => $m['type'] === 'out' ? -$m['quantity'] : $m['quantity'],
+                'type' => ['in' => 'Stock in', 'out' => 'Stock-out', 'usage' => 'Used by order', 'adjust' => 'Adjustment'][$m['type']],
+                'quantity' => in_array($m['type'], ['out', 'usage'], true) ? -$m['quantity'] : $m['quantity'],
+                'order_number' => $m['order_id'] !== null ? ($orderNumbers[$m['order_id']] ?? null) : null,
                 'unit' => $itemById[$m['item_id']]['unit'] ?? '',
                 'by' => $names[$m['user_id']] ?? '',
             ], $sorted),
             'totals' => ['moved_at' => count($inside).' movements'],
         ];
         $series = [
+            'soap_by_wash_type' => $soap['by_wash_type'],
+            'soap_by_source' => $soap['by_source'],
+            'top_soaps' => $soap['top'],
             'levels' => array_map(fn ($i) => [
                 'key' => (string) $i['id'],
                 'label' => $i['name'],

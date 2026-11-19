@@ -20,6 +20,7 @@ class InventoryMovementController extends APIController
      * Newest first.
      *
      * @queryParam item integer One item's movements. Example: 1
+     * @queryParam type string in, out, adjust or usage (soap used by orders). Example: usage
      * @queryParam page integer The page number. Example: 1
      */
     public function index()
@@ -28,10 +29,15 @@ class InventoryMovementController extends APIController
             return $this->notAuthorized('You are not authorized to view inventory.');
         }
 
-        $query = InventoryMovement::query()->with(['item.unit', 'user.role'])->orderByDesc('moved_at')->orderByDesc('id');
+        $query = InventoryMovement::query()->with(['item.unit', 'user.role', 'order:id,order_number'])->orderByDesc('moved_at')->orderByDesc('id');
         $item = request()->query('item', request()->query('item_id'));
         if (is_numeric($item)) {
             $query->where('item_id', (int) $item);
+        }
+
+        $type = request()->query('type');
+        if (is_string($type) && in_array($type, [...InventoryMovement::TYPES, InventoryMovement::USAGE], true)) {
+            $query->where('type', $type);
         }
 
         return InventoryMovementResource::collection($query->paginate($this->perPage()));

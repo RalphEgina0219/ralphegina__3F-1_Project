@@ -19,7 +19,7 @@ final class Series
 
     public const ACTIVE_STAGES = StatusRules::BOARD;
 
-    public const METHOD_LABELS = ['cash' => 'Cash', 'gcash' => 'GCash'];
+    public const METHOD_LABELS = ['cash' => 'Cash', 'gcash' => 'GCash', 'maya' => 'Maya'];
 
     public const UNPAID_AGE_BUCKETS = [
         ['key' => '0-7', 'label' => '0–7 days', 'min' => 0, 'max' => 7],
@@ -224,7 +224,7 @@ final class Series
                 'share' => $sum > 0 ? $value / $sum : 0,
                 'extra' => ['count' => count($mine)],
             ];
-        }, ['cash', 'gcash']);
+        }, ['cash', 'gcash', 'maya']);
     }
 
     /** For orders received in the range: billed, collected so far, and still owed. */
@@ -694,6 +694,88 @@ final class Series
         return array_values(array_map(fn ($w) => ['key' => $w['key'], 'label' => $w['label'], 'values' => (object) $w['values']], $weeks));
     }
 
+    /** Orders received in the range, per wash type, most used first (with each one's share). */
+    public static function ordersByWashType(array $orders, array $range): array
+    {
+        $by = [];
+        foreach (self::receivedIn($orders, $range) as $order) {
+            $by[$order['wash_type']] = ($by[$order['wash_type']] ?? 0) + 1;
+        }
+
+        $list = [];
+        foreach ($by as $label => $value) {
+            $list[] = ['key' => (string) $label, 'label' => (string) $label, 'value' => $value];
+        }
+        usort($list, fn ($a, $b) => ($b['value'] <=> $a['value']) ?: self::compare($a['label'], $b['label']));
+
+        return self::withShares($list);
+    }
+
+    /**
+     * Soap used by orders in the range. Per item: the amount by wash type (one chart per item, so
+     * every bar shares a unit), the amount used by orders against manual stock-outs, and how many
+     * orders used it (the top soaps).
+     *
+     * @return array{by_wash_type: list<array<string, mixed>>, by_source: list<array<string, mixed>>, top: list<array<string, mixed>>}
+     */
+    public static function soapUsage(array $movements, array $items, array $orders, array $range): array
+    {
+        $byOrder = array_column($orders, null, 'id');
+        $inside = array_filter($movements, fn ($m) => ManilaTime::inRange($m['moved_at'], $range));
+        $byWash = [];
+        $bySource = [];
+        $top = [];
+
+        foreach ($items as $item) {
+            $bySource[$item['id']] = ['item_id' => $item['id'], 'label' => $item['name'], 'unit' => $item['unit'], 'orders' => 0, 'manual' => 0];
+        }
+        foreach ($inside as $m) {
+            $item = null;
+            foreach ($items as $candidate) {
+                if ($candidate['id'] === $m['item_id']) {
+                    $item = $candidate;
+                    break;
+                }
+            }
+            if (! $item) {
+                continue;
+            }
+            if ($m['type'] === 'out') {
+                $bySource[$item['id']]['manual'] += $m['quantity'];
+            } elseif ($m['type'] === 'usage') {
+                $bySource[$item['id']]['orders'] += $m['quantity'];
+                $wash = $byOrder[$m['order_id']]['wash_type'] ?? 'Unknown';
+                $byWash[$item['id']]['item'] = $item;
+                $byWash[$item['id']]['by'][$wash] = ($byWash[$item['id']]['by'][$wash] ?? 0) + $m['quantity'];
+                $top[$item['id']]['item'] = $item;
+                $top[$item['id']]['amount'] = ($top[$item['id']]['amount'] ?? 0) + $m['quantity'];
+                $top[$item['id']]['orders'][$m['order_id']] = true;
+            }
+        }
+
+        $byWashList = [];
+        foreach ($byWash as $row) {
+            $points = [];
+            foreach ($row['by'] as $label => $value) {
+                $points[] = ['key' => (string) $label, 'label' => (string) $label, 'value' => Js::roundTo($value, 3)];
+            }
+            usort($points, fn ($a, $b) => ($b['value'] <=> $a['value']) ?: self::compare($a['label'], $b['label']));
+            $byWashList[] = ['item_id' => $row['item']['id'], 'label' => $row['item']['name'], 'unit' => $row['item']['unit'], 'total' => Js::roundTo(array_sum(array_column($points, 'value')), 3), 'points' => self::withShares($points)];
+        }
+
+        $topList = [];
+        foreach ($top as $row) {
+            $topList[] = ['key' => (string) $row['item']['id'], 'label' => $row['item']['name'], 'unit' => $row['item']['unit'], 'value' => count($row['orders']), 'amount' => Js::roundTo($row['amount'], 3)];
+        }
+        usort($topList, fn ($a, $b) => ($b['value'] <=> $a['value']) ?: (($b['amount'] <=> $a['amount']) ?: self::compare($a['label'], $b['label'])));
+
+        return [
+            'by_wash_type' => $byWashList,
+            'by_source' => array_values(array_map(fn ($r) => array_merge($r, ['orders' => Js::roundTo($r['orders'], 3), 'manual' => Js::roundTo($r['manual'], 3)]), $bySource)),
+            'top' => array_slice($topList, 0, 5),
+        ];
+    }
+
     // Staff and stock --------------------------------------------------------------------------
 
     /** Per staff member: status updates made and orders taken at the counter, in the range. */
@@ -730,9 +812,9 @@ final class Series
         $usage = [];
         foreach ($items as $item) {
             $usage[$item['id']] = array_map(
-                fn ($p) => ['date' => $p['date'], 'value' => self::round1($p['value'])],
+                fn ($p) => ['date' => $p['date'], 'value' => Js::roundTo($p['value'], 3)],
                 self::sumByDay(
-                    array_filter($movements, fn ($m) => $m['item_id'] === $item['id'] && $m['type'] === 'out'),
+                    array_filter($movements, fn ($m) => $m['item_id'] === $item['id'] && in_array($m['type'], ['out', 'usage'], true)),
                     $range,
                     fn ($m) => $m['moved_at'],
                     fn ($m) => $m['quantity'],

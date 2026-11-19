@@ -44,7 +44,7 @@ abstract class TestCase extends BaseTestCase
     /** Replaces the reference data with the full demo seed (120 days of orders and payments). */
     protected function useDemoData(): void
     {
-        foreach (['audit_logs', 'notifications', 'inventory_movements', 'inventory_items', 'payments', 'order_baskets', 'order_status_history', 'order_items', 'orders', 'order_sequences',
+        foreach (['audit_logs', 'notifications', 'inventory_movements', 'wash_type_supplies', 'inventory_items', 'payments', 'order_baskets', 'order_status_history', 'order_items', 'orders', 'wash_types', 'order_sequences',
             'receipt_sequences', 'baskets', 'customer_accounts', 'customers', 'services', 'shop_settings', 'units', 'payment_methods', 'order_statuses', 'barangays', 'role_permission', 'users', 'permissions', 'roles'] as $table) {
             DB::table($table)->delete();
         }

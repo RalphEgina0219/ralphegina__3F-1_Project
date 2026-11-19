@@ -7,6 +7,7 @@ use App\Support\BasketCodes;
 use App\Support\Billing;
 use App\Support\CustomerNotice;
 use App\Support\Js;
+use App\Support\WashRules;
 use Database\Seeders\Demo\Mulberry32;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -113,11 +114,57 @@ class DemoSeeder extends Seeder
         ['Maria Santos', 0, [9, 20], [[self::WDF, 6.5], [self::IRONING, 6], [self::EXPRESS, 1]], 'washing', 200, null, self::KEVIN, 8, 'Separate white uniforms. Unscented conditioner.'],
     ];
 
+    /**
+     * Soap items added to the supplies (generic names the owner renames to brands): [id, name, unit id, reorder level].
+     * Detergent powder (1, kg), Fabric conditioner (2, L) and Liquid detergent (4, L) come from the reference data.
+     */
+    private const DEMO_SOAPS = [
+        [9, 'Color-safe detergent', 2, 4],
+        [10, 'Stain remover', 2, 3],
+        [11, 'Detergent pods', 3, 40],
+    ];
+
+    /** Unit code of each soap item. */
+    private const SOAP_UNITS = [1 => 'kg', 2 => 'L', 4 => 'L', 9 => 'L', 10 => 'L', 11 => 'pcs'];
+
+    /** Which soap each wash type uses and how much per kilo, in g (kg items), mL (L items) or pieces: [item id, usage]. */
+    private const WASH_SOAPS = [
+        'Regular washing' => [[1, 25]],
+        'Colored clothes' => [[9, 30]],
+        'Softness and fragrance' => [[4, 30], [2, 20]],
+        'Stain removal' => [[1, 25], [10, 15]],
+        'Tough stains' => [[11, 0.25], [10, 25]],
+    ];
+
+    /** The share of orders per wash type in the history (a second random stream: the main one is untouched). */
+    private const WASH_MIX = [['Regular washing', 0.55], ['Colored clothes', 0.15], ['Softness and fragrance', 0.15], ['Stain removal', 0.10], ['Tough stains', 0.05]];
+
+    /** Tough stains carries a surcharge to show the feature. */
+    private const TOUGH_STAINS_SURCHARGE_CENTS = 500;
+
+    /** The share of GCash payments that were made with Maya instead. */
+    private const MAYA_SHARE_OF_GCASH = 0.35;
+
     private const MINUTE = 60_000;
 
     private const HOUR = 3_600_000;
 
     private Mulberry32 $rand;
+
+    /** A second stream for the wash types and Maya, so the original history keeps its exact numbers. */
+    private Mulberry32 $wash;
+
+    /** @var array<string, int> wash type name => id */
+    private array $washIds = [];
+
+    /** @var array<string, int> wash type name => surcharge per kg (centavos) */
+    private array $washSurcharge = [];
+
+    /** @var list<array<string, mixed>> the soap each order used */
+    private array $soapMoves = [];
+
+    /** @var array<int, array<string, float>> item id => day => amount used by orders */
+    private array $soapDaily = [];
 
     private int $nowMs;
 
@@ -132,6 +179,7 @@ class DemoSeeder extends Seeder
     {
         $started = microtime(true);
         $this->rand = new Mulberry32(20261031);
+        $this->wash = new Mulberry32(20261120);
         // SEED_NOW_MS pins "now" (epoch ms), to compare with the frontend seed for the same instant.
         $this->nowMs = (int) (env('SEED_NOW_MS') ?: floor(microtime(true) * 1000));
         $this->today = T::day($this->nowMs);
@@ -142,6 +190,7 @@ class DemoSeeder extends Seeder
         $reference->seededAt = $this->dt($seededAt);
         $reference->setContainer($this->container)->setCommand($this->command);
         $reference->run();
+        $this->washTypeSetup($this->dt($seededAt));
 
         foreach ([[self::LIZA, 150 * self::MINUTE], [self::KEVIN, 190 * self::MINUTE], [self::AIRA, 24 * self::HOUR], [self::JESSA, 49 * 24 * self::HOUR]] as [$id, $ago]) {
             DB::table('users')->where('id', $id)->update(['last_login_at' => $this->dt($this->nowMs - $ago)]);
@@ -553,12 +602,16 @@ class DemoSeeder extends Seeder
         $addPayment = function (array $order, int $amount, string $method, int $by, int|float $at) use (&$receiptSeq): int {
             $receiptSeq++;
             $id = count($this->rows['payments']) + 1;
+            // The reference number draws from the main stream exactly as before; whether a digital payment
+            // was Maya is decided on the second stream.
+            $reference = $method === 'gcash' ? '5012'.(int) floor(100000000 + $this->rand() * 899999999) : null;
+            $effective = $method === 'gcash' && $this->wash->next() < self::MAYA_SHARE_OF_GCASH ? 'maya' : $method;
             $this->rows['payments'][] = [
                 'id' => $id,
                 'order_id' => $order['id'],
-                'payment_method_id' => $method === 'cash' ? 1 : 2,
+                'payment_method_id' => $effective === 'cash' ? 1 : ($effective === 'gcash' ? 2 : 3),
                 'amount_cents' => $amount,
-                'reference_number' => $method === 'gcash' ? '5012'.(int) floor(100000000 + $this->rand() * 899999999) : null,
+                'reference_number' => $reference,
                 'receipt_number' => 'OR-'.str_pad((string) $receiptSeq, 6, '0', STR_PAD_LEFT),
                 'received_by' => $by,
                 'paid_at' => $at,
@@ -566,7 +619,7 @@ class DemoSeeder extends Seeder
                 'voided_by' => null,
                 'void_reason' => null,
             ];
-            $this->audit($at, $by, 'payment.recorded', 'payment', $id, ['order_number' => $order['order_number'], 'amount_cents' => $amount, 'method' => $method]);
+            $this->audit($at, $by, 'payment.recorded', 'payment', $id, ['order_number' => $order['order_number'], 'amount_cents' => $amount, 'method' => $effective]);
 
             return $id;
         };
@@ -578,12 +631,21 @@ class DemoSeeder extends Seeder
             $id = count($this->rows['orders']) + 1;
             $last = end($plan['steps']) ?: ['status' => 1, 'at' => $plan['receivedAt'], 'by' => $plan['by']];
             $daysAgo = $this->daysAgoOf($plan['receivedAt']);
+            $washName = $this->pickWashType();
+            $perKgTenths = 0;
+            foreach ($plan['items'] as [$serviceId, $amount]) {
+                if ($serviceId === self::WDF || $serviceId === self::WASH) {
+                    $perKgTenths += Billing::kgToTenths($amount);
+                }
+            }
             $order = [
                 'id' => $id,
                 'order_number' => "LF-{$key}-".str_pad((string) $sequences[$key], 4, '0', STR_PAD_LEFT),
                 'customer_id' => $plan['customer'],
                 'current_status_id' => $last['status'],
                 'received_by' => $plan['by'],
+                'wash_type_id' => $this->washIds[$washName],
+                'wash_surcharge_per_kg_cents' => $this->washSurcharge[$washName],
                 'received_at' => $plan['receivedAt'],
                 'promised_at' => $plan['promisedAt'],
                 'released_at' => $last['status'] === 6 ? $last['at'] : null,
@@ -610,6 +672,10 @@ class DemoSeeder extends Seeder
                     'subtotal_cents' => $subtotal,
                 ];
             }
+
+            // The wash type surcharge and the soap this order used.
+            $total += WashRules::surchargeCents($perKgTenths, $this->washSurcharge[$washName]);
+            $this->useSoap($order, $washName, $perKgTenths, (int) $plan['receivedAt'] + self::MINUTE, $plan['by']);
 
             foreach ($plan['steps'] as $index => $step) {
                 $previous = $plan['steps'][$index - 1] ?? null;
@@ -749,6 +815,54 @@ class DemoSeeder extends Seeder
         usort($this->rows['audit_logs'], fn ($a, $b) => $a['created_at'] <=> $b['created_at']);
     }
 
+    /** The demo's soap items, the wash types' soap assignments and Tough stains' surcharge. */
+    private function washTypeSetup(string $at): void
+    {
+        foreach (self::DEMO_SOAPS as [$id, $name, $unit, $reorder]) {
+            DB::table('inventory_items')->insert(['id' => $id, 'name' => $name, 'unit_id' => $unit, 'reorder_level' => $reorder, 'is_active' => true, 'created_at' => $at, 'updated_at' => $at]);
+        }
+
+        DB::table('wash_types')->where('name', 'Tough stains')->update(['surcharge_per_kg_cents' => self::TOUGH_STAINS_SURCHARGE_CENTS]);
+        foreach (DB::table('wash_types')->get(['id', 'name', 'surcharge_per_kg_cents']) as $row) {
+            $this->washIds[$row->name] = (int) $row->id;
+            $this->washSurcharge[$row->name] = (int) $row->surcharge_per_kg_cents;
+        }
+        foreach (self::WASH_SOAPS as $name => $soaps) {
+            foreach ($soaps as [$itemId, $usage]) {
+                DB::table('wash_type_supplies')->insert(['wash_type_id' => $this->washIds[$name], 'inventory_item_id' => $itemId, 'usage_per_kg_small_unit' => $usage, 'created_at' => $at, 'updated_at' => $at]);
+            }
+        }
+    }
+
+    private function pickWashType(): string
+    {
+        $roll = $this->wash->next();
+        foreach (self::WASH_MIX as [$name, $share]) {
+            $roll -= $share;
+            if ($roll <= 0) {
+                return $name;
+            }
+        }
+
+        return self::WASH_MIX[0][0];
+    }
+
+    /** One usage movement per soap of the order's wash type (none when the order has no per-kg laundry). */
+    private function useSoap(array $order, string $washName, int $perKgTenths, int $at, int $by): void
+    {
+        foreach (self::WASH_SOAPS[$washName] as [$itemId, $usage]) {
+            $quantity = WashRules::usageQuantity(self::SOAP_UNITS[$itemId], (float) $usage, $perKgTenths);
+            if ($quantity <= 0) {
+                continue;
+            }
+            $this->soapDaily[$itemId][T::day($at)] = ($this->soapDaily[$itemId][T::day($at)] ?? 0) + $quantity;
+            $this->soapMoves[] = [
+                'item' => $itemId, 'type' => 'usage', 'quantity' => $quantity, 'required' => $quantity, 'order' => $order['id'], 'at' => $at, 'by' => $by,
+                'remarks' => "Order {$order['order_number']} · {$washName} · ".($perKgTenths / 10).' kg',
+            ];
+        }
+    }
+
     private function openAccount(int $customerId, string $fullName, int|float $at): void
     {
         $this->rows['customer_accounts'][] = [
@@ -777,11 +891,15 @@ class DemoSeeder extends Seeder
 
             return $sum;
         };
+        // The soaps (null) are not guessed: they are what the orders' wash types used (useSoap).
         $supplies = [
-            [1, fn ($l) => $kg($l, self::WDF, self::WASH) * 0.012, 2, 25, false],
-            [2, fn ($l) => $kg($l, self::WDF) * 0.007, 3.5, 12, false],
+            [1, null, 2, 25, false],
+            [2, null, 3.5, 12, false],
             [3, fn ($l) => 1, 40, 300, true],
-            [4, fn ($l) => $kg($l, self::COMFORTER) * 0.3 + $kg($l, self::WASH) * 0.004, 12, 10, false],
+            [4, null, 12, 10, false],
+            [9, null, 9, 10, false],
+            [10, null, 8, 5, false],
+            [11, null, 120, 100, true],
             [5, fn ($l) => $kg($l, self::WDF) * 0.0015, 6, 4, false],
             [6, fn ($l) => $kg($l, self::IRONING) * 0.5, 120, 150, true],
             [7, fn ($l) => 1 / 80, 9, 6, true],
@@ -798,15 +916,22 @@ class DemoSeeder extends Seeder
         }
         $firstDay = T::addDays($this->today, -self::HISTORY_DAYS);
         $days = T::eachDay(['from' => $firstDay, 'to' => $this->today]);
-        $reorders = array_column(ReferenceDataSeeder::INVENTORY_ITEMS, 3, 0);
+        $allItems = array_merge(ReferenceDataSeeder::INVENTORY_ITEMS, self::DEMO_SOAPS);
+        $reorders = array_column($allItems, 3, 0);
 
         $moves = [];
         foreach ($supplies as [$item, $use, $target, $restock, $whole]) {
             $cap = $reorders[$item] + $restock;
-            $round = fn (float $value) => $whole ? Js::round($value) : Js::round($value * 10) / 10;
+            $soap = $use === null;
+            $round = fn (float $value) => $whole ? Js::round($value) : ($soap ? Js::roundTo($value, 3) : Js::round($value * 10) / 10);
             $usage = [];
             $carry = 0.0;
             foreach ($days as $day) {
+                if ($soap) {
+                    $usage[] = Js::roundTo($this->soapDaily[$item][$day] ?? 0, 3);
+
+                    continue;
+                }
                 // seed.ts adds the carry after the day's sum; keep that order for identical floats.
                 $raw = array_sum(array_map($use, $linesByDay[$day] ?? [])) + $carry;
                 $used = $round($raw);
@@ -820,7 +945,7 @@ class DemoSeeder extends Seeder
                 $used = $usage[$index];
                 $daysAgo = self::HISTORY_DAYS - $index;
                 $closing = $index === count($days) - 1 ? $this->nowMs - 40 * self::MINUTE : T::instant($day, 18, 45);
-                if ($used > 0) {
+                if ($used > 0 && ! $soap) {
                     $moves[] = ['item' => $item, 'type' => 'out', 'quantity' => $used, 'at' => $closing, 'by' => $this->staffOn($daysAgo), 'remarks' => 'Used today'];
                 }
                 $level = $round($level + $used);
@@ -833,17 +958,25 @@ class DemoSeeder extends Seeder
             $moves[] = ['item' => $item, 'type' => 'in', 'quantity' => $level, 'at' => T::instant($firstDay, 7, 30), 'by' => self::LIZA, 'remarks' => 'Opening stock'];
         }
 
+        foreach ($this->soapMoves as $soapMove) {
+            $moves[] = $soapMove;
+        }
         usort($moves, fn ($a, $b) => ($a['at'] <=> $b['at']) ?: (($a['type'] === 'in' ? 0 : 1) <=> ($b['type'] === 'in' ? 0 : 1)));
-        $names = array_column(ReferenceDataSeeder::INVENTORY_ITEMS, 1, 0);
+        $names = array_column($allItems, 1, 0);
         foreach ($moves as $move) {
             $this->rows['inventory_movements'][] = [
                 'item_id' => $move['item'],
                 'user_id' => $move['by'],
+                'order_id' => $move['order'] ?? null,
                 'type' => $move['type'],
                 'quantity' => $move['quantity'],
+                'required_quantity' => $move['required'] ?? null,
                 'remarks' => $move['remarks'],
                 'moved_at' => $move['at'],
             ];
+            if ($move['type'] === 'usage') {
+                continue;
+            }
             $this->audit($move['at'], $move['by'], 'inventory.movement', 'inventory_item', $move['item'], [
                 'item_name' => $names[$move['item']],
                 'type' => $move['type'],

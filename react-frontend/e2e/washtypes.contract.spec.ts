@@ -41,7 +41,7 @@ async function takeInOrder(page: Page, washType: string) {
   await page.getByRole('listbox', { name: 'Matching customers' }).getByText('Maria Santos').click();
   await page.getByRole('combobox', { name: 'Add an available basket' }).click();
   await page.getByRole('option').first().click();
-  await page.getByLabel('Weight for Wash-Dry-Fold').fill('6.5');
+  await page.getByLabel('Weight for Wash-Dry-Fold', { exact: true }).fill('6.5');
   await page.getByRole('radio', { name: new RegExp(washType) }).check();
   await page.getByLabel('Pay at pickup').check();
 }
@@ -247,7 +247,7 @@ for (const width of [1440, 390]) {
     await page.getByRole('combobox', { name: 'Add an available basket' }).click();
     await page.getByRole('option').first().click();
     if (phone) await page.getByRole('button', { name: /^Next: Services/ }).click();
-    await page.getByLabel('Weight for Wash-Dry-Fold').fill('6.5');
+    await page.getByLabel('Weight for Wash-Dry-Fold', { exact: true }).fill('6.5');
     await page.getByRole('radio', { name: /Tough stains/ }).check();
     await expectFits(page, 'New Order, wash type');
     await shot(page, 'new-order-wash-type', width);

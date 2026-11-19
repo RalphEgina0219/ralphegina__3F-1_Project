@@ -25,6 +25,7 @@ class ShopSettingsResource extends ApiResource
                 $this->mergeWhen($request->routeIs('settings.*'), fn () => [
                     'openingHours' => $this->opening_hours,
                     'claimPolicyDays' => (int) $this->claim_policy_days,
+                    'blockOrdersOnLowSoap' => (bool) $this->block_orders_on_low_soap,
                 ]),
             ],
         ];

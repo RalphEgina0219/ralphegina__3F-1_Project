@@ -28,12 +28,20 @@ const positive = (value: string | null) => {
   return Number.isInteger(number) && number > 0 ? number : undefined;
 };
 
+/** Like positive, but 0 counts: it is the wash type surcharge category. */
+const serviceId = (value: string | null) => {
+  const number = Number(value);
+  return value !== null && value !== '' && Number.isInteger(number) && number >= 0
+    ? number
+    : undefined;
+};
+
 function readFilters(query: URLSearchParams): ReportFilters {
   const method = query.get('method');
   const status = query.get('status');
   return {
-    service: positive(query.get('service')),
-    method: method === 'cash' || method === 'gcash' ? method : undefined,
+    service: serviceId(query.get('service')),
+    method: method === 'cash' || method === 'gcash' || method === 'maya' ? method : undefined,
     status: STATUS_ORDER.includes(status as StatusCode) ? (status as StatusCode) : undefined,
     staff: positive(query.get('staff')),
     barangay: query.get('barangay')?.trim() || undefined,

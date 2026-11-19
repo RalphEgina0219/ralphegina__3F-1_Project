@@ -1,23 +1,25 @@
-name: Notifications
+name: Users
 description: |-
 
-  The staff bell: orders ready for pickup and low stock.
+  Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+  their name on the history they made.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/notifications
+    uri: api/v1/users
     metadata:
       custom: []
-      groupName: Notifications
+      groupName: Users
       groupDescription: |-
 
-        The staff bell: orders ready for pickup and low stock.
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
       subgroup: ''
       subgroupDescription: ''
-      title: 'List staff notifications'
-      description: 'Newest first. `meta.unread` counts the unread ones.'
+      title: 'List staff users'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -34,8 +36,8 @@ endpoints:
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":[{"type":"notification","id":139,"attributes":{"type":"low_stock","message":"Detergent powder is critically low (2 kg left).","sentAt":"2026-11-10T12:15:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":141,"attributes":{"type":"low_stock","message":"Plastic laundry bags are below their reorder level (40 pcs left).","sentAt":"2026-11-09T12:55:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":87,"attributes":{"type":"ready_for_pickup","message":"LF-261109-0019 is ready for pickup (Joy Mendoza).","sentAt":"2026-11-09T12:25:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1640}}}},{"type":"notification","id":57,"attributes":{"type":"ready_for_pickup","message":"LF-261109-0013 is ready for pickup (Carmela Aquino).","sentAt":"2026-11-09T11:36:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1634}}}},{"type":"notification","id":140,"attributes":{"type":"low_stock","message":"Fabric conditioner is below its reorder level (3.5 L left).","sentAt":"2026-11-08T12:55:29.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":null}}},{"type":"notification","id":2,"attributes":{"type":"ready_for_pickup","message":"LF-261107-0013 is ready for pickup (Lorna Dela Cruz).","sentAt":"2026-11-07T10:40:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1594}}}},{"type":"notification","id":1,"attributes":{"type":"ready_for_pickup","message":"LF-261106-0009 is ready for pickup (Arnel Pascual).","sentAt":"2026-11-06T06:28:00.000Z","readAt":null,"channel":"in_app","status":"recorded"},"relationships":{"order":{"data":{"type":"order","id":1574}}}}],"links":{"first":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","last":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/notifications?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"http:\/\/laundryflow.test\/api\/v1\/notifications","per_page":20,"to":7,"total":7,"unread":7}}'
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -46,7 +48,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -54,16 +56,141 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: 'api/v1/notifications/{notification_id}/read'
+    uri: api/v1/users
     metadata:
       custom: []
-      groupName: Notifications
+      groupName: Users
       groupDescription: |-
 
-        The staff bell: orders ready for pickup and low stock.
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Mark a notification as read'
+      title: 'Add a staff user'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.name:
+        custom: []
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Rico Santos'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.username:
+        custom: []
+        name: data.attributes.username
+        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        required: true
+        example: rico.s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.role:
+        custom: []
+        name: data.attributes.role
+        description: 'admin or staff.'
+        required: true
+        example: staff
+        type: string
+        enumValues:
+          - admin
+          - staff
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.password:
+        custom: []
+        name: data.attributes.password
+        description: 'At least 8 characters. Must be at least 8 characters.'
+        required: true
+        example: password123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: 'true re-enables a disabled account.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          name: 'Rico Santos'
+          username: rico.s
+          role: staff
+          password: password123
+          isActive: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/users/{id}'
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Show a staff user'
       description: ''
       authenticated: true
       deprecated: false
@@ -72,10 +199,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      notification_id:
+      id:
         custom: []
-        name: notification_id
-        description: 'The ID of the notification.'
+        name: id
+        description: 'The ID of the user.'
         required: true
         example: 1
         type: integer
@@ -84,7 +211,339 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      notification_id: 1
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/users/{user_id}'
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Replace a staff user (name, username and role)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      user_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.name:
+        custom: []
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Rico Santos'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.username:
+        custom: []
+        name: data.attributes.username
+        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        required: true
+        example: rico.s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.role:
+        custom: []
+        name: data.attributes.role
+        description: 'admin or staff.'
+        required: true
+        example: staff
+        type: string
+        enumValues:
+          - admin
+          - staff
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.password:
+        custom: []
+        name: data.attributes.password
+        description: 'At least 8 characters. Must be at least 8 characters.'
+        required: false
+        example: password123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: 'true re-enables a disabled account.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          name: 'Rico Santos'
+          username: rico.s
+          role: staff
+          password: password123
+          isActive: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/users/{id}'
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update a staff user (fields sent; isActive true re-enables)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.name:
+        custom: []
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: false
+        example: 'Rico Santos'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.username:
+        custom: []
+        name: data.attributes.username
+        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        required: false
+        example: rico.s
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.role:
+        custom: []
+        name: data.attributes.role
+        description: 'admin or staff.'
+        required: false
+        example: staff
+        type: string
+        enumValues:
+          - admin
+          - staff
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.password:
+        custom: []
+        name: data.attributes.password
+        description: 'At least 8 characters. Must be at least 8 characters.'
+        required: false
+        example: password123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: 'true re-enables a disabled account.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          name: 'Rico Santos'
+          username: rico.s
+          role: staff
+          password: password123
+          isActive: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/users/{user_id}/disable'
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Disable a staff user'
+      description: 'The account can no longer sign in, and its tokens stop working at once. Not your own account.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      user_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -95,7 +554,159 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/users/{user_id}/reset-password'
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
+        their name on the history they made.
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Reset a staff user's password"
+      description: |-
+        Returns a temporary password, once. Only its hash is stored. The user must choose a new
+        password at their next sign-in: until then every route but `me`, `logout`, `refresh` and
+        `PUT /auth/password` answers 403.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      user_id:
+        custom: []
+        name: user_id
+        description: 'The ID of the user.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      user_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/roles/permissions
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        The permissions the owner can switch on for all staff.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Staff permissions'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/roles/staff/permissions
+    metadata:
+      custom: []
+      groupName: Users
+      groupDescription: |-
+
+        The permissions the owner can switch on for all staff.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Replace the staff permissions'
+      description: |-
+        The whole set at once (PUT). Unknown codes are ignored. Turning one off takes effect
+        immediately; a newly granted one arrives with each staff member's next sign-in or refresh.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes.permissions:
+        custom: []
+        name: data.attributes.permissions
+        description: 'The codes to switch on.'
+        required: true
+        example:
+          - payments.record
+          - inventory.stock_out
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null

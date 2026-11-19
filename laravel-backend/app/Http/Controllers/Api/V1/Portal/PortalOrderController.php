@@ -33,7 +33,7 @@ class PortalOrderController extends APIController
         $released = OrderStatus::idFor('released');
         $own = fn (): Builder => Order::query()->where('customer_id', $this->customerId());
 
-        $query = $own()->withMoney()->with(['baskets', 'items.service'])->orderByDesc('received_at')->orderByDesc('id');
+        $query = $own()->withMoney()->with(['baskets', 'items.service', 'washType'])->orderByDesc('received_at')->orderByDesc('id');
         match (request()->query('status')) {
             'active' => $query->where('current_status_id', '!=', $released),
             'completed' => $query->where('current_status_id', $released),
@@ -66,7 +66,7 @@ class PortalOrderController extends APIController
             ->where('customer_id', $this->customerId())
             ->where('order_number', strtoupper($orderNumber))
             ->withMoney()
-            ->with(['baskets', 'items.service', 'payments.method', 'statusHistory', 'customer'])
+            ->with(['baskets', 'items.service', 'washType', 'payments.method', 'statusHistory', 'customer'])
             ->first();
 
         if (! $order) {

@@ -5,6 +5,7 @@ namespace App\Support\Analytics;
 use App\Models\InventoryItem;
 use App\Support\InventoryRules;
 use App\Support\Js;
+use App\Support\WashRules;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,6 +16,11 @@ use Illuminate\Support\Facades\DB;
  */
 final class Facts
 {
+    /** The pseudo service id and name under which wash type surcharges are reported. */
+    public const SURCHARGE_ID = 0;
+
+    public const SURCHARGE_NAME = 'Wash type surcharges';
+
     public static function load(): array
     {
         $paid = DB::table('payments')->whereNull('voided_at')
@@ -47,14 +53,21 @@ final class Facts
             ->join('customers as c', 'c.id', '=', 'o.customer_id')
             ->join('barangays as b', 'b.id', '=', 'c.barangay_id')
             ->join('order_statuses as st', 'st.id', '=', 'o.current_status_id')
+            ->join('wash_types as w', 'w.id', '=', 'o.wash_type_id')
             ->orderBy('o.id')
             ->get([
-                'o.id', 'o.order_number', 'o.customer_id', 'c.full_name', 'b.name as barangay', 'o.received_by', 'st.code as status',
+                'o.id', 'o.order_number', 'o.customer_id', 'c.full_name', 'b.name as barangay', 'o.received_by', 'st.code as status', 'o.wash_type_id', 'w.name as wash_type', 'o.wash_surcharge_per_kg_cents',
                 DB::raw('UNIX_TIMESTAMP(o.received_at) * 1000 AS received_ms'),
                 DB::raw('UNIX_TIMESTAMP(o.promised_at) * 1000 AS promised_ms'),
                 DB::raw('UNIX_TIMESTAMP(o.released_at) * 1000 AS released_ms'),
             ]) as $row) {
             $orderLines = $lines[$row->id] ?? [];
+            $kilos = Js::roundTo(array_sum(array_column($orderLines, 'kilos')), 1);
+            // The wash type surcharge is its own revenue category, so totals still reconcile.
+            $surcharge = WashRules::surchargeCents(Js::round($kilos * 10), (int) $row->wash_surcharge_per_kg_cents);
+            if ($surcharge > 0) {
+                $orderLines[] = ['service_id' => self::SURCHARGE_ID, 'service_name' => self::SURCHARGE_NAME, 'subtotal_cents' => $surcharge, 'kilos' => 0, 'pieces' => 0, 'flat' => false, 'surcharge' => true];
+            }
             $received = (int) $row->received_ms;
             $since = $history[$row->id]->status_since ?? null;
             $ready = $history[$row->id]->ready_at ?? null;
@@ -71,10 +84,12 @@ final class Facts
                 'ready_at' => $ready !== null ? (int) $ready : null,
                 'released_at' => $row->released_ms !== null ? (int) $row->released_ms : null,
                 'status' => $row->status,
+                'wash_type_id' => (int) $row->wash_type_id,
+                'wash_type' => $row->wash_type,
                 'status_since' => $since !== null ? (int) $since : $received,
                 'total_cents' => (int) array_sum(array_column($orderLines, 'subtotal_cents')),
                 'paid_cents' => (int) ($paid[$row->id] ?? 0),
-                'kilos' => Js::roundTo(array_sum(array_column($orderLines, 'kilos')), 1),
+                'kilos' => $kilos,
                 'pieces' => (int) array_sum(array_column($orderLines, 'pieces')),
                 'express' => in_array(true, array_column($orderLines, 'flat'), true),
                 'lines' => $orderLines,
@@ -109,9 +124,10 @@ final class Facts
             ])->all();
 
         $movements = DB::table('inventory_movements')->orderBy('id')
-            ->get(['item_id', 'type', 'quantity', 'user_id', DB::raw('UNIX_TIMESTAMP(moved_at) * 1000 AS moved_ms')])
+            ->get(['item_id', 'order_id', 'type', 'quantity', 'user_id', DB::raw('UNIX_TIMESTAMP(moved_at) * 1000 AS moved_ms')])
             ->map(fn ($row) => [
                 'item_id' => (int) $row->item_id,
+                'order_id' => $row->order_id === null ? null : (int) $row->order_id,
                 'type' => $row->type,
                 'quantity' => (float) $row->quantity,
                 'moved_at' => (int) $row->moved_ms,

@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Models\Service;
 use App\Models\ShopSetting;
 use App\Models\User;
+use App\Models\WashType;
 use App\Permissions\V1\Abilities;
 use App\Policies\V1\AuditLogPolicy;
 use App\Policies\V1\BasketPolicy;
@@ -25,6 +26,7 @@ use App\Policies\V1\PaymentPolicy;
 use App\Policies\V1\ServicePolicy;
 use App\Policies\V1\ShopSettingPolicy;
 use App\Policies\V1\UserPolicy;
+use App\Policies\V1\WashTypePolicy;
 use App\Support\Iso;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -59,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         // Policies live in a versioned folder, so they are registered explicitly (course L19, L23).
         Gate::policy(Customer::class, CustomerPolicy::class);
         Gate::policy(Service::class, ServicePolicy::class);
+        Gate::policy(WashType::class, WashTypePolicy::class);
         Gate::policy(Basket::class, BasketPolicy::class);
         Gate::policy(Order::class, OrderPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);

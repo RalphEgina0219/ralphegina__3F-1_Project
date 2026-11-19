@@ -25,7 +25,7 @@ class ReportController extends APIController
      * @queryParam to string Last Manila day, inclusive. Example: 2026-11-08
      * @queryParam compare string previous (default) or none. Example: previous
      * @queryParam service integer One service (payments split by allocation). Example: 1
-     * @queryParam method string cash or gcash. Example: gcash
+     * @queryParam method string cash, gcash or maya. Example: maya
      * @queryParam status string One status code. Example: ready_for_pickup
      * @queryParam staff integer One staff member. Example: 2
      * @queryParam barangay string One barangay by name. Example: Poblacion
@@ -54,8 +54,8 @@ class ReportController extends APIController
         $barangay = $request->query('barangay');
 
         return [
-            'service' => $positive($request->query('service')),
-            'method' => in_array($method, ['cash', 'gcash'], true) ? $method : null,
+            'service' => is_numeric($request->query('service')) && (int) $request->query('service') >= 0 ? (int) $request->query('service') : null,
+            'method' => in_array($method, ['cash', 'gcash', 'maya'], true) ? $method : null,
             'status' => in_array($status, StatusRules::ORDER, true) ? $status : null,
             'staff' => $positive($request->query('staff')),
             'barangay' => is_string($barangay) && trim($barangay) !== '' ? trim($barangay) : null,

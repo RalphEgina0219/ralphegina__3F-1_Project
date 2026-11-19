@@ -4,6 +4,7 @@ import { ChartCard, chartStatus } from '@/components/charts/ChartCard';
 import {
   CUSTOMER_COLORS,
   METHOD_COLORS,
+  type MethodKey,
   STAGE_COLORS,
   UI,
   serviceColor,
@@ -227,11 +228,11 @@ export default function AdminCharts({ query }: { query: Query }) {
       <ChartCard
         className="lg:col-span-4"
         title="Payment method mix"
-        subtitle={`Cash and GCash collected, ${period}`}
+        subtitle={`Cash, GCash and Maya collected, ${period}`}
         legend={mix.map((m) => ({
           key: m.key,
           label: m.label,
-          color: METHOD_COLORS[m.key as 'cash' | 'gcash'],
+          color: METHOD_COLORS[m.key as MethodKey],
           detail: `${formatPeso(m.value)} · ${shareLabel(m.share)}`,
         }))}
         status={chartStatus(query, collectedTotal === 0)}
@@ -264,7 +265,7 @@ export default function AdminCharts({ query }: { query: Query }) {
             label: m.label,
             value: m.value,
             share: m.share,
-            color: METHOD_COLORS[m.key as 'cash' | 'gcash'],
+            color: METHOD_COLORS[m.key as MethodKey],
           }))}
         />
       </ChartCard>

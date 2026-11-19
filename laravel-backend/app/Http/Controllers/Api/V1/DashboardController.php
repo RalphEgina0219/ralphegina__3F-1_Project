@@ -89,6 +89,7 @@ class DashboardController extends APIController
             $summary['kpis']['salesTodayCents'] = $sum(null, $todayKey);
             $summary['kpis']['salesTodayCashCents'] = $sum('cash', $todayKey);
             $summary['kpis']['salesTodayGcashCents'] = $sum('gcash', $todayKey);
+            $summary['kpis']['salesTodayMayaCents'] = $sum('maya', $todayKey);
             $summary['weeklySales'] = collect(range(6, 0))->map(fn (int $back) => [
                 'date' => $today->subDays($back)->toDateString(),
                 'salesCents' => $sum(null, $today->subDays($back)->toDateString()),

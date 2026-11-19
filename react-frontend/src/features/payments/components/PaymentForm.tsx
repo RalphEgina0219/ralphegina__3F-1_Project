@@ -17,6 +17,7 @@ import { useRecordPayment } from '../api';
 const METHOD_OPTIONS = [
   { value: 'cash', label: 'Cash' },
   { value: 'gcash', label: 'GCash' },
+  { value: 'maya', label: 'Maya' },
 ];
 
 interface PaymentFormProps {
@@ -54,7 +55,7 @@ export function PaymentForm({ order, formId, onSaved, onPendingChange }: Payment
         orderId: order.id,
         amount_cents: parseMoney(form.amount) ?? 0,
         payment_method: form.method,
-        reference_number: form.method === 'gcash' ? form.reference : null,
+        reference_number: form.method === 'gcash' || form.method === 'maya' ? form.reference : null,
       },
       {
         onSuccess: (saved) => {
@@ -114,8 +115,12 @@ export function PaymentForm({ order, formId, onSaved, onPendingChange }: Payment
           />
         )}
       </Field>
-      {method === 'gcash' && (
-        <Field label="GCash reference no." required error={errors.reference?.message}>
+      {(method === 'gcash' || method === 'maya') && (
+        <Field
+          label={`${method === 'maya' ? 'Maya' : 'GCash'} reference no.`}
+          required
+          error={errors.reference?.message}
+        >
           {(field) => (
             <Input {...field} {...register('reference')} inputMode="numeric" autoComplete="off" />
           )}

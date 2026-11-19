@@ -9,9 +9,11 @@ use App\Models\OrderItem;
 use App\Models\OrderStatus;
 use App\Models\OrderStatusHistory;
 use App\Models\User;
+use App\Models\WashType;
 use App\Support\Audit;
 use App\Support\Notifier;
 use App\Support\Sequences;
+use App\Support\WashRules;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +27,10 @@ use Illuminate\Validation\ValidationException;
  */
 final class CreateOrder
 {
-    public function __construct(private readonly Payments $payments) {}
+    public function __construct(private readonly Payments $payments, private readonly SoapUsage $soap) {}
 
     /**
-     * @param  array{customer_id: int, basket_ids: list<int>, lines: list<array<string, mixed>>, promised_at: string, notes: ?string, payment: ?array}  $input
+     * @param  array{customer_id: int, basket_ids: list<int>, lines: list<array<string, mixed>>, wash_type_id: int, wash_surcharge_per_kg_cents: int, promised_at: string, notes: ?string, payment: ?array}  $input
      */
     public function __invoke(array $input, User $staff): Order
     {
@@ -77,12 +79,23 @@ final class CreateOrder
             }
         }
 
+        // The wash type's soap, checked under the item locks before an order number is drawn.
+        $washType = WashType::query()->findOrFail($input['wash_type_id']);
+        $perKgTenths = WashRules::perKgTenths(array_map(fn ($line) => [
+            'pricing_type' => ($line['weight_kg'] ?? null) === null ? 'other' : 'per_kg',
+            'weight_kg' => $line['weight_kg'] ?? null,
+        ], $input['lines']));
+        $soapPlan = $this->soap->plan($washType, $perKgTenths);
+        $this->soap->guard($soapPlan);
+
         $receivedId = OrderStatus::idFor('received');
         $order = Order::query()->create([
             'order_number' => Sequences::nextOrderNumber($now),
             'customer_id' => $input['customer_id'],
             'current_status_id' => $receivedId,
             'received_by' => $staff->id,
+            'wash_type_id' => $washType->id,
+            'wash_surcharge_per_kg_cents' => $input['wash_surcharge_per_kg_cents'],
             'received_at' => $now,
             'promised_at' => CarbonImmutable::parse($input['promised_at']),
             'notes' => $input['notes'],
@@ -91,6 +104,8 @@ final class CreateOrder
         foreach ($input['lines'] as $line) {
             OrderItem::query()->create(['order_id' => $order->id] + $line);
         }
+
+        $this->soap->deduct($order, $washType, $perKgTenths, $soapPlan, $staff);
 
         OrderStatusHistory::query()->create([
             'order_id' => $order->id,
@@ -119,6 +134,7 @@ final class CreateOrder
         Audit::record($staff->id, 'order.created', 'order', $order->id, [
             'order_number' => $order->order_number,
             'basket_ids' => $baskets->pluck('id')->all(),
+            'wash_type' => $washType->name,
         ]);
 
         return $order;

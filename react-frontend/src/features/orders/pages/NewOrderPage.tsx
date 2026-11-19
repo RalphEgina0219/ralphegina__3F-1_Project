@@ -23,7 +23,7 @@ import { useCustomer } from '@/features/customers/api';
 import { CreateAccountDialog } from '@/features/customers/components/CreateAccountDialog';
 import { CustomerFormDialog } from '@/features/customers/components/CustomerFormDialog';
 import { useAvailableBaskets } from '@/features/baskets/api';
-import { useServices } from '@/features/settings/api';
+import { useServices, useWashTypes } from '@/features/settings/api';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { applyFieldErrors, errorMessage, errorStatus } from '@/lib/api';
 import { billableQuantity, kgToTenths, lineSubtotalCents } from '@/lib/billing';
@@ -32,6 +32,15 @@ import { toDateTimeLocal } from '@/lib/dates';
 import { formatKg, formatPhone, itemRateSuffix } from '@/lib/format';
 import { centsToInput, formatMoney, formatRate, parseMoney } from '@/lib/money';
 import { useUnsavedChanges } from '@/lib/unsaved';
+import {
+  perKgTenths,
+  shortages,
+  soapPlan,
+  soapPreview,
+  WASH_TYPE_HINT,
+  washBillLine,
+  washSurchargeCents,
+} from '@/lib/wash';
 import { newOrderSchema, type NewOrderForm } from '@/schemas/order';
 import type { BasketRefDto, CustomerDto, NewOrderInput, Service } from '@/types/api';
 import { useCreateOrder } from '../api';
@@ -121,6 +130,7 @@ export default function NewOrderPage() {
   const [params] = useSearchParams();
   const canTakePayment = useCan('payments.record');
   const services = useServices({ active: true });
+  const washTypes = useWashTypes({ active: true });
   const createOrder = useCreateOrder();
   const isPhone = useMediaQuery('(max-width: 767px)');
   const [step, setStep] = useState(1);
@@ -145,6 +155,7 @@ export default function NewOrderPage() {
     defaultValues: {
       customer_id: 0,
       basket_ids: [],
+      wash_type_id: 0,
       items: [],
       addons: [],
       promised_at: defaultPromisedAt(),
@@ -159,6 +170,7 @@ export default function NewOrderPage() {
   const addons = useWatch({ control, name: 'addons' });
   const method = useWatch({ control, name: 'payment_method' });
   const amount = useWatch({ control, name: 'amount' });
+  const washTypeId = useWatch({ control, name: 'wash_type_id' });
 
   const catalog = useMemo(() => services.data ?? [], [services.data]);
   const lineServices = useMemo(() => catalog.filter((s) => s.pricing_type !== 'flat'), [catalog]);
@@ -179,6 +191,15 @@ export default function NewOrderPage() {
     // Only for the first load of the catalog: staff may remove every row afterwards.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineServices.length]);
+
+  // One wash type per order, required: it starts on the first active one (Regular washing).
+  const washList = useMemo(() => washTypes.data?.data ?? [], [washTypes.data]);
+  useEffect(() => {
+    const first = washList[0];
+    if (first && !washTypeId) setValue('wash_type_id', first.id);
+  }, [washList, washTypeId, setValue]);
+  const blockOnShortage = washTypes.data?.meta.block_orders_on_low_soap ?? false;
+  const wash = washList.find((w) => w.id === washTypeId);
 
   // Arriving from a customer's profile preselects that customer.
   const presetId = Number(params.get('customer_id')) || undefined;
@@ -245,7 +266,20 @@ export default function NewOrderPage() {
     return [...rows, ...flats];
   }, [watchedItems, addons, catalog]);
 
-  const totalCents = lines.reduce((sum, line) => sum + line.subtotal, 0);
+  // The wash type applies to the laundry weighed by kilo: the per-kg lines.
+  const weighedTenths = perKgTenths(
+    lines.map((line) => ({
+      pricing_type: line.service.pricing_type,
+      weight_kg: line.service.pricing_type === 'per_kg' ? line.amount : null,
+    })),
+  );
+  const washCents = washSurchargeCents(weighedTenths, wash?.surcharge_per_kg_cents ?? 0);
+  const soapNeeds = useMemo(
+    () => (wash ? soapPlan(wash.supplies, weighedTenths) : []),
+    [wash, weighedTenths],
+  );
+  const soapWarnings = shortages(soapNeeds);
+  const totalCents = lines.reduce((sum, line) => sum + line.subtotal, 0) + washCents;
   const paidNow = method === 'later' ? 0 : (parseMoney(amount) ?? 0);
   const balance = Math.max(0, totalCents - paidNow);
   const overpaid = method !== 'later' && paidNow > totalCents;
@@ -281,6 +315,7 @@ export default function NewOrderPage() {
       const input: NewOrderInput = {
         customer_id: form.customer_id,
         basket_ids: form.basket_ids,
+        wash_type_id: form.wash_type_id,
         items: [
           ...form.items.map((item) => {
             const service = catalog.find((s) => String(s.id) === item.service_id);
@@ -325,6 +360,12 @@ export default function NewOrderPage() {
             toast.error('Check the highlighted fields.');
             return;
           }
+          // 409 with the soap rule on: the stock cannot cover the wash type. Nothing was saved.
+          if (errorStatus(error) === 409 && /soap/i.test(errorMessage(error))) {
+            if (step !== 3 && !isPhone) setStep(3);
+            toast.error(errorMessage(error));
+            return;
+          }
           // 409: a basket was taken by another order since it was chosen. The API names both.
           if (errorStatus(error) === 409) {
             setError('basket_ids', { type: 'server', message: errorMessage(error) });
@@ -354,7 +395,42 @@ export default function NewOrderPage() {
             </dd>
           </div>
         ))}
+        {wash && lines.length > 0 && (
+          <div data-testid="bill-wash-line" className="text-muted">
+            <dt>
+              Wash type:{' '}
+              {washBillLine(wash.name, wash.surcharge_per_kg_cents, weighedTenths, formatMoney)}
+            </dt>
+          </div>
+        )}
       </dl>
+      {weighedTenths === 0 && lines.length > 0 && (
+        <p className="mt-1 text-[13px] text-muted">{WASH_TYPE_HINT}</p>
+      )}
+      {soapNeeds.length > 0 && (
+        <p data-testid="soap-preview" className="mt-2 text-[13px] text-muted">
+          <span className="font-semibold">Soap to be used:</span> {soapPreview(soapNeeds)}
+        </p>
+      )}
+      {soapWarnings.length > 0 && (
+        <div
+          role="alert"
+          data-testid="soap-warning"
+          className="mt-2 rounded-control border border-warn-line bg-warn-bg p-3 text-[13px] text-warn"
+        >
+          <p className="flex items-start gap-1.5 font-semibold">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {blockOnShortage
+              ? 'Not enough soap in stock. This order cannot be saved until a stock-in is recorded.'
+              : 'Not enough soap recorded. You can still save: only what is recorded is deducted, never below zero.'}
+          </p>
+          <ul className="mt-1 list-disc pl-6">
+            {soapWarnings.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <p className="mt-3 flex items-center justify-between border-t border-dashed border-line-strong pt-3 text-xl font-extrabold">
         Total
         <Money cents={totalCents} />
@@ -366,7 +442,8 @@ export default function NewOrderPage() {
           {[
             { value: 'cash', label: 'Cash', show: canTakePayment },
             { value: 'gcash', label: 'GCash', show: canTakePayment },
-            { value: 'later', label: 'Pay later', show: true },
+            { value: 'maya', label: 'Maya', show: canTakePayment },
+            { value: 'later', label: 'Pay at pickup', show: true },
           ]
             .filter((option) => option.show)
             .map((option) => (
@@ -391,11 +468,16 @@ export default function NewOrderPage() {
         </div>
         {!canTakePayment && (
           <p className="mt-1.5 text-[13px] text-muted">
-            Your account cannot record payments, so this is billed for later.
+            Your account cannot record payments, so this is paid at pickup.
           </p>
         )}
       </fieldset>
 
+      {method === 'later' && (
+        <p className="mt-2 text-[13px] text-muted">
+          No payment is recorded now. The full balance is due at pickup.
+        </p>
+      )}
       {method !== 'later' && (
         <Field label="Amount received now" className="mt-4" error={errors.amount?.message}>
           {(field) => (
@@ -422,9 +504,9 @@ export default function NewOrderPage() {
           )}
         </Field>
       )}
-      {method === 'gcash' && (
+      {(method === 'gcash' || method === 'maya') && (
         <Field
-          label="GCash reference no."
+          label={`${method === 'maya' ? 'Maya' : 'GCash'} reference no.`}
           required
           className="mt-3"
           error={errors.reference?.message}
@@ -714,6 +796,61 @@ export default function NewOrderPage() {
                   )}
                 />
               )}
+
+              <fieldset className="mt-4 border-t border-line pt-3" data-testid="wash-type-picker">
+                <legend className="text-[15px] font-bold">Wash type</legend>
+                <p className="mt-0.5 mb-2 text-[13px] text-muted">{WASH_TYPE_HINT}</p>
+                {washTypes.isPending ? (
+                  <div
+                    role="status"
+                    aria-label="Loading wash types"
+                    className="grid gap-2 sm:grid-cols-2"
+                  >
+                    <Skeleton className="h-14" />
+                    <Skeleton className="h-14" />
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {washList.map((option) => (
+                      // The radio is inside the label, which holds the wash type's name.
+                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+                      <label
+                        key={option.id}
+                        className={cn(
+                          'flex min-h-14 cursor-pointer items-center gap-3 rounded-control border px-3 py-2',
+                          washTypeId === option.id
+                            ? 'border-flow bg-flow-soft'
+                            : 'border-line-strong bg-surface',
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="wash_type"
+                          value={option.id}
+                          checked={washTypeId === option.id}
+                          onChange={() =>
+                            setValue('wash_type_id', option.id, { shouldValidate: true })
+                          }
+                          className="accent-flow"
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-semibold">{option.name}</span>
+                          <span className="block text-xs text-muted">
+                            {option.surcharge_per_kg_cents > 0
+                              ? `+${formatMoney(option.surcharge_per_kg_cents)}/kg`
+                              : 'No extra charge'}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {errors.wash_type_id?.message && (
+                  <p className="mt-1 text-[13px] font-medium text-danger">
+                    {errors.wash_type_id.message}
+                  </p>
+                )}
+              </fieldset>
             </Section>
 
             <Section number={4} title="Estimated completion & notes" hiddenOnPhone={step !== 4}>
@@ -771,6 +908,12 @@ export default function NewOrderPage() {
                 </div>
               ))}
               {lines.length > 3 && <div>+ {lines.length - 3} more</div>}
+              {washCents > 0 && (
+                <div className="flex justify-between gap-3">
+                  <dt className="min-w-0 truncate">Wash type: {wash?.name}</dt>
+                  <dd>{formatMoney(washCents)}</dd>
+                </div>
+              )}
             </dl>
           )}
           <p className="flex items-center justify-between text-[17px] font-extrabold">

@@ -26,7 +26,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://laundryflow.test";
+        var tryItOutBaseUrl = "http://localhost:8000";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -222,6 +222,16 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-health" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="health">
+                    <a href="#health">Health</a>
+                </li>
+                                    <ul id="tocify-subheader-health" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="health-GETapi-v1-health">
+                                <a href="#health-GETapi-v1-health">Check the API</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
                     <ul id="tocify-header-inventory" class="tocify-header">
                 <li class="tocify-item level-1" data-unique="inventory">
                     <a href="#inventory">Inventory</a>
@@ -356,6 +366,9 @@
                                                                                 <li class="tocify-item level-2" data-unique="settings-PUTapi-v1-settings-shop">
                                 <a href="#settings-PUTapi-v1-settings-shop">Replace the shop profile</a>
                             </li>
+                                                                                <li class="tocify-item level-2" data-unique="settings-PUTapi-v1-settings-stock-rule">
+                                <a href="#settings-PUTapi-v1-settings-stock-rule">Set the soap stock rule</a>
+                            </li>
                                                                                 <li class="tocify-item level-2" data-unique="settings-GETapi-v1-activity-logs">
                                 <a href="#settings-GETapi-v1-activity-logs">Activity log</a>
                             </li>
@@ -395,6 +408,28 @@
                             </li>
                                                                         </ul>
                             </ul>
+                    <ul id="tocify-header-wash-types" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="wash-types">
+                    <a href="#wash-types">Wash types</a>
+                </li>
+                                    <ul id="tocify-subheader-wash-types" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="wash-types-GETapi-v1-wash-types">
+                                <a href="#wash-types-GETapi-v1-wash-types">List wash types</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="wash-types-POSTapi-v1-wash-types">
+                                <a href="#wash-types-POSTapi-v1-wash-types">Add a wash type</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="wash-types-GETapi-v1-wash-types--washType_id-">
+                                <a href="#wash-types-GETapi-v1-wash-types--washType_id-">Show a wash type</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="wash-types-PUTapi-v1-wash-types--washType_id-">
+                                <a href="#wash-types-PUTapi-v1-wash-types--washType_id-">Replace a wash type (fields sent; `supplies` replaces the whole list)</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="wash-types-PATCHapi-v1-wash-types--washType_id-">
+                                <a href="#wash-types-PATCHapi-v1-wash-types--washType_id-">Update a wash type (fields sent)</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
             </div>
 
     <ul class="toc-footer" id="toc-footer">
@@ -404,7 +439,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: November 10, 2026</li>
+        <li>Last updated: November 20, 2026</li>
     </ul>
 </div>
 
@@ -414,7 +449,7 @@
         <h1 id="introduction">Introduction</h1>
 <p>The REST API of LaundryFlow, the laundry shop management and QR basket tracking system: staff (JWT, api guard) and the customer portal (JWT, customer guard). Built following the course API Master Class in Laravel: versioned at /api/v1, JSON:API-style resources, course error format.</p>
 <aside>
-    <strong>Base URL</strong>: <code>http://laundryflow.test</code>
+    <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -445,7 +480,7 @@ attempts a minute for the same username and IP answer 429.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/auth/login" \
+    "http://localhost:8000/api/v1/auth/login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -458,7 +493,7 @@ attempts a minute for the same username and IP answer 429.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/auth/login"
+    "http://localhost:8000/api/v1/auth/login"
 );
 
 const headers = {
@@ -617,7 +652,7 @@ a new one carrying the user's current abilities.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/auth/refresh" \
+    "http://localhost:8000/api/v1/auth/refresh" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -625,7 +660,7 @@ a new one carrying the user's current abilities.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/auth/refresh"
+    "http://localhost:8000/api/v1/auth/refresh"
 );
 
 const headers = {
@@ -743,7 +778,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/auth/logout" \
+    "http://localhost:8000/api/v1/auth/logout" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -751,7 +786,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/auth/logout"
+    "http://localhost:8000/api/v1/auth/logout"
 );
 
 const headers = {
@@ -869,7 +904,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/auth/me" \
+    --get "http://localhost:8000/api/v1/auth/me" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -877,7 +912,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/auth/me"
+    "http://localhost:8000/api/v1/auth/me"
 );
 
 const headers = {
@@ -896,7 +931,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-auth-me">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -909,32 +944,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;user&quot;: {
-            &quot;type&quot;: &quot;user&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Liza Ramos&quot;,
-                &quot;username&quot;: &quot;liza.ramos&quot;,
-                &quot;role&quot;: &quot;admin&quot;,
-                &quot;permissions&quot;: [
-                    &quot;payments.record&quot;,
-                    &quot;inventory.stock_out&quot;,
-                    &quot;payments.void&quot;
-                ],
-                &quot;isActive&quot;: true,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-            }
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    },
-    &quot;message&quot;: &quot;User retrieved&quot;,
-    &quot;status&quot;: 200
+    ]
 }</code>
  </pre>
     </span>
@@ -1037,7 +1053,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/auth/password" \
+    "http://localhost:8000/api/v1/auth/password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -1051,7 +1067,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/auth/password"
+    "http://localhost:8000/api/v1/auth/password"
 );
 
 const headers = {
@@ -1216,7 +1232,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/baskets/available" \
+    --get "http://localhost:8000/api/v1/baskets/available" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1224,7 +1240,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/available"
+    "http://localhost:8000/api/v1/baskets/available"
 );
 
 const headers = {
@@ -1243,7 +1259,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-baskets-available">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -1256,586 +1272,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0003&quot;,
-                &quot;qrToken&quot;: &quot;3t5LslevO5v4sX4q8Z1VGEsj2olOH5fK&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 34,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T09:39:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/3&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 6,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0006&quot;,
-                &quot;qrToken&quot;: &quot;F5kPnAw7iL4vrHdbT-aKtkSgw99jFas4&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 31,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T04:07:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/6&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 9,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0009&quot;,
-                &quot;qrToken&quot;: &quot;LxpTBVMHh-92wi__tYB1a5vfMx5UdQTb&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 33,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T04:07:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/9&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 14,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0014&quot;,
-                &quot;qrToken&quot;: &quot;vHYXeqvYPr79K4ZzGcWuU3e-jla7E_1w&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T07:10:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/14&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 17,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0017&quot;,
-                &quot;qrToken&quot;: &quot;ajnGhf-hRi1f3ZhEd7WlK2ibpY0uAiNR&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 36,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T07:18:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/17&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 18,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0018&quot;,
-                &quot;qrToken&quot;: &quot;v9z_BjI_8X26ncs8-YcY5CSnfKV4ejgp&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 30,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T07:18:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/18&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 36,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0036&quot;,
-                &quot;qrToken&quot;: &quot;VvujhhamJc7JlbCH5KbmGf1GuSHTsoPD&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-06T23:31:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/36&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 37,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0037&quot;,
-                &quot;qrToken&quot;: &quot;dAGh8g6altpAsydEPl-lJT7yN09D5A5H&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 35,
-                &quot;lastUsedAt&quot;: &quot;2026-11-06T23:43:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/37&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 39,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0039&quot;,
-                &quot;qrToken&quot;: &quot;ubttv-Hbnwcu-QQXSOrolTn2cWqy29aA&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 29,
-                &quot;lastUsedAt&quot;: &quot;2026-11-06T23:49:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/39&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 40,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0040&quot;,
-                &quot;qrToken&quot;: &quot;E_PXtiwVN7h_nXI-WYh8eRZ0bS2EHLbg&quot;,
-                &quot;label&quot;: &quot;Red, small&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 30,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T10:44:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/40&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 41,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0041&quot;,
-                &quot;qrToken&quot;: &quot;t3PQcRWcrt7DtjC3MrOSup3vzpP-ve2_&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 22,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T23:21:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/41&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 42,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0042&quot;,
-                &quot;qrToken&quot;: &quot;XSWBZiFUrh3Ci_-ve7kGMHZMT9_vXfIc&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 28,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T23:21:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/42&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 43,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0043&quot;,
-                &quot;qrToken&quot;: &quot;nSnhpfcSzj69TpQnSIl4gtK4nLOPaFRO&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 27,
-                &quot;lastUsedAt&quot;: &quot;2026-10-31T05:01:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/43&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 45,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0045&quot;,
-                &quot;qrToken&quot;: &quot;XCrJxrvqV8OempMPtjXtkb_RjtTi-7ty&quot;,
-                &quot;label&quot;: &quot;Red, small&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 34,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T00:55:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/45&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 46,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0046&quot;,
-                &quot;qrToken&quot;: &quot;FBXV1cz0uR8yY0t-ElCrB_eA_YoSvCre&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 33,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T00:55:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/46&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 47,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0047&quot;,
-                &quot;qrToken&quot;: &quot;wbCiUX9jFlrJq0FvAb9XN0M9OXPE_xW2&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 35,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T00:59:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/47&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 48,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0048&quot;,
-                &quot;qrToken&quot;: &quot;kbPiZjkzcwAHi5P8Wm36w23iBYvv1Rke&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 35,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T02:46:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/48&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 49,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0049&quot;,
-                &quot;qrToken&quot;: &quot;8qYFq-GgmNTkYBYacmiLixtC4r-a8wFe&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T03:20:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/49&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 50,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0050&quot;,
-                &quot;qrToken&quot;: &quot;FOB7eqI5KRYh35vWFIl8DOr9kaxBNqRG&quot;,
-                &quot;label&quot;: &quot;Red, small&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 30,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T03:20:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/50&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 51,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0051&quot;,
-                &quot;qrToken&quot;: &quot;ZJnNgsUi7SxVl1x6w0zzwmtnqNx1bELD&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 30,
-                &quot;lastUsedAt&quot;: &quot;2026-11-07T01:34:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/51&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 52,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0052&quot;,
-                &quot;qrToken&quot;: &quot;QeTM9ax_JuHyBxkOgOtCBl1HkBklwTa7&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-07T01:34:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/52&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 54,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0054&quot;,
-                &quot;qrToken&quot;: &quot;SeZZ2mBTg-74mTThUrZdcPOTBC28Q5hO&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 33,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T04:47:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/54&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 56,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0056&quot;,
-                &quot;qrToken&quot;: &quot;QGsTvT-9SYl6IIecbn9Iu3E9bXw88_kH&quot;,
-                &quot;label&quot;: &quot;Blue, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T04:47:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/56&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 58,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0058&quot;,
-                &quot;qrToken&quot;: &quot;fSsUS0uzA1vrZkigmCAX9N-DsptGMPdz&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 31,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T05:05:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/58&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 59,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0059&quot;,
-                &quot;qrToken&quot;: &quot;DTw3TgiVDHcLrgftF4DHswq3Klpml2WO&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 35,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T05:21:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/59&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 63,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0063&quot;,
-                &quot;qrToken&quot;: &quot;k-nNdNpkruiJyoIIWIXFPyuVyn6753s-&quot;,
-                &quot;label&quot;: &quot;Green, large&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 30,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T08:07:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/63&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 64,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0064&quot;,
-                &quot;qrToken&quot;: &quot;XjyMgsMzVKsXw0xiCUuaF0DuSFW68anx&quot;,
-                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T08:12:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/64&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 65,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0065&quot;,
-                &quot;qrToken&quot;: &quot;mRQJiakggPcQmj9mW-JG13od7BCv77GF&quot;,
-                &quot;label&quot;: &quot;Red, small&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 37,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T08:12:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/65&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 70,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0070&quot;,
-                &quot;qrToken&quot;: &quot;8AgwSQMoI6qrXCKOQtDn1nBIbQ_prUl-&quot;,
-                &quot;label&quot;: &quot;Red, small&quot;,
-                &quot;status&quot;: &quot;available&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: null,
-                &quot;timesUsed&quot;: 32,
-                &quot;lastUsedAt&quot;: &quot;2026-11-08T01:07:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/70&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -1940,7 +1381,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/baskets?status=available&amp;search=0007&amp;sort=basketNumber&amp;page=1" \
+    --get "http://localhost:8000/api/v1/baskets?status=available&amp;search=0007&amp;sort=basketNumber&amp;page=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1948,7 +1389,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets"
+    "http://localhost:8000/api/v1/baskets"
 );
 
 const params = {
@@ -1976,7 +1417,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-baskets">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -1989,47 +1430,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/baskets?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/baskets?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: null,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/baskets&quot;,
-        &quot;per_page&quot;: 20,
-        &quot;to&quot;: null,
-        &quot;total&quot;: 0,
-        &quot;counts&quot;: {
-            &quot;available&quot;: 29,
-            &quot;in_use&quot;: 39,
-            &quot;retired&quot;: 2
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -2182,7 +1589,7 @@ permanent 32-character QR token.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/baskets" \
+    "http://localhost:8000/api/v1/baskets" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2199,7 +1606,7 @@ permanent 32-character QR token.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets"
+    "http://localhost:8000/api/v1/baskets"
 );
 
 const headers = {
@@ -2375,7 +1782,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/baskets/1" \
+    --get "http://localhost:8000/api/v1/baskets/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -2383,7 +1790,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/1"
+    "http://localhost:8000/api/v1/baskets/1"
 );
 
 const headers = {
@@ -2402,7 +1809,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-baskets--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -2415,29 +1822,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;basket&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;basketNumber&quot;: &quot;BSK-0001&quot;,
-            &quot;qrToken&quot;: &quot;EUB90MOU1lMdVeWqd6vKaX1CPg-5EaJu&quot;,
-            &quot;label&quot;: &quot;Blue, large&quot;,
-            &quot;status&quot;: &quot;in_use&quot;,
-            &quot;notes&quot;: null,
-            &quot;createdBy&quot;: 1,
-            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-            &quot;currentOrder&quot;: {
-                &quot;id&quot;: 1605,
-                &quot;orderNumber&quot;: &quot;LF-261108-0003&quot;
-            },
-            &quot;timesUsed&quot;: 33,
-            &quot;lastUsedAt&quot;: &quot;2026-11-08T01:35:00.000Z&quot;
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -2553,7 +1944,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/baskets/1" \
+    "http://localhost:8000/api/v1/baskets/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2570,7 +1961,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/1"
+    "http://localhost:8000/api/v1/baskets/1"
 );
 
 const headers = {
@@ -2759,7 +2150,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/baskets/1" \
+    "http://localhost:8000/api/v1/baskets/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2776,7 +2167,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/1"
+    "http://localhost:8000/api/v1/baskets/1"
 );
 
 const headers = {
@@ -2966,7 +2357,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/baskets/1/retire" \
+    "http://localhost:8000/api/v1/baskets/1/retire" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -2975,7 +2366,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/1/retire"
+    "http://localhost:8000/api/v1/baskets/1/retire"
 );
 
 const headers = {
@@ -3143,7 +2534,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/baskets/1/history" \
+    --get "http://localhost:8000/api/v1/baskets/1/history" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3151,7 +2542,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/baskets/1/history"
+    "http://localhost:8000/api/v1/baskets/1/history"
 );
 
 const headers = {
@@ -3170,7 +2561,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-baskets--basket_id--history">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -3183,501 +2574,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 2102,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261108-0003&quot;,
-                &quot;customerName&quot;: &quot;Erlinda Medina&quot;,
-                &quot;assignedAt&quot;: &quot;2026-11-08T01:35:00.000Z&quot;,
-                &quot;releasedAt&quot;: null
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1605
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1605&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 2047,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261105-0015&quot;,
-                &quot;customerName&quot;: &quot;Gerald Yap&quot;,
-                &quot;assignedAt&quot;: &quot;2026-11-05T09:27:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-11-06T23:11:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1563
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1563&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1992,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261102-0013&quot;,
-                &quot;customerName&quot;: &quot;Pia Francisco&quot;,
-                &quot;assignedAt&quot;: &quot;2026-11-02T09:44:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-11-03T23:46:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1516
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1516&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1956,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261101-0010&quot;,
-                &quot;customerName&quot;: &quot;Pia Francisco&quot;,
-                &quot;assignedAt&quot;: &quot;2026-11-01T01:50:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-11-02T04:51:18.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1489
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1489&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1847,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261027-0012&quot;,
-                &quot;customerName&quot;: &quot;Carmela Aquino&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-27T09:12:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-31T04:15:31.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1408
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1408&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1749,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261023-0009&quot;,
-                &quot;customerName&quot;: &quot;Alvin Manalo&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-23T05:20:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-25T07:04:34.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1336
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1336&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1645,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261018-0008&quot;,
-                &quot;customerName&quot;: &quot;Norma Belmonte&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-18T01:23:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-20T23:30:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1256
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1256&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1585,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261015-0005&quot;,
-                &quot;customerName&quot;: &quot;Kristine Mercado&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-15T00:36:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-17T01:54:08.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1207
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1207&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1540,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261012-0014&quot;,
-                &quot;customerName&quot;: &quot;Pia Francisco&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-12T07:39:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-14T02:54:10.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1170
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1170&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;basketAssignment&quot;,
-            &quot;id&quot;: 1456,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261009-0002&quot;,
-                &quot;customerName&quot;: &quot;Nestor Lagman&quot;,
-                &quot;assignedAt&quot;: &quot;2026-10-08T23:24:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-10-11T07:47:54.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1109
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1109&quot;
-                    }
-                },
-                &quot;basket&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;assignedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=4&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=2&quot;
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 4,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=2&quot;,
-                &quot;label&quot;: &quot;2&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=3&quot;,
-                &quot;label&quot;: &quot;3&quot;,
-                &quot;page&quot;: 3,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=4&quot;,
-                &quot;label&quot;: &quot;4&quot;,
-                &quot;page&quot;: 4,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history?page=2&quot;,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/baskets/1/history&quot;,
-        &quot;per_page&quot;: 10,
-        &quot;to&quot;: 10,
-        &quot;total&quot;: 33
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -3795,7 +2698,7 @@ available, retired, or its last order is completed); an order number answers wit
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/scan/BSK-0007" \
+    --get "http://localhost:8000/api/v1/scan/BSK-0007" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -3803,7 +2706,7 @@ available, retired, or its last order is completed); an order number answers wit
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/scan/BSK-0007"
+    "http://localhost:8000/api/v1/scan/BSK-0007"
 );
 
 const headers = {
@@ -3822,7 +2725,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-scan--code-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -3830,368 +2733,18 @@ fetch(url, {
             </summary>
             <pre><code class="language-http">cache-control: no-cache, private
 content-type: application/json
-x-ratelimit-limit: 120
-x-ratelimit-remaining: 119
 access-control-allow-origin: http://localhost:5173
 access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;basket&quot;,
-        &quot;basket&quot;: {
-            &quot;type&quot;: &quot;basket&quot;,
-            &quot;id&quot;: 7,
-            &quot;attributes&quot;: {
-                &quot;basketNumber&quot;: &quot;BSK-0007&quot;,
-                &quot;qrToken&quot;: &quot;C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT&quot;,
-                &quot;label&quot;: &quot;Blue, medium&quot;,
-                &quot;status&quot;: &quot;in_use&quot;,
-                &quot;notes&quot;: null,
-                &quot;createdBy&quot;: 1,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;currentOrder&quot;: {
-                    &quot;id&quot;: 1644,
-                    &quot;orderNumber&quot;: &quot;LF-261110-0001&quot;
-                },
-                &quot;timesUsed&quot;: 31,
-                &quot;lastUsedAt&quot;: &quot;2026-11-09T22:40:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/7&quot;
-            }
-        },
-        &quot;activeOrder&quot;: {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 1644,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261110-0001&quot;,
-                &quot;status&quot;: &quot;washing&quot;,
-                &quot;statusLabel&quot;: &quot;Washing&quot;,
-                &quot;statusSince&quot;: &quot;2026-11-09T23:44:00.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-11-09T22:40:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-11-11T02:00:00.000Z&quot;,
-                &quot;releasedAt&quot;: null,
-                &quot;notes&quot;: null,
-                &quot;totalCents&quot;: 15500,
-                &quot;paidCents&quot;: 15500,
-                &quot;balanceCents&quot;: 0,
-                &quot;paymentStatus&quot;: &quot;paid&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-11-09T22:40:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-11-09T23:44:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 13
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/13&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 2
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1644&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 13,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Nina Ramirez&quot;,
-                        &quot;contactNumber&quot;: &quot;09198845120&quot;,
-                        &quot;barangayName&quot;: &quot;Batangan&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;ordersCount&quot;: 5,
-                        &quot;createdAt&quot;: &quot;2026-07-17T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-17T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 5
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/13&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 7,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0007&quot;,
-                            &quot;qrToken&quot;: &quot;C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT&quot;,
-                            &quot;label&quot;: &quot;Blue, medium&quot;,
-                            &quot;status&quot;: &quot;in_use&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/7&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2160,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 3,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 10500,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1644
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2161,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 1,
-                            &quot;unitPriceCents&quot;: 5000,
-                            &quot;subtotalCents&quot;: 5000,
-                            &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                            &quot;pricingType&quot;: &quot;flat&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1644
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 5
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                },
-                &quot;payments&quot;: [
-                    {
-                        &quot;type&quot;: &quot;payment&quot;,
-                        &quot;id&quot;: 2004,
-                        &quot;attributes&quot;: {
-                            &quot;method&quot;: &quot;cash&quot;,
-                            &quot;methodLabel&quot;: &quot;Cash&quot;,
-                            &quot;amountCents&quot;: 15500,
-                            &quot;referenceNumber&quot;: null,
-                            &quot;receiptNumber&quot;: &quot;OR-002204&quot;,
-                            &quot;paidAt&quot;: &quot;2026-11-09T22:42:00.000Z&quot;,
-                            &quot;voidedAt&quot;: null,
-                            &quot;voidReason&quot;: null
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1644
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1644&quot;
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/payments/2004&quot;
-                        },
-                        &quot;includes&quot;: {
-                            &quot;receivedBy&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2,
-                                &quot;attributes&quot;: {
-                                    &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                    &quot;username&quot;: &quot;kevin.m&quot;,
-                                    &quot;role&quot;: &quot;staff&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                                }
-                            },
-                            &quot;voidedBy&quot;: null
-                        }
-                    }
-                ],
-                &quot;statusHistory&quot;: [
-                    {
-                        &quot;type&quot;: &quot;statusChange&quot;,
-                        &quot;id&quot;: 9830,
-                        &quot;attributes&quot;: {
-                            &quot;fromStatus&quot;: &quot;received&quot;,
-                            &quot;toStatus&quot;: &quot;washing&quot;,
-                            &quot;note&quot;: null,
-                            &quot;changedAt&quot;: &quot;2026-11-09T23:44:00.000Z&quot;
-                        },
-                        &quot;includes&quot;: {
-                            &quot;changedBy&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 3,
-                                &quot;attributes&quot;: {
-                                    &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                    &quot;username&quot;: &quot;aira.d&quot;,
-                                    &quot;role&quot;: &quot;staff&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;statusChange&quot;,
-                        &quot;id&quot;: 9829,
-                        &quot;attributes&quot;: {
-                            &quot;fromStatus&quot;: null,
-                            &quot;toStatus&quot;: &quot;received&quot;,
-                            &quot;note&quot;: null,
-                            &quot;changedAt&quot;: &quot;2026-11-09T22:40:00.000Z&quot;
-                        },
-                        &quot;includes&quot;: {
-                            &quot;changedBy&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2,
-                                &quot;attributes&quot;: {
-                                    &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                    &quot;username&quot;: &quot;kevin.m&quot;,
-                                    &quot;role&quot;: &quot;staff&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;basketHistory&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basketAssignment&quot;,
-                        &quot;id&quot;: 2154,
-                        &quot;attributes&quot;: {
-                            &quot;assignedAt&quot;: &quot;2026-11-09T22:40:00.000Z&quot;,
-                            &quot;releasedAt&quot;: null
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1644
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1644&quot;
-                                }
-                            },
-                            &quot;basket&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;basket&quot;,
-                                    &quot;id&quot;: 7
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/7&quot;
-                                }
-                            }
-                        },
-                        &quot;includes&quot;: {
-                            &quot;basket&quot;: {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 7,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0007&quot;,
-                                    &quot;qrToken&quot;: &quot;C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT&quot;,
-                                    &quot;label&quot;: &quot;Blue, medium&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/7&quot;
-                                }
-                            },
-                            &quot;assignedBy&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2,
-                                &quot;attributes&quot;: {
-                                    &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                    &quot;username&quot;: &quot;kevin.m&quot;,
-                                    &quot;role&quot;: &quot;staff&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;shop&quot;: {
-                    &quot;type&quot;: &quot;shopSettings&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;LaundryFlow&quot;,
-                        &quot;address&quot;: &quot;Brgy. Poblacion, Bongabong, Oriental Mindoro&quot;,
-                        &quot;contactNumber&quot;: &quot;[SHOP CONTACT NO.]&quot;,
-                        &quot;receiptFooter&quot;: &quot;Salamat po! Unclaimed items after 30 days are the customer&#039;s responsibility.&quot;
-                    }
-                }
-            }
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    },
-    &quot;message&quot;: &quot;Basket found&quot;,
-    &quot;status&quot;: 200
+    ]
 }</code>
  </pre>
     </span>
@@ -4313,7 +2866,7 @@ stay with the shop.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/customer/account" \
+    "http://localhost:8000/api/v1/customer/account" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -4337,7 +2890,7 @@ stay with the shop.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/account"
+    "http://localhost:8000/api/v1/customer/account"
 );
 
 const headers = {
@@ -4568,7 +3121,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customer/orders?status=active" \
+    --get "http://localhost:8000/api/v1/customer/orders?status=active" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4576,7 +3129,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/orders"
+    "http://localhost:8000/api/v1/customer/orders"
 );
 
 const params = {
@@ -4782,7 +3335,7 @@ number answers 404, exactly like one that does not exist.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customer/orders/LF-261110-0009" \
+    --get "http://localhost:8000/api/v1/customer/orders/LF-261110-0009" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -4790,7 +3343,7 @@ number answers 404, exactly like one that does not exist.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/orders/LF-261110-0009"
+    "http://localhost:8000/api/v1/customer/orders/LF-261110-0009"
 );
 
 const headers = {
@@ -5045,7 +3598,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customer/notifications" \
+    --get "http://localhost:8000/api/v1/customer/notifications" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5053,7 +3606,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/notifications"
+    "http://localhost:8000/api/v1/customer/notifications"
 );
 
 const headers = {
@@ -5219,7 +3772,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customer/notifications/1/read" \
+    "http://localhost:8000/api/v1/customer/notifications/1/read" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5227,7 +3780,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/notifications/1/read"
+    "http://localhost:8000/api/v1/customer/notifications/1/read"
 );
 
 const headers = {
@@ -5362,7 +3915,7 @@ every staff route, and a staff token by every customer route.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customer/auth/register" \
+    "http://localhost:8000/api/v1/customer/auth/register" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -5379,7 +3932,7 @@ every staff route, and a staff token by every customer route.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/auth/register"
+    "http://localhost:8000/api/v1/customer/auth/register"
 );
 
 const headers = {
@@ -5578,7 +4131,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customer/auth/login" \
+    "http://localhost:8000/api/v1/customer/auth/login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -5590,7 +4143,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/auth/login"
+    "http://localhost:8000/api/v1/customer/auth/login"
 );
 
 const headers = {
@@ -5725,7 +4278,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customer/auth/refresh" \
+    "http://localhost:8000/api/v1/customer/auth/refresh" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5733,7 +4286,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/auth/refresh"
+    "http://localhost:8000/api/v1/customer/auth/refresh"
 );
 
 const headers = {
@@ -5851,7 +4404,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customer/auth/me" \
+    --get "http://localhost:8000/api/v1/customer/auth/me" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -5859,7 +4412,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/auth/me"
+    "http://localhost:8000/api/v1/customer/auth/me"
 );
 
 const headers = {
@@ -6005,7 +4558,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customer/auth/logout" \
+    "http://localhost:8000/api/v1/customer/auth/logout" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -6013,7 +4566,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/auth/logout"
+    "http://localhost:8000/api/v1/customer/auth/logout"
 );
 
 const headers = {
@@ -6131,7 +4684,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/customer/account/password" \
+    "http://localhost:8000/api/v1/customer/account/password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -6145,7 +4698,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/account/password"
+    "http://localhost:8000/api/v1/customer/account/password"
 );
 
 const headers = {
@@ -6309,14 +4862,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customer/barangays" \
+    --get "http://localhost:8000/api/v1/customer/barangays" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customer/barangays"
+    "http://localhost:8000/api/v1/customer/barangays"
 );
 
 const headers = {
@@ -6690,14 +5243,14 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/barangays" \
+    --get "http://localhost:8000/api/v1/barangays" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/barangays"
+    "http://localhost:8000/api/v1/barangays"
 );
 
 const headers = {
@@ -6715,7 +5268,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-barangays">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -6728,258 +5281,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Anilao&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Aplaya&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Bagong Bayan I&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 4,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Bagong Bayan II&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 5,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Batangan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 6,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Bukal&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 7,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Camantigue&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 8,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Carmundo&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 9,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Cawayan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 10,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Dayhagan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 11,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Formon&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 12,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Hagan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 13,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Hagupit&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 14,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Ipil&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 15,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Kaligtasan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 16,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Labasan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 17,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Labonan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 18,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Libertad&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 19,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Lisap&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 20,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Luna&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 21,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Malitbog&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 22,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Mapang&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 23,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Masaguisi&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 24,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Mina de Oro&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 25,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Morente&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 26,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Ogbot&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 27,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Orconuma&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 28,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Poblacion&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 29,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Pulosahi&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 30,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Sagana&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 31,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;San Isidro&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 32,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;San Jose&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 33,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;San Juan&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 34,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Sigange&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 35,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Sta. Cruz&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;barangay&quot;,
-            &quot;id&quot;: 36,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Tawas&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -7072,7 +5378,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customers?search=santos&amp;fullName=%2Asantos%2A&amp;barangay=28&amp;hasAccount=1&amp;sort=-lastVisitAt&amp;page=1&amp;perPage=15" \
+    --get "http://localhost:8000/api/v1/customers?search=santos&amp;fullName=%2Asantos%2A&amp;barangay=28&amp;hasAccount=1&amp;sort=-lastVisitAt&amp;page=1&amp;perPage=15" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -7080,7 +5386,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers"
+    "http://localhost:8000/api/v1/customers"
 );
 
 const params = {
@@ -7111,7 +5417,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-customers">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -7124,80 +5430,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;customer&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                &quot;streetAddress&quot;: null,
-                &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-                &quot;hasAccount&quot;: true,
-                &quot;account&quot;: {
-                    &quot;email&quot;: &quot;maria.santos@example.com&quot;,
-                    &quot;isActive&quot;: true,
-                    &quot;mustChangePassword&quot;: false,
-                    &quot;lastLoginAt&quot;: &quot;2026-11-10T12:56:22.000Z&quot;,
-                    &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                },
-                &quot;ordersCount&quot;: 4,
-                &quot;lastVisitAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-                &quot;totalSpentCents&quot;: 80750,
-                &quot;balanceCents&quot;: 16750,
-                &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;barangay&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;barangay&quot;,
-                        &quot;id&quot;: 28
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/customers?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/customers?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/customers?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/customers&quot;,
-        &quot;per_page&quot;: 15,
-        &quot;to&quot;: 1,
-        &quot;total&quot;: 1,
-        &quot;withBalance&quot;: 20
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -7396,7 +5635,7 @@ once: read it out to the customer. They must change it at the first sign-in.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customers" \
+    "http://localhost:8000/api/v1/customers" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -7423,7 +5662,7 @@ once: read it out to the customer. They must change it at the first sign-in.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers"
+    "http://localhost:8000/api/v1/customers"
 );
 
 const headers = {
@@ -7693,7 +5932,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customers/1" \
+    --get "http://localhost:8000/api/v1/customers/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -7701,7 +5940,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1"
+    "http://localhost:8000/api/v1/customers/1"
 );
 
 const headers = {
@@ -7720,7 +5959,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-customers--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -7733,42 +5972,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;customer&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;fullName&quot;: &quot;Maria Santos&quot;,
-            &quot;contactNumber&quot;: &quot;09178452210&quot;,
-            &quot;barangayName&quot;: &quot;Poblacion&quot;,
-            &quot;streetAddress&quot;: null,
-            &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-            &quot;hasAccount&quot;: true,
-            &quot;account&quot;: {
-                &quot;email&quot;: &quot;maria.santos@example.com&quot;,
-                &quot;isActive&quot;: true,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-11-10T12:56:22.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-            },
-            &quot;ordersCount&quot;: 4,
-            &quot;lastVisitAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-            &quot;totalSpentCents&quot;: 80750,
-            &quot;balanceCents&quot;: 16750,
-            &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-            &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-        },
-        &quot;relationships&quot;: {
-            &quot;barangay&quot;: {
-                &quot;data&quot;: {
-                    &quot;type&quot;: &quot;barangay&quot;,
-                    &quot;id&quot;: 28
-                }
-            }
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -7884,7 +6094,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/customers/1" \
+    "http://localhost:8000/api/v1/customers/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -7910,7 +6120,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1"
+    "http://localhost:8000/api/v1/customers/1"
 );
 
 const headers = {
@@ -8180,7 +6390,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/customers/1" \
+    "http://localhost:8000/api/v1/customers/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -8206,7 +6416,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1"
+    "http://localhost:8000/api/v1/customers/1"
 );
 
 const headers = {
@@ -8477,7 +6687,7 @@ works here too.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/customers/1/orders?include=customer%2Cbaskets%2Citems%2CreceivedBy" \
+    --get "http://localhost:8000/api/v1/customers/1/orders?include=customer%2Cbaskets%2Citems%2CreceivedBy" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -8485,7 +6695,7 @@ works here too.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1/orders"
+    "http://localhost:8000/api/v1/customers/1/orders"
 );
 
 const params = {
@@ -8510,7 +6720,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-customers--customer_id--orders">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -8523,708 +6733,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 1652,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261110-0009&quot;,
-                &quot;status&quot;: &quot;washing&quot;,
-                &quot;statusLabel&quot;: &quot;Washing&quot;,
-                &quot;statusSince&quot;: &quot;2026-11-10T02:54:00.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-11-11T02:00:00.000Z&quot;,
-                &quot;releasedAt&quot;: null,
-                &quot;notes&quot;: &quot;Separate white uniforms. Unscented conditioner.&quot;,
-                &quot;totalCents&quot;: 36750,
-                &quot;paidCents&quot;: 20000,
-                &quot;balanceCents&quot;: 16750,
-                &quot;paymentStatus&quot;: &quot;partial&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-11-10T02:54:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 2
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1652&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                        &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                        &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-                        &quot;ordersCount&quot;: 4,
-                        &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 28
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 20,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0020&quot;,
-                            &quot;qrToken&quot;: &quot;PZlhj_IT-QbVvd7fFOD92Vi3kl8lxIWn&quot;,
-                            &quot;label&quot;: &quot;Red, small&quot;,
-                            &quot;status&quot;: &quot;in_use&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/20&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2170,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 6.5,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 22750,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2171,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 6,
-                            &quot;unitPriceCents&quot;: 1500,
-                            &quot;subtotalCents&quot;: 9000,
-                            &quot;serviceName&quot;: &quot;Ironing&quot;,
-                            &quot;pricingType&quot;: &quot;per_piece&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 4
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/4&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2172,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 1,
-                            &quot;unitPriceCents&quot;: 5000,
-                            &quot;subtotalCents&quot;: 5000,
-                            &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                            &quot;pricingType&quot;: &quot;flat&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 5
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 288,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-260809-0009&quot;,
-                &quot;status&quot;: &quot;released&quot;,
-                &quot;statusLabel&quot;: &quot;Completed&quot;,
-                &quot;statusSince&quot;: &quot;2026-08-10T05:31:16.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-08-09T07:27:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-08-09T23:01:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-08-10T05:31:16.000Z&quot;,
-                &quot;notes&quot;: null,
-                &quot;totalCents&quot;: 16550,
-                &quot;paidCents&quot;: 16550,
-                &quot;balanceCents&quot;: 0,
-                &quot;paymentStatus&quot;: &quot;paid&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-08-09T07:27:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-08-10T05:31:16.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/288&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                        &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                        &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-                        &quot;ordersCount&quot;: 4,
-                        &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 28
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 52,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0052&quot;,
-                            &quot;qrToken&quot;: &quot;QeTM9ax_JuHyBxkOgOtCBl1HkBklwTa7&quot;,
-                            &quot;label&quot;: &quot;Blue, medium&quot;,
-                            &quot;status&quot;: &quot;available&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/52&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 380,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 3.3,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 11550,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 288
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 381,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 1,
-                            &quot;unitPriceCents&quot;: 5000,
-                            &quot;subtotalCents&quot;: 5000,
-                            &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                            &quot;pricingType&quot;: &quot;flat&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 288
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 5
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 287,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-260809-0008&quot;,
-                &quot;status&quot;: &quot;released&quot;,
-                &quot;statusLabel&quot;: &quot;Completed&quot;,
-                &quot;statusSince&quot;: &quot;2026-08-09T09:59:58.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-08-09T03:40:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-08-09T09:40:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-08-09T09:59:58.000Z&quot;,
-                &quot;notes&quot;: null,
-                &quot;totalCents&quot;: 30550,
-                &quot;paidCents&quot;: 30550,
-                &quot;balanceCents&quot;: 0,
-                &quot;paymentStatus&quot;: &quot;paid&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-08-09T03:40:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-08-09T09:59:58.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/287&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                        &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                        &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-                        &quot;ordersCount&quot;: 4,
-                        &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 28
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 48,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0048&quot;,
-                            &quot;qrToken&quot;: &quot;kbPiZjkzcwAHi5P8Wm36w23iBYvv1Rke&quot;,
-                            &quot;label&quot;: &quot;Green, large&quot;,
-                            &quot;status&quot;: &quot;available&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/48&quot;
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 49,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0049&quot;,
-                            &quot;qrToken&quot;: &quot;8qYFq-GgmNTkYBYacmiLixtC4r-a8wFe&quot;,
-                            &quot;label&quot;: &quot;Yellow, medium&quot;,
-                            &quot;status&quot;: &quot;available&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/49&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 378,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 7.3,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 25550,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 287
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 379,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 1,
-                            &quot;unitPriceCents&quot;: 5000,
-                            &quot;subtotalCents&quot;: 5000,
-                            &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                            &quot;pricingType&quot;: &quot;flat&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 287
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 5
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 106,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-260725-0001&quot;,
-                &quot;status&quot;: &quot;released&quot;,
-                &quot;statusLabel&quot;: &quot;Completed&quot;,
-                &quot;statusSince&quot;: &quot;2026-07-26T01:17:27.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-07-25T01:02:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-07-26T01:02:00.000Z&quot;,
-                &quot;releasedAt&quot;: &quot;2026-07-26T01:17:27.000Z&quot;,
-                &quot;notes&quot;: null,
-                &quot;totalCents&quot;: 13650,
-                &quot;paidCents&quot;: 13650,
-                &quot;balanceCents&quot;: 0,
-                &quot;paymentStatus&quot;: &quot;paid&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-07-25T01:02:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-26T01:17:27.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 4
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/106&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                        &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                        &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;notes&quot;: &quot;Prefers unscented conditioner&quot;,
-                        &quot;ordersCount&quot;: 4,
-                        &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 28
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 10,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0010&quot;,
-                            &quot;qrToken&quot;: &quot;n-uYb73oWesRgmVlyKAUc3eT7mI4b-_t&quot;,
-                            &quot;label&quot;: &quot;Red, small&quot;,
-                            &quot;status&quot;: &quot;in_use&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/10&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 143,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 3.9,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 13650,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 106
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 4,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                        &quot;username&quot;: &quot;jessa.l&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/customers/1/orders?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/customers/1/orders?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/customers/1/orders?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/customers/1/orders&quot;,
-        &quot;per_page&quot;: 50,
-        &quot;to&quot;: 4,
-        &quot;total&quot;: 4
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -9353,7 +6868,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customers/1/account" \
+    "http://localhost:8000/api/v1/customers/1/account" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -9369,7 +6884,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1/account"
+    "http://localhost:8000/api/v1/customers/1/account"
 );
 
 const headers = {
@@ -9545,7 +7060,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/customers/1/account" \
+    "http://localhost:8000/api/v1/customers/1/account" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -9561,7 +7076,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1/account"
+    "http://localhost:8000/api/v1/customers/1/account"
 );
 
 const headers = {
@@ -9747,7 +7262,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/customers/1/reset-password" \
+    "http://localhost:8000/api/v1/customers/1/reset-password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9755,7 +7270,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/customers/1/reset-password"
+    "http://localhost:8000/api/v1/customers/1/reset-password"
 );
 
 const headers = {
@@ -9892,7 +7407,7 @@ responses contain no money from payments.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/dashboard/summary" \
+    --get "http://localhost:8000/api/v1/dashboard/summary" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -9900,7 +7415,7 @@ responses contain no money from payments.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/dashboard/summary"
+    "http://localhost:8000/api/v1/dashboard/summary"
 );
 
 const headers = {
@@ -9919,7 +7434,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-dashboard-summary">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -9932,2196 +7447,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;kpis&quot;: {
-            &quot;ordersToday&quot;: 19,
-            &quot;ordersVsLastWeek&quot;: 4,
-            &quot;inProcess&quot;: 20,
-            &quot;readyForPickup&quot;: 15,
-            &quot;readyOver2Days&quot;: 4,
-            &quot;unpaidCents&quot;: 606400,
-            &quot;unpaidOrders&quot;: 29,
-            &quot;salesTodayCents&quot;: 566350,
-            &quot;salesTodayCashCents&quot;: 402750,
-            &quot;salesTodayGcashCents&quot;: 163600
-        },
-        &quot;flowCounts&quot;: {
-            &quot;received&quot;: 4,
-            &quot;washing&quot;: 14,
-            &quot;drying&quot;: 4,
-            &quot;folding&quot;: 2,
-            &quot;ready_for_pickup&quot;: 15,
-            &quot;released&quot;: 1623,
-            &quot;released_today&quot;: 19
-        },
-        &quot;recentOrders&quot;: [
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1662,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0019&quot;,
-                    &quot;status&quot;: &quot;received&quot;,
-                    &quot;statusLabel&quot;: &quot;Received&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T10:56:00.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T10:56:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-10T23:26:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 20000,
-                    &quot;paidCents&quot;: 0,
-                    &quot;balanceCents&quot;: 20000,
-                    &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T10:56:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T10:56:00.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 36
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1662&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 36,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Pia Francisco&quot;,
-                            &quot;contactNumber&quot;: &quot;09264405517&quot;,
-                            &quot;barangayName&quot;: &quot;Luna&quot;,
-                            &quot;streetAddress&quot;: &quot;Purok 5&quot;,
-                            &quot;ordersCount&quot;: 362,
-                            &quot;createdAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 20
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 35,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0035&quot;,
-                                &quot;qrToken&quot;: &quot;8mDXzg0PPoWP-utqeZAt0sFIZbFhWEAk&quot;,
-                                &quot;label&quot;: &quot;Red, small&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/35&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2186,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 15000,
-                                &quot;subtotalCents&quot;: 15000,
-                                &quot;serviceName&quot;: &quot;Comforter / Blanket&quot;,
-                                &quot;pricingType&quot;: &quot;per_piece&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1662
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 3
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/3&quot;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2187,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 5000,
-                                &quot;subtotalCents&quot;: 5000,
-                                &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                                &quot;pricingType&quot;: &quot;flat&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1662
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 5
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                            &quot;username&quot;: &quot;aira.d&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                }
-            },
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1661,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0018&quot;,
-                    &quot;status&quot;: &quot;washing&quot;,
-                    &quot;statusLabel&quot;: &quot;Washing&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T10:46:56.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T10:10:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-11T10:10:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 19950,
-                    &quot;paidCents&quot;: 19950,
-                    &quot;balanceCents&quot;: 0,
-                    &quot;paymentStatus&quot;: &quot;paid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T10:10:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T10:46:56.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 892
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/892&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1661&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 892,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Alvin Zamora&quot;,
-                            &quot;contactNumber&quot;: &quot;09153401088&quot;,
-                            &quot;barangayName&quot;: &quot;Mina de Oro&quot;,
-                            &quot;streetAddress&quot;: null,
-                            &quot;ordersCount&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-11-10T10:02:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-11-10T10:02:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 24
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/892&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 34,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0034&quot;,
-                                &quot;qrToken&quot;: &quot;Yiz9xh1VqIjC6vliiaWdPxlSx_WIlEIj&quot;,
-                                &quot;label&quot;: &quot;Yellow, medium&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/34&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2185,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: 5.7,
-                                &quot;quantity&quot;: null,
-                                &quot;unitPriceCents&quot;: 3500,
-                                &quot;subtotalCents&quot;: 19950,
-                                &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                &quot;pricingType&quot;: &quot;per_kg&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1661
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 1
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                            &quot;username&quot;: &quot;aira.d&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                }
-            },
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1660,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0017&quot;,
-                    &quot;status&quot;: &quot;washing&quot;,
-                    &quot;statusLabel&quot;: &quot;Washing&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T10:49:17.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T10:00:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-11T10:00:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 32550,
-                    &quot;paidCents&quot;: 0,
-                    &quot;balanceCents&quot;: 32550,
-                    &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T10:00:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T10:49:17.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 891
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/891&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1660&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 891,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Daisy Lacson&quot;,
-                            &quot;contactNumber&quot;: &quot;09424362553&quot;,
-                            &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                            &quot;streetAddress&quot;: &quot;Purok 2&quot;,
-                            &quot;ordersCount&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-11-10T09:53:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-11-10T09:53:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 28
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/891&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 33,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0033&quot;,
-                                &quot;qrToken&quot;: &quot;nfcglvhBhu2Dm2HLbOxhgehr145aDXtp&quot;,
-                                &quot;label&quot;: &quot;Green, large&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/33&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2184,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: 9.3,
-                                &quot;quantity&quot;: null,
-                                &quot;unitPriceCents&quot;: 3500,
-                                &quot;subtotalCents&quot;: 32550,
-                                &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                &quot;pricingType&quot;: &quot;per_kg&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1660
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 1
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 2,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                            &quot;username&quot;: &quot;kevin.m&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                        }
-                    }
-                }
-            },
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1659,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0016&quot;,
-                    &quot;status&quot;: &quot;washing&quot;,
-                    &quot;statusLabel&quot;: &quot;Washing&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T10:07:32.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T09:35:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-10T23:20:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 29850,
-                    &quot;paidCents&quot;: 29850,
-                    &quot;balanceCents&quot;: 0,
-                    &quot;paymentStatus&quot;: &quot;paid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T09:35:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T10:07:32.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 664
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/664&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1659&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 664,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Jonathan Macaraeg&quot;,
-                            &quot;contactNumber&quot;: &quot;09963735348&quot;,
-                            &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                            &quot;streetAddress&quot;: null,
-                            &quot;ordersCount&quot;: 2,
-                            &quot;createdAt&quot;: &quot;2026-10-09T09:22:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-10-09T09:22:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 28
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/664&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 32,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0032&quot;,
-                                &quot;qrToken&quot;: &quot;mSS8avBN5wHWxj_fQcYdZiKd18S47jkW&quot;,
-                                &quot;label&quot;: &quot;Blue, medium&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/32&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2182,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: 7.1,
-                                &quot;quantity&quot;: null,
-                                &quot;unitPriceCents&quot;: 3500,
-                                &quot;subtotalCents&quot;: 24850,
-                                &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                &quot;pricingType&quot;: &quot;per_kg&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1659
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 1
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2183,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 5000,
-                                &quot;subtotalCents&quot;: 5000,
-                                &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                                &quot;pricingType&quot;: &quot;flat&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1659
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 5
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                            &quot;username&quot;: &quot;aira.d&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                }
-            },
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1658,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0015&quot;,
-                    &quot;status&quot;: &quot;washing&quot;,
-                    &quot;statusLabel&quot;: &quot;Washing&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T09:20:50.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T09:04:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-10T23:17:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 20000,
-                    &quot;paidCents&quot;: 0,
-                    &quot;balanceCents&quot;: 20000,
-                    &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T09:04:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T09:20:50.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 36
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1658&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 36,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Pia Francisco&quot;,
-                            &quot;contactNumber&quot;: &quot;09264405517&quot;,
-                            &quot;barangayName&quot;: &quot;Luna&quot;,
-                            &quot;streetAddress&quot;: &quot;Purok 5&quot;,
-                            &quot;ordersCount&quot;: 362,
-                            &quot;createdAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 20
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 31,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0031&quot;,
-                                &quot;qrToken&quot;: &quot;dgDD2fFT82Vwe_2hFWHlzkqiWSqq7k2J&quot;,
-                                &quot;label&quot;: &quot;Blue, large&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/31&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2180,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 15000,
-                                &quot;subtotalCents&quot;: 15000,
-                                &quot;serviceName&quot;: &quot;Comforter / Blanket&quot;,
-                                &quot;pricingType&quot;: &quot;per_piece&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1658
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 3
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/3&quot;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2181,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 5000,
-                                &quot;subtotalCents&quot;: 5000,
-                                &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                                &quot;pricingType&quot;: &quot;flat&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1658
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 5
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                            &quot;username&quot;: &quot;aira.d&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                }
-            },
-            {
-                &quot;type&quot;: &quot;order&quot;,
-                &quot;id&quot;: 1657,
-                &quot;attributes&quot;: {
-                    &quot;orderNumber&quot;: &quot;LF-261110-0014&quot;,
-                    &quot;status&quot;: &quot;washing&quot;,
-                    &quot;statusLabel&quot;: &quot;Washing&quot;,
-                    &quot;statusSince&quot;: &quot;2026-11-10T09:03:08.000Z&quot;,
-                    &quot;receivedAt&quot;: &quot;2026-11-10T08:41:00.000Z&quot;,
-                    &quot;promisedAt&quot;: &quot;2026-11-10T23:27:00.000Z&quot;,
-                    &quot;releasedAt&quot;: null,
-                    &quot;notes&quot;: null,
-                    &quot;totalCents&quot;: 19750,
-                    &quot;paidCents&quot;: 0,
-                    &quot;balanceCents&quot;: 19750,
-                    &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                    &quot;isOverdue&quot;: false,
-                    &quot;createdAt&quot;: &quot;2026-11-10T08:41:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-11-10T09:03:08.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 36
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;receivedBy&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1657&quot;
-                },
-                &quot;includes&quot;: {
-                    &quot;customer&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 36,
-                        &quot;attributes&quot;: {
-                            &quot;fullName&quot;: &quot;Pia Francisco&quot;,
-                            &quot;contactNumber&quot;: &quot;09264405517&quot;,
-                            &quot;barangayName&quot;: &quot;Luna&quot;,
-                            &quot;streetAddress&quot;: &quot;Purok 5&quot;,
-                            &quot;ordersCount&quot;: 362,
-                            &quot;createdAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;barangay&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;barangay&quot;,
-                                    &quot;id&quot;: 20
-                                }
-                            }
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                        }
-                    },
-                    &quot;baskets&quot;: [
-                        {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 28,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0028&quot;,
-                                &quot;qrToken&quot;: &quot;QNwtAI0bIFD1VRqH6oeIst2WoRm-QKJB&quot;,
-                                &quot;label&quot;: &quot;Green, large&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/28&quot;
-                            }
-                        }
-                    ],
-                    &quot;items&quot;: [
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2178,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: 5.9,
-                                &quot;quantity&quot;: null,
-                                &quot;unitPriceCents&quot;: 2500,
-                                &quot;subtotalCents&quot;: 14750,
-                                &quot;serviceName&quot;: &quot;Wash only&quot;,
-                                &quot;pricingType&quot;: &quot;per_kg&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1657
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 2
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            &quot;type&quot;: &quot;orderItem&quot;,
-                            &quot;id&quot;: 2179,
-                            &quot;attributes&quot;: {
-                                &quot;weightKg&quot;: null,
-                                &quot;quantity&quot;: 1,
-                                &quot;unitPriceCents&quot;: 5000,
-                                &quot;subtotalCents&quot;: 5000,
-                                &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                                &quot;pricingType&quot;: &quot;flat&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;order&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;order&quot;,
-                                        &quot;id&quot;: 1657
-                                    }
-                                },
-                                &quot;service&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;service&quot;,
-                                        &quot;id&quot;: 5
-                                    },
-                                    &quot;links&quot;: {
-                                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                    }
-                                }
-                            }
-                        }
-                    ],
-                    &quot;receivedBy&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 3,
-                        &quot;attributes&quot;: {
-                            &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                            &quot;username&quot;: &quot;aira.d&quot;,
-                            &quot;role&quot;: &quot;staff&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                        }
-                    }
-                }
-            }
-        ],
-        &quot;lowStock&quot;: [
-            {
-                &quot;type&quot;: &quot;inventoryItem&quot;,
-                &quot;id&quot;: 1,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;Detergent powder&quot;,
-                    &quot;unitCode&quot;: &quot;kg&quot;,
-                    &quot;unitLabel&quot;: &quot;Kilogram&quot;,
-                    &quot;reorderLevel&quot;: 5,
-                    &quot;isActive&quot;: true,
-                    &quot;onHand&quot;: 2,
-                    &quot;stockStatus&quot;: &quot;critical&quot;,
-                    &quot;levelPercent&quot;: 20
-                },
-                &quot;relationships&quot;: {
-                    &quot;unit&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;unit&quot;,
-                            &quot;id&quot;: 1
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                }
-            },
-            {
-                &quot;type&quot;: &quot;inventoryItem&quot;,
-                &quot;id&quot;: 3,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;Plastic laundry bags&quot;,
-                    &quot;unitCode&quot;: &quot;pcs&quot;,
-                    &quot;unitLabel&quot;: &quot;Piece&quot;,
-                    &quot;reorderLevel&quot;: 50,
-                    &quot;isActive&quot;: true,
-                    &quot;onHand&quot;: 40,
-                    &quot;stockStatus&quot;: &quot;low&quot;,
-                    &quot;levelPercent&quot;: 40
-                },
-                &quot;relationships&quot;: {
-                    &quot;unit&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;unit&quot;,
-                            &quot;id&quot;: 3
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/3&quot;
-                }
-            },
-            {
-                &quot;type&quot;: &quot;inventoryItem&quot;,
-                &quot;id&quot;: 2,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;Fabric conditioner&quot;,
-                    &quot;unitCode&quot;: &quot;L&quot;,
-                    &quot;unitLabel&quot;: &quot;Liter&quot;,
-                    &quot;reorderLevel&quot;: 4,
-                    &quot;isActive&quot;: true,
-                    &quot;onHand&quot;: 3.5,
-                    &quot;stockStatus&quot;: &quot;low&quot;,
-                    &quot;levelPercent&quot;: 44
-                },
-                &quot;relationships&quot;: {
-                    &quot;unit&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;unit&quot;,
-                            &quot;id&quot;: 2
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/2&quot;
-                }
-            }
-        ],
-        &quot;weeklySales&quot;: [
-            {
-                &quot;date&quot;: &quot;2026-11-04&quot;,
-                &quot;salesCents&quot;: 335350
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-05&quot;,
-                &quot;salesCents&quot;: 423000
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-06&quot;,
-                &quot;salesCents&quot;: 334950
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-07&quot;,
-                &quot;salesCents&quot;: 382300
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-08&quot;,
-                &quot;salesCents&quot;: 313300
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-09&quot;,
-                &quot;salesCents&quot;: 578500
-            },
-            {
-                &quot;date&quot;: &quot;2026-11-10&quot;,
-                &quot;salesCents&quot;: 566350
-            }
-        ],
-        &quot;needsAction&quot;: [
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1646,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261110-0003&quot;,
-                        &quot;status&quot;: &quot;received&quot;,
-                        &quot;statusLabel&quot;: &quot;Received&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-09T23:05:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-09T23:05:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-11T03:05:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 15000,
-                        &quot;paidCents&quot;: 15000,
-                        &quot;balanceCents&quot;: 0,
-                        &quot;paymentStatus&quot;: &quot;paid&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-11-09T23:05:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-09T23:05:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 11
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/11&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1646&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 11,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Paolo Mendoza&quot;,
-                                &quot;contactNumber&quot;: &quot;09267730145&quot;,
-                                &quot;barangayName&quot;: &quot;Lisap&quot;,
-                                &quot;streetAddress&quot;: null,
-                                &quot;ordersCount&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-15T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-15T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 19
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/11&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 10,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0010&quot;,
-                                    &quot;qrToken&quot;: &quot;n-uYb73oWesRgmVlyKAUc3eT7mI4b-_t&quot;,
-                                    &quot;label&quot;: &quot;Red, small&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/10&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2163,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 6,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 2500,
-                                    &quot;subtotalCents&quot;: 15000,
-                                    &quot;serviceName&quot;: &quot;Wash only&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1646
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 2
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;waiting&quot;,
-                &quot;reason&quot;: &quot;Received 13 hr&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1623,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261109-0002&quot;,
-                        &quot;status&quot;: &quot;washing&quot;,
-                        &quot;statusLabel&quot;: &quot;Washing&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-09T02:04:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-09T00:30:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-09T10:30:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 17500,
-                        &quot;paidCents&quot;: 0,
-                        &quot;balanceCents&quot;: 17500,
-                        &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                        &quot;isOverdue&quot;: true,
-                        &quot;createdAt&quot;: &quot;2026-11-09T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-09T02:04:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 14
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/14&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 3
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1623&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 14,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Ben Soriano&quot;,
-                                &quot;contactNumber&quot;: &quot;09352214876&quot;,
-                                &quot;barangayName&quot;: &quot;Hagan&quot;,
-                                &quot;streetAddress&quot;: &quot;Purok 6&quot;,
-                                &quot;ordersCount&quot;: 2,
-                                &quot;createdAt&quot;: &quot;2026-07-27T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-27T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 12
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/14&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 44,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0044&quot;,
-                                    &quot;qrToken&quot;: &quot;zluWjO3PFVlrWuIJojP5Rc8x2c9fM0k_&quot;,
-                                    &quot;label&quot;: &quot;Yellow, medium&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/44&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2134,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 7,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 2500,
-                                    &quot;subtotalCents&quot;: 17500,
-                                    &quot;serviceName&quot;: &quot;Wash only&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1623
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 2
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;waiting&quot;,
-                &quot;reason&quot;: &quot;Washing 1 day&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1633,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261109-0012&quot;,
-                        &quot;status&quot;: &quot;drying&quot;,
-                        &quot;statusLabel&quot;: &quot;Drying&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-09T08:02:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-09T06:05:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-11T02:00:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 29750,
-                        &quot;paidCents&quot;: 10000,
-                        &quot;balanceCents&quot;: 19750,
-                        &quot;paymentStatus&quot;: &quot;partial&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-11-09T06:05:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-09T08:02:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 15
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/15&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 3
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1633&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 15,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Cris Navarro&quot;,
-                                &quot;contactNumber&quot;: &quot;09161007723&quot;,
-                                &quot;barangayName&quot;: &quot;Labasan&quot;,
-                                &quot;streetAddress&quot;: null,
-                                &quot;ordersCount&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-24T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-24T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 16
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/15&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 60,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0060&quot;,
-                                    &quot;qrToken&quot;: &quot;i3G8PF1RlocByAlFhV-ijRsa1h8VlXLY&quot;,
-                                    &quot;label&quot;: &quot;Red, small&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/60&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2147,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 8.5,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 3500,
-                                    &quot;subtotalCents&quot;: 29750,
-                                    &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1633
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 1
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;waiting&quot;,
-                &quot;reason&quot;: &quot;Drying 1 day&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1638,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261109-0017&quot;,
-                        &quot;status&quot;: &quot;folding&quot;,
-                        &quot;statusLabel&quot;: &quot;Folding&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-09T11:01:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-09T08:25:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-11T02:00:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 23500,
-                        &quot;paidCents&quot;: 23500,
-                        &quot;balanceCents&quot;: 0,
-                        &quot;paymentStatus&quot;: &quot;paid&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-11-09T08:25:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-09T11:01:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 16
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/16&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1638&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 16,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Elena Cruz&quot;,
-                                &quot;contactNumber&quot;: &quot;09473356192&quot;,
-                                &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                                &quot;streetAddress&quot;: &quot;Purok 4&quot;,
-                                &quot;ordersCount&quot;: 5,
-                                &quot;createdAt&quot;: &quot;2026-07-29T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-29T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 28
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/16&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 66,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0066&quot;,
-                                    &quot;qrToken&quot;: &quot;LJWYxLnBA0S_VdOz0HMrcPkL-fHvP8B1&quot;,
-                                    &quot;label&quot;: &quot;Blue, large&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/66&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2153,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 5,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 3500,
-                                    &quot;subtotalCents&quot;: 17500,
-                                    &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1638
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 1
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2154,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: null,
-                                    &quot;quantity&quot;: 4,
-                                    &quot;unitPriceCents&quot;: 1500,
-                                    &quot;subtotalCents&quot;: 6000,
-                                    &quot;serviceName&quot;: &quot;Ironing&quot;,
-                                    &quot;pricingType&quot;: &quot;per_piece&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1638
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 4
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/4&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;waiting&quot;,
-                &quot;reason&quot;: &quot;Folding 1 day&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1080,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261007-0001&quot;,
-                        &quot;status&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;statusLabel&quot;: &quot;Ready for Pickup&quot;,
-                        &quot;statusSince&quot;: &quot;2026-10-07T06:19:41.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-10-06T23:27:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-10-07T05:27:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: &quot;Unclaimed. Customer was texted twice.&quot;,
-                        &quot;totalCents&quot;: 21250,
-                        &quot;paidCents&quot;: 0,
-                        &quot;balanceCents&quot;: 21250,
-                        &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-10-06T23:27:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-10-07T06:19:41.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 36
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1080&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 36,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Pia Francisco&quot;,
-                                &quot;contactNumber&quot;: &quot;09264405517&quot;,
-                                &quot;barangayName&quot;: &quot;Luna&quot;,
-                                &quot;streetAddress&quot;: &quot;Purok 5&quot;,
-                                &quot;ordersCount&quot;: 362,
-                                &quot;createdAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-14T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 20
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/36&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 24,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0024&quot;,
-                                    &quot;qrToken&quot;: &quot;r81mapLNAE_PK2ZHD0Oo2v9MPqm0losW&quot;,
-                                    &quot;label&quot;: &quot;Yellow, medium&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/24&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 1434,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 6.5,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 2500,
-                                    &quot;subtotalCents&quot;: 16250,
-                                    &quot;serviceName&quot;: &quot;Wash only&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1080
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 2
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 1435,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: null,
-                                    &quot;quantity&quot;: 1,
-                                    &quot;unitPriceCents&quot;: 5000,
-                                    &quot;subtotalCents&quot;: 5000,
-                                    &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                                    &quot;pricingType&quot;: &quot;flat&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1080
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 5
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;unclaimed&quot;,
-                &quot;reason&quot;: &quot;Ready 34 days, not claimed&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1428,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261029-0001&quot;,
-                        &quot;status&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;statusLabel&quot;: &quot;Ready for Pickup&quot;,
-                        &quot;statusSince&quot;: &quot;2026-10-29T23:42:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-10-28T23:24:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-10-29T23:24:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: &quot;Unclaimed. Customer was texted twice.&quot;,
-                        &quot;totalCents&quot;: 25900,
-                        &quot;paidCents&quot;: 15000,
-                        &quot;balanceCents&quot;: 10900,
-                        &quot;paymentStatus&quot;: &quot;partial&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-10-28T23:24:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-10-29T23:42:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 24
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/24&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1428&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 24,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Cherry Lim&quot;,
-                                &quot;contactNumber&quot;: &quot;09778214409&quot;,
-                                &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                                &quot;streetAddress&quot;: null,
-                                &quot;ordersCount&quot;: 2,
-                                &quot;createdAt&quot;: &quot;2026-07-21T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-21T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 28
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/24&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 38,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0038&quot;,
-                                    &quot;qrToken&quot;: &quot;0_XIWjdGgnMr1dXg_VwKlmq36PN-Ynd9&quot;,
-                                    &quot;label&quot;: &quot;Green, large&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/38&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 1883,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 7.4,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 3500,
-                                    &quot;subtotalCents&quot;: 25900,
-                                    &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1428
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 1
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;unclaimed&quot;,
-                &quot;reason&quot;: &quot;Ready 11 days, not claimed&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1574,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261106-0009&quot;,
-                        &quot;status&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;statusLabel&quot;: &quot;Ready for Pickup&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-06T06:28:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-06T02:15:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-07T06:15:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 15750,
-                        &quot;paidCents&quot;: 0,
-                        &quot;balanceCents&quot;: 15750,
-                        &quot;paymentStatus&quot;: &quot;unpaid&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-11-06T02:15:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-06T06:28:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 17
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/17&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 3
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1574&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 17,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Arnel Pascual&quot;,
-                                &quot;contactNumber&quot;: &quot;09215580346&quot;,
-                                &quot;barangayName&quot;: &quot;Masaguisi&quot;,
-                                &quot;streetAddress&quot;: null,
-                                &quot;ordersCount&quot;: 68,
-                                &quot;createdAt&quot;: &quot;2026-07-15T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-15T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 23
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/17&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 15,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0015&quot;,
-                                    &quot;qrToken&quot;: &quot;s36lQNBBctmCbZ6Iy7GREfTgjaZAVBa1&quot;,
-                                    &quot;label&quot;: &quot;Red, small&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/15&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2071,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 4.5,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 3500,
-                                    &quot;subtotalCents&quot;: 15750,
-                                    &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1574
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 1
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;unclaimed&quot;,
-                &quot;reason&quot;: &quot;Ready 4 days, not claimed&quot;
-            },
-            {
-                &quot;order&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1594,
-                    &quot;attributes&quot;: {
-                        &quot;orderNumber&quot;: &quot;LF-261107-0013&quot;,
-                        &quot;status&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;statusLabel&quot;: &quot;Ready for Pickup&quot;,
-                        &quot;statusSince&quot;: &quot;2026-11-07T10:40:00.000Z&quot;,
-                        &quot;receivedAt&quot;: &quot;2026-11-07T05:40:00.000Z&quot;,
-                        &quot;promisedAt&quot;: &quot;2026-11-08T09:40:00.000Z&quot;,
-                        &quot;releasedAt&quot;: null,
-                        &quot;notes&quot;: null,
-                        &quot;totalCents&quot;: 15000,
-                        &quot;paidCents&quot;: 15000,
-                        &quot;balanceCents&quot;: 0,
-                        &quot;paymentStatus&quot;: &quot;paid&quot;,
-                        &quot;isOverdue&quot;: false,
-                        &quot;createdAt&quot;: &quot;2026-11-07T05:40:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-11-07T10:40:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;customer&quot;,
-                                &quot;id&quot;: 18
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/18&quot;
-                            }
-                        },
-                        &quot;receivedBy&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;user&quot;,
-                                &quot;id&quot;: 2
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1594&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;customer&quot;: {
-                            &quot;type&quot;: &quot;customer&quot;,
-                            &quot;id&quot;: 18,
-                            &quot;attributes&quot;: {
-                                &quot;fullName&quot;: &quot;Lorna Dela Cruz&quot;,
-                                &quot;contactNumber&quot;: &quot;09175523018&quot;,
-                                &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                                &quot;streetAddress&quot;: null,
-                                &quot;ordersCount&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-28T00:30:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-28T00:30:00.000Z&quot;
-                            },
-                            &quot;relationships&quot;: {
-                                &quot;barangay&quot;: {
-                                    &quot;data&quot;: {
-                                        &quot;type&quot;: &quot;barangay&quot;,
-                                        &quot;id&quot;: 28
-                                    }
-                                }
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/18&quot;
-                            }
-                        },
-                        &quot;baskets&quot;: [
-                            {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 55,
-                                &quot;attributes&quot;: {
-                                    &quot;basketNumber&quot;: &quot;BSK-0055&quot;,
-                                    &quot;qrToken&quot;: &quot;3JczJmNg1oG24k7M2a-b6rl9jRSMNpcv&quot;,
-                                    &quot;label&quot;: &quot;Red, small&quot;,
-                                    &quot;status&quot;: &quot;in_use&quot;,
-                                    &quot;notes&quot;: null,
-                                    &quot;createdBy&quot;: 1,
-                                    &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                    &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/55&quot;
-                                }
-                            }
-                        ],
-                        &quot;items&quot;: [
-                            {
-                                &quot;type&quot;: &quot;orderItem&quot;,
-                                &quot;id&quot;: 2098,
-                                &quot;attributes&quot;: {
-                                    &quot;weightKg&quot;: 6,
-                                    &quot;quantity&quot;: null,
-                                    &quot;unitPriceCents&quot;: 2500,
-                                    &quot;subtotalCents&quot;: 15000,
-                                    &quot;serviceName&quot;: &quot;Wash only&quot;,
-                                    &quot;pricingType&quot;: &quot;per_kg&quot;
-                                },
-                                &quot;relationships&quot;: {
-                                    &quot;order&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;order&quot;,
-                                            &quot;id&quot;: 1594
-                                        }
-                                    },
-                                    &quot;service&quot;: {
-                                        &quot;data&quot;: {
-                                            &quot;type&quot;: &quot;service&quot;,
-                                            &quot;id&quot;: 2
-                                        },
-                                        &quot;links&quot;: {
-                                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-                                        }
-                                    }
-                                }
-                            }
-                        ],
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                &quot;kind&quot;: &quot;unclaimed&quot;,
-                &quot;reason&quot;: &quot;Ready 3 days, not claimed&quot;
-            }
-        ]
-    },
-    &quot;message&quot;: &quot;Dashboard&quot;,
-    &quot;status&quot;: 200
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -12228,7 +7560,7 @@ staff document, which is built without a single peso field (not hidden: never se
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/analytics/dashboard?from=2026-10-10&amp;to=2026-11-08&amp;compare=previous" \
+    --get "http://localhost:8000/api/v1/analytics/dashboard?from=2026-10-10&amp;to=2026-11-08&amp;compare=previous" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -12236,7 +7568,7 @@ staff document, which is built without a single peso field (not hidden: never se
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/analytics/dashboard"
+    "http://localhost:8000/api/v1/analytics/dashboard"
 );
 
 const params = {
@@ -12263,7 +7595,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-analytics-dashboard">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -12276,801 +7608,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;range&quot;: {
-            &quot;from&quot;: &quot;2026-10-10&quot;,
-            &quot;to&quot;: &quot;2026-11-08&quot;
-        },
-        &quot;compare_range&quot;: {
-            &quot;from&quot;: &quot;2026-09-10&quot;,
-            &quot;to&quot;: &quot;2026-10-09&quot;
-        },
-        &quot;generated_at&quot;: &quot;2026-11-10T12:57:04.047Z&quot;,
-        &quot;kpis&quot;: [
-            {
-                &quot;key&quot;: &quot;sales&quot;,
-                &quot;label&quot;: &quot;Sales&quot;,
-                &quot;format&quot;: &quot;money&quot;,
-                &quot;value&quot;: 11097650,
-                &quot;previous&quot;: 9824700,
-                &quot;delta_pct&quot;: 13,
-                &quot;spark&quot;: [
-                    327550,
-                    418850,
-                    436350,
-                    319450,
-                    446950,
-                    351350,
-                    284150,
-                    474900,
-                    325200,
-                    333000,
-                    313950,
-                    168400,
-                    423950,
-                    307650,
-                    322100,
-                    674600,
-                    449450,
-                    270650,
-                    328100,
-                    347400,
-                    318800,
-                    429200,
-                    353950,
-                    400550,
-                    482250,
-                    335350,
-                    423000,
-                    334950,
-                    382300,
-                    313300
-                ],
-                &quot;hint&quot;: &quot;Payments collected&quot;
-            },
-            {
-                &quot;key&quot;: &quot;orders&quot;,
-                &quot;label&quot;: &quot;Orders&quot;,
-                &quot;format&quot;: &quot;count&quot;,
-                &quot;value&quot;: 502,
-                &quot;previous&quot;: 440,
-                &quot;delta_pct&quot;: 14.1,
-                &quot;spark&quot;: [
-                    18,
-                    19,
-                    16,
-                    15,
-                    15,
-                    16,
-                    13,
-                    17,
-                    22,
-                    13,
-                    13,
-                    15,
-                    16,
-                    14,
-                    22,
-                    20,
-                    13,
-                    16,
-                    15,
-                    17,
-                    14,
-                    21,
-                    24,
-                    14,
-                    15,
-                    16,
-                    17,
-                    16,
-                    21,
-                    19
-                ],
-                &quot;hint&quot;: &quot;Received in this period&quot;
-            },
-            {
-                &quot;key&quot;: &quot;kilos&quot;,
-                &quot;label&quot;: &quot;Kilos processed&quot;,
-                &quot;format&quot;: &quot;kg&quot;,
-                &quot;value&quot;: 2494.1,
-                &quot;previous&quot;: 2164.8,
-                &quot;delta_pct&quot;: 15.2,
-                &quot;spark&quot;: [
-                    84.7,
-                    99.8,
-                    96.1,
-                    83.3,
-                    66.8,
-                    75.4,
-                    54,
-                    63.3,
-                    113.6,
-                    59.9,
-                    77.8,
-                    81.1,
-                    58.7,
-                    72,
-                    136.8,
-                    98.3,
-                    58.6,
-                    76.5,
-                    76.5,
-                    73,
-                    81.8,
-                    107.4,
-                    120,
-                    88.9,
-                    64,
-                    71.1,
-                    45.6,
-                    79.5,
-                    113,
-                    116.6
-                ],
-                &quot;hint&quot;: &quot;Wash-Dry-Fold and Wash only&quot;
-            },
-            {
-                &quot;key&quot;: &quot;aov&quot;,
-                &quot;label&quot;: &quot;Average order value&quot;,
-                &quot;format&quot;: &quot;money&quot;,
-                &quot;value&quot;: 22419,
-                &quot;previous&quot;: 22846,
-                &quot;delta_pct&quot;: -1.9,
-                &quot;spark&quot;: [
-                    22692,
-                    24242,
-                    22278,
-                    22770,
-                    24753,
-                    23763,
-                    20031,
-                    18344,
-                    20855,
-                    21265,
-                    22362,
-                    19870,
-                    23997,
-                    21921,
-                    24809,
-                    23393,
-                    24292,
-                    22022,
-                    20083,
-                    19835,
-                    21729,
-                    20419,
-                    24967,
-                    22389,
-                    22727,
-                    25491,
-                    19012,
-                    20997,
-                    21386,
-                    27684
-                ],
-                &quot;hint&quot;: &quot;Billed per order&quot;
-            },
-            {
-                &quot;key&quot;: &quot;unpaid&quot;,
-                &quot;label&quot;: &quot;Unpaid balances&quot;,
-                &quot;format&quot;: &quot;money&quot;,
-                &quot;value&quot;: 761250,
-                &quot;previous&quot;: 604350,
-                &quot;delta_pct&quot;: 26,
-                &quot;spark&quot;: [
-                    685250,
-                    727000,
-                    647100,
-                    669200,
-                    593550,
-                    622400,
-                    598650,
-                    435600,
-                    569200,
-                    512650,
-                    489400,
-                    619050,
-                    579050,
-                    578300,
-                    802000,
-                    595250,
-                    461600,
-                    543300,
-                    516450,
-                    506250,
-                    491650,
-                    491250,
-                    736500,
-                    649400,
-                    508050,
-                    580550,
-                    480750,
-                    481750,
-                    548550,
-                    761250
-                ],
-                &quot;tone&quot;: &quot;warn&quot;,
-                &quot;inverse&quot;: true,
-                &quot;hint&quot;: &quot;Across 8 orders&quot;
-            }
-        ],
-        &quot;series&quot;: {
-            &quot;role&quot;: &quot;admin&quot;,
-            &quot;sales&quot;: [
-                {
-                    &quot;date&quot;: &quot;2026-10-10&quot;,
-                    &quot;value&quot;: 327550,
-                    &quot;previous&quot;: 236750
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-11&quot;,
-                    &quot;value&quot;: 418850,
-                    &quot;previous&quot;: 285850
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-12&quot;,
-                    &quot;value&quot;: 436350,
-                    &quot;previous&quot;: 269950
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-13&quot;,
-                    &quot;value&quot;: 319450,
-                    &quot;previous&quot;: 330700
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-14&quot;,
-                    &quot;value&quot;: 446950,
-                    &quot;previous&quot;: 457800
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-15&quot;,
-                    &quot;value&quot;: 351350,
-                    &quot;previous&quot;: 250350
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-16&quot;,
-                    &quot;value&quot;: 284150,
-                    &quot;previous&quot;: 140050
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-17&quot;,
-                    &quot;value&quot;: 474900,
-                    &quot;previous&quot;: 314300
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-18&quot;,
-                    &quot;value&quot;: 325200,
-                    &quot;previous&quot;: 421000
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-19&quot;,
-                    &quot;value&quot;: 333000,
-                    &quot;previous&quot;: 373500
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-20&quot;,
-                    &quot;value&quot;: 313950,
-                    &quot;previous&quot;: 351050
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-21&quot;,
-                    &quot;value&quot;: 168400,
-                    &quot;previous&quot;: 314150
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-22&quot;,
-                    &quot;value&quot;: 423950,
-                    &quot;previous&quot;: 372250
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-23&quot;,
-                    &quot;value&quot;: 307650,
-                    &quot;previous&quot;: 344400
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-24&quot;,
-                    &quot;value&quot;: 322100,
-                    &quot;previous&quot;: 312700
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-25&quot;,
-                    &quot;value&quot;: 674600,
-                    &quot;previous&quot;: 212500
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-26&quot;,
-                    &quot;value&quot;: 449450,
-                    &quot;previous&quot;: 336650
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-27&quot;,
-                    &quot;value&quot;: 270650,
-                    &quot;previous&quot;: 411900
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-28&quot;,
-                    &quot;value&quot;: 328100,
-                    &quot;previous&quot;: 407400
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-29&quot;,
-                    &quot;value&quot;: 347400,
-                    &quot;previous&quot;: 321650
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-30&quot;,
-                    &quot;value&quot;: 318800,
-                    &quot;previous&quot;: 302900
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-31&quot;,
-                    &quot;value&quot;: 429200,
-                    &quot;previous&quot;: 406800
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-01&quot;,
-                    &quot;value&quot;: 353950,
-                    &quot;previous&quot;: 318200
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-02&quot;,
-                    &quot;value&quot;: 400550,
-                    &quot;previous&quot;: 317850
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-03&quot;,
-                    &quot;value&quot;: 482250,
-                    &quot;previous&quot;: 331200
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-04&quot;,
-                    &quot;value&quot;: 335350,
-                    &quot;previous&quot;: 420600
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-05&quot;,
-                    &quot;value&quot;: 423000,
-                    &quot;previous&quot;: 444200
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-06&quot;,
-                    &quot;value&quot;: 334950,
-                    &quot;previous&quot;: 325450
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-07&quot;,
-                    &quot;value&quot;: 382300,
-                    &quot;previous&quot;: 244600
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-08&quot;,
-                    &quot;value&quot;: 313300,
-                    &quot;previous&quot;: 248000
-                }
-            ],
-            &quot;revenue_by_service&quot;: [
-                {
-                    &quot;key&quot;: &quot;1&quot;,
-                    &quot;label&quot;: &quot;Wash-Dry-Fold&quot;,
-                    &quot;value&quot;: 7163203,
-                    &quot;share&quot;: 0.6454702572166179
-                },
-                {
-                    &quot;key&quot;: &quot;3&quot;,
-                    &quot;label&quot;: &quot;Comforter / Blanket&quot;,
-                    &quot;value&quot;: 1371000,
-                    &quot;share&quot;: 0.12353966830815533
-                },
-                {
-                    &quot;key&quot;: &quot;2&quot;,
-                    &quot;label&quot;: &quot;Wash only&quot;,
-                    &quot;value&quot;: 1044500,
-                    &quot;share&quot;: 0.09411902519902862
-                },
-                {
-                    &quot;key&quot;: &quot;4&quot;,
-                    &quot;label&quot;: &quot;Ironing&quot;,
-                    &quot;value&quot;: 1024000,
-                    &quot;share&quot;: 0.09227178727027795
-                },
-                {
-                    &quot;key&quot;: &quot;5&quot;,
-                    &quot;label&quot;: &quot;Express (same day)&quot;,
-                    &quot;value&quot;: 494947,
-                    &quot;share&quot;: 0.044599262005920175
-                }
-            ],
-            &quot;pipeline&quot;: [
-                {
-                    &quot;key&quot;: &quot;received&quot;,
-                    &quot;label&quot;: &quot;Received&quot;,
-                    &quot;value&quot;: 4,
-                    &quot;share&quot;: 0.10256410256410256
-                },
-                {
-                    &quot;key&quot;: &quot;washing&quot;,
-                    &quot;label&quot;: &quot;Washing&quot;,
-                    &quot;value&quot;: 14,
-                    &quot;share&quot;: 0.358974358974359
-                },
-                {
-                    &quot;key&quot;: &quot;drying&quot;,
-                    &quot;label&quot;: &quot;Drying&quot;,
-                    &quot;value&quot;: 4,
-                    &quot;share&quot;: 0.10256410256410256
-                },
-                {
-                    &quot;key&quot;: &quot;folding&quot;,
-                    &quot;label&quot;: &quot;Folding&quot;,
-                    &quot;value&quot;: 2,
-                    &quot;share&quot;: 0.05128205128205128
-                },
-                {
-                    &quot;key&quot;: &quot;ready_for_pickup&quot;,
-                    &quot;label&quot;: &quot;Ready for Pickup&quot;,
-                    &quot;value&quot;: 15,
-                    &quot;share&quot;: 0.38461538461538464
-                }
-            ],
-            &quot;payment_mix&quot;: [
-                {
-                    &quot;key&quot;: &quot;cash&quot;,
-                    &quot;label&quot;: &quot;Cash&quot;,
-                    &quot;value&quot;: 7696700,
-                    &quot;share&quot;: 0.693543227620262,
-                    &quot;extra&quot;: {
-                        &quot;count&quot;: 413
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;gcash&quot;,
-                    &quot;label&quot;: &quot;GCash&quot;,
-                    &quot;value&quot;: 3400950,
-                    &quot;share&quot;: 0.30645677237973806,
-                    &quot;extra&quot;: {
-                        &quot;count&quot;: 185
-                    }
-                }
-            ],
-            &quot;heatmap&quot;: {
-                &quot;weekdays&quot;: [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                ],
-                &quot;hours&quot;: [
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                    17,
-                    18
-                ],
-                &quot;cells&quot;: [
-                    [
-                        10,
-                        8,
-                        10,
-                        4,
-                        4,
-                        1,
-                        4,
-                        2,
-                        5,
-                        1,
-                        5,
-                        2
-                    ],
-                    [
-                        7,
-                        7,
-                        8,
-                        7,
-                        5,
-                        5,
-                        1,
-                        2,
-                        3,
-                        4,
-                        7,
-                        3
-                    ],
-                    [
-                        6,
-                        5,
-                        5,
-                        5,
-                        4,
-                        2,
-                        4,
-                        2,
-                        3,
-                        8,
-                        13,
-                        4
-                    ],
-                    [
-                        5,
-                        14,
-                        4,
-                        6,
-                        4,
-                        2,
-                        1,
-                        3,
-                        7,
-                        6,
-                        11,
-                        3
-                    ],
-                    [
-                        4,
-                        9,
-                        7,
-                        7,
-                        5,
-                        1,
-                        3,
-                        1,
-                        5,
-                        3,
-                        5,
-                        7
-                    ],
-                    [
-                        16,
-                        10,
-                        18,
-                        9,
-                        2,
-                        2,
-                        9,
-                        5,
-                        8,
-                        4,
-                        8,
-                        8
-                    ],
-                    [
-                        12,
-                        15,
-                        11,
-                        8,
-                        3,
-                        1,
-                        4,
-                        12,
-                        8,
-                        13,
-                        15,
-                        2
-                    ]
-                ],
-                &quot;max&quot;: 18,
-                &quot;total&quot;: 502
-            },
-            &quot;turnaround&quot;: [
-                {
-                    &quot;date&quot;: &quot;2026-10-10&quot;,
-                    &quot;value&quot;: 24.9,
-                    &quot;count&quot;: 14
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-11&quot;,
-                    &quot;value&quot;: 23.2,
-                    &quot;count&quot;: 19
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-12&quot;,
-                    &quot;value&quot;: 21.4,
-                    &quot;count&quot;: 20
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-13&quot;,
-                    &quot;value&quot;: 18.7,
-                    &quot;count&quot;: 15
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-14&quot;,
-                    &quot;value&quot;: 24.9,
-                    &quot;count&quot;: 15
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-15&quot;,
-                    &quot;value&quot;: 22.1,
-                    &quot;count&quot;: 12
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-16&quot;,
-                    &quot;value&quot;: 24.8,
-                    &quot;count&quot;: 17
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-17&quot;,
-                    &quot;value&quot;: 22.5,
-                    &quot;count&quot;: 13
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-18&quot;,
-                    &quot;value&quot;: 23.2,
-                    &quot;count&quot;: 19
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-19&quot;,
-                    &quot;value&quot;: 21.6,
-                    &quot;count&quot;: 23
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-20&quot;,
-                    &quot;value&quot;: 24.5,
-                    &quot;count&quot;: 10
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-21&quot;,
-                    &quot;value&quot;: 24.1,
-                    &quot;count&quot;: 14
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-22&quot;,
-                    &quot;value&quot;: 22,
-                    &quot;count&quot;: 12
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-23&quot;,
-                    &quot;value&quot;: 26.5,
-                    &quot;count&quot;: 18
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-24&quot;,
-                    &quot;value&quot;: 22.7,
-                    &quot;count&quot;: 18
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-25&quot;,
-                    &quot;value&quot;: 21.9,
-                    &quot;count&quot;: 19
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-26&quot;,
-                    &quot;value&quot;: 22.7,
-                    &quot;count&quot;: 21
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-27&quot;,
-                    &quot;value&quot;: 21,
-                    &quot;count&quot;: 14
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-28&quot;,
-                    &quot;value&quot;: 19.5,
-                    &quot;count&quot;: 14
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-29&quot;,
-                    &quot;value&quot;: 24.5,
-                    &quot;count&quot;: 14
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-30&quot;,
-                    &quot;value&quot;: 22.6,
-                    &quot;count&quot;: 18
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-31&quot;,
-                    &quot;value&quot;: 24.7,
-                    &quot;count&quot;: 12
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-01&quot;,
-                    &quot;value&quot;: 23.3,
-                    &quot;count&quot;: 26
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-02&quot;,
-                    &quot;value&quot;: 22.5,
-                    &quot;count&quot;: 19
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-03&quot;,
-                    &quot;value&quot;: 24.5,
-                    &quot;count&quot;: 16
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-04&quot;,
-                    &quot;value&quot;: 20.9,
-                    &quot;count&quot;: 17
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-05&quot;,
-                    &quot;value&quot;: 19.2,
-                    &quot;count&quot;: 16
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-06&quot;,
-                    &quot;value&quot;: 24.1,
-                    &quot;count&quot;: 15
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-07&quot;,
-                    &quot;value&quot;: 21.9,
-                    &quot;count&quot;: 19
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-08&quot;,
-                    &quot;value&quot;: 22.6,
-                    &quot;count&quot;: 16
-                }
-            ],
-            &quot;turnaround_target&quot;: 24,
-            &quot;new_vs_returning&quot;: [
-                {
-                    &quot;key&quot;: &quot;2026-10-10&quot;,
-                    &quot;label&quot;: &quot;Week of Oct 10&quot;,
-                    &quot;values&quot;: {
-                        &quot;new&quot;: 16,
-                        &quot;returning&quot;: 9
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;2026-10-12&quot;,
-                    &quot;label&quot;: &quot;Week of Oct 12&quot;,
-                    &quot;values&quot;: {
-                        &quot;new&quot;: 51,
-                        &quot;returning&quot;: 29
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;2026-10-19&quot;,
-                    &quot;label&quot;: &quot;Week of Oct 19&quot;,
-                    &quot;values&quot;: {
-                        &quot;new&quot;: 49,
-                        &quot;returning&quot;: 30
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;2026-10-26&quot;,
-                    &quot;label&quot;: &quot;Week of Oct 26&quot;,
-                    &quot;values&quot;: {
-                        &quot;new&quot;: 43,
-                        &quot;returning&quot;: 30
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;2026-11-02&quot;,
-                    &quot;label&quot;: &quot;Week of Nov 2&quot;,
-                    &quot;values&quot;: {
-                        &quot;new&quot;: 58,
-                        &quot;returning&quot;: 22
-                    }
-                }
-            ],
-            &quot;collected&quot;: {
-                &quot;billed&quot;: 11254550,
-                &quot;collected&quot;: 11121500,
-                &quot;outstanding&quot;: 133050,
-                &quot;unpaid_orders&quot;: 7
-            }
-        },
-        &quot;table&quot;: null,
-        &quot;insights&quot;: [
-            &quot;Sales rose 13.0% compared with the previous 30 days.&quot;,
-            &quot;Wash-Dry-Fold brought in 65% of revenue.&quot;,
-            &quot;The busiest hour is 8 AM&ndash;9 AM; the busiest single slot is Saturday at 9 AM.&quot;
-        ]
-    },
-    &quot;message&quot;: &quot;Dashboard analytics&quot;,
-    &quot;status&quot;: 200
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -13196,6 +7740,152 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                 </form>
 
+                <h1 id="health">Health</h1>
+
+    
+
+                                <h2 id="health-GETapi-v1-health">Check the API</h2>
+
+<p>
+</p>
+
+<p>Answers 200 when the API runs and its database accepts queries, and 503 when the database
+cannot be reached. It never returns data from the database. Docker's health check and the
+frontend's dev server call it.</p>
+
+<span id="example-requests-GETapi-v1-health">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/v1/health" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/health"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-health">
+            <blockquote>
+            <p>Example response (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;status&quot;: &quot;ok&quot;,
+        &quot;database&quot;: &quot;ok&quot;
+    },
+    &quot;message&quot;: &quot;OK&quot;,
+    &quot;status&quot;: 200
+}</code>
+ </pre>
+            <blockquote>
+            <p>Example response (503):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 503,
+            &quot;message&quot;: &quot;The database is not reachable.&quot;,
+            &quot;source&quot;: &quot;database&quot;
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-health" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-health"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-health"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-health" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-health">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-health" data-method="GET"
+      data-path="api/v1/health"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-health', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-health"
+                    onclick="tryItOut('GETapi-v1-health');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-health"
+                    onclick="cancelTryOut('GETapi-v1-health');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-health"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/health</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-health"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-health"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
                 <h1 id="inventory">Inventory</h1>
 
     <p>Supply items. Stock on hand is computed from the movements, never typed in.</p>
@@ -13214,7 +7904,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/inventory/units" \
+    --get "http://localhost:8000/api/v1/inventory/units" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13222,7 +7912,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/units"
+    "http://localhost:8000/api/v1/inventory/units"
 );
 
 const headers = {
@@ -13241,7 +7931,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-inventory-units">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -13254,38 +7944,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;unit&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;code&quot;: &quot;kg&quot;,
-                &quot;label&quot;: &quot;Kilogram&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;unit&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;code&quot;: &quot;L&quot;,
-                &quot;label&quot;: &quot;Liter&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;unit&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;code&quot;: &quot;pcs&quot;,
-                &quot;label&quot;: &quot;Piece&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;unit&quot;,
-            &quot;id&quot;: 4,
-            &quot;attributes&quot;: {
-                &quot;code&quot;: &quot;rolls&quot;,
-                &quot;label&quot;: &quot;Roll&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -13390,7 +8053,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/inventory/items" \
+    --get "http://localhost:8000/api/v1/inventory/items" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -13398,7 +8061,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/items"
+    "http://localhost:8000/api/v1/inventory/items"
 );
 
 const headers = {
@@ -13417,7 +8080,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-inventory-items">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -13430,206 +8093,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;unitLabel&quot;: &quot;Kilogram&quot;,
-                &quot;reorderLevel&quot;: 5,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 2,
-                &quot;stockStatus&quot;: &quot;critical&quot;,
-                &quot;levelPercent&quot;: 20
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 1
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Fabric conditioner&quot;,
-                &quot;unitCode&quot;: &quot;L&quot;,
-                &quot;unitLabel&quot;: &quot;Liter&quot;,
-                &quot;reorderLevel&quot;: 4,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 3.5,
-                &quot;stockStatus&quot;: &quot;low&quot;,
-                &quot;levelPercent&quot;: 44
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 2
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/2&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Plastic laundry bags&quot;,
-                &quot;unitCode&quot;: &quot;pcs&quot;,
-                &quot;unitLabel&quot;: &quot;Piece&quot;,
-                &quot;reorderLevel&quot;: 50,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 40,
-                &quot;stockStatus&quot;: &quot;low&quot;,
-                &quot;levelPercent&quot;: 40
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 3
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/3&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 4,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Liquid detergent&quot;,
-                &quot;unitCode&quot;: &quot;L&quot;,
-                &quot;unitLabel&quot;: &quot;Liter&quot;,
-                &quot;reorderLevel&quot;: 5,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 12,
-                &quot;stockStatus&quot;: &quot;ok&quot;,
-                &quot;levelPercent&quot;: 100
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 2
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/4&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 5,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Bleach&quot;,
-                &quot;unitCode&quot;: &quot;L&quot;,
-                &quot;unitLabel&quot;: &quot;Liter&quot;,
-                &quot;reorderLevel&quot;: 2,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 6,
-                &quot;stockStatus&quot;: &quot;ok&quot;,
-                &quot;levelPercent&quot;: 100
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 2
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/5&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 6,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Hangers&quot;,
-                &quot;unitCode&quot;: &quot;pcs&quot;,
-                &quot;unitLabel&quot;: &quot;Piece&quot;,
-                &quot;reorderLevel&quot;: 40,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 120,
-                &quot;stockStatus&quot;: &quot;ok&quot;,
-                &quot;levelPercent&quot;: 100
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 3
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/6&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 7,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Thermal receipt rolls&quot;,
-                &quot;unitCode&quot;: &quot;rolls&quot;,
-                &quot;unitLabel&quot;: &quot;Roll&quot;,
-                &quot;reorderLevel&quot;: 3,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 9,
-                &quot;stockStatus&quot;: &quot;ok&quot;,
-                &quot;levelPercent&quot;: 100
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 4
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/7&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryItem&quot;,
-            &quot;id&quot;: 8,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;QR tag stickers&quot;,
-                &quot;unitCode&quot;: &quot;pcs&quot;,
-                &quot;unitLabel&quot;: &quot;Piece&quot;,
-                &quot;reorderLevel&quot;: 100,
-                &quot;isActive&quot;: true,
-                &quot;onHand&quot;: 310,
-                &quot;stockStatus&quot;: &quot;ok&quot;,
-                &quot;levelPercent&quot;: 100
-            },
-            &quot;relationships&quot;: {
-                &quot;unit&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;unit&quot;,
-                        &quot;id&quot;: 3
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/8&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -13734,7 +8202,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/inventory/items" \
+    "http://localhost:8000/api/v1/inventory/items" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -13759,7 +8227,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/items"
+    "http://localhost:8000/api/v1/inventory/items"
 );
 
 const headers = {
@@ -14013,7 +8481,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/inventory/items/1" \
+    --get "http://localhost:8000/api/v1/inventory/items/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14021,7 +8489,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/items/1"
+    "http://localhost:8000/api/v1/inventory/items/1"
 );
 
 const headers = {
@@ -14040,7 +8508,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-inventory-items--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -14053,31 +8521,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;inventoryItem&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;name&quot;: &quot;Detergent powder&quot;,
-            &quot;unitCode&quot;: &quot;kg&quot;,
-            &quot;unitLabel&quot;: &quot;Kilogram&quot;,
-            &quot;reorderLevel&quot;: 5,
-            &quot;isActive&quot;: true,
-            &quot;onHand&quot;: 2,
-            &quot;stockStatus&quot;: &quot;critical&quot;,
-            &quot;levelPercent&quot;: 20
-        },
-        &quot;relationships&quot;: {
-            &quot;unit&quot;: {
-                &quot;data&quot;: {
-                    &quot;type&quot;: &quot;unit&quot;,
-                    &quot;id&quot;: 1
-                }
-            }
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -14193,7 +8643,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/inventory/items/1" \
+    "http://localhost:8000/api/v1/inventory/items/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -14218,7 +8668,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/items/1"
+    "http://localhost:8000/api/v1/inventory/items/1"
 );
 
 const headers = {
@@ -14485,7 +8935,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/inventory/items/1" \
+    "http://localhost:8000/api/v1/inventory/items/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -14510,7 +8960,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/items/1"
+    "http://localhost:8000/api/v1/inventory/items/1"
 );
 
 const headers = {
@@ -14777,7 +9227,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/inventory/movements?item=1&amp;page=1" \
+    --get "http://localhost:8000/api/v1/inventory/movements?item=1&amp;type=usage&amp;page=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -14785,11 +9235,12 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/movements"
+    "http://localhost:8000/api/v1/inventory/movements"
 );
 
 const params = {
     "item": "1",
+    "type": "usage",
     "page": "1",
 };
 Object.keys(params)
@@ -14811,7 +9262,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-inventory-movements">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -14824,418 +9275,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 847,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 1.2,
-                &quot;signedQuantity&quot;: -1.2,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-10T12:15:29.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 838,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 1.6,
-                &quot;signedQuantity&quot;: -1.6,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-09T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 830,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 1.4,
-                &quot;signedQuantity&quot;: -1.4,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-08T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 822,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 1.4,
-                &quot;signedQuantity&quot;: -1.4,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-07T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 815,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 1,
-                &quot;signedQuantity&quot;: -1,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-06T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 808,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 0.5,
-                &quot;signedQuantity&quot;: -0.5,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-05T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 800,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 0.9,
-                &quot;signedQuantity&quot;: -0.9,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-04T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;inventoryMovement&quot;,
-            &quot;id&quot;: 793,
-            &quot;attributes&quot;: {
-                &quot;itemName&quot;: &quot;Detergent powder&quot;,
-                &quot;unitCode&quot;: &quot;kg&quot;,
-                &quot;type&quot;: &quot;out&quot;,
-                &quot;quantity&quot;: 0.7,
-                &quot;signedQuantity&quot;: -0.7,
-                &quot;remarks&quot;: &quot;Used today&quot;,
-                &quot;movedAt&quot;: &quot;2026-11-03T10:45:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;item&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;inventoryItem&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/inventory/items/1&quot;
-                    }
-                }
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=16&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=2&quot;
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 16,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=2&quot;,
-                &quot;label&quot;: &quot;2&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=3&quot;,
-                &quot;label&quot;: &quot;3&quot;,
-                &quot;page&quot;: 3,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=4&quot;,
-                &quot;label&quot;: &quot;4&quot;,
-                &quot;page&quot;: 4,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=5&quot;,
-                &quot;label&quot;: &quot;5&quot;,
-                &quot;page&quot;: 5,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=6&quot;,
-                &quot;label&quot;: &quot;6&quot;,
-                &quot;page&quot;: 6,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=7&quot;,
-                &quot;label&quot;: &quot;7&quot;,
-                &quot;page&quot;: 7,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=8&quot;,
-                &quot;label&quot;: &quot;8&quot;,
-                &quot;page&quot;: 8,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=9&quot;,
-                &quot;label&quot;: &quot;9&quot;,
-                &quot;page&quot;: 9,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=10&quot;,
-                &quot;label&quot;: &quot;10&quot;,
-                &quot;page&quot;: 10,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;...&quot;,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=15&quot;,
-                &quot;label&quot;: &quot;15&quot;,
-                &quot;page&quot;: 15,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=16&quot;,
-                &quot;label&quot;: &quot;16&quot;,
-                &quot;page&quot;: 16,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements?page=2&quot;,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/inventory/movements&quot;,
-        &quot;per_page&quot;: 8,
-        &quot;to&quot;: 8,
-        &quot;total&quot;: 124
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -15336,6 +9382,18 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <p>One item's movements. Example: <code>1</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>type</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="type"                data-endpoint="GETapi-v1-inventory-movements"
+               value="usage"
+               data-component="query">
+    <br>
+<p>in, out, adjust or usage (soap used by orders). Example: <code>usage</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
 <small>integer</small>&nbsp;
 <i>optional</i> &nbsp;
@@ -15364,7 +9422,7 @@ inventory.stock_out. A stock-out cannot exceed what is on hand.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/inventory/movements" \
+    "http://localhost:8000/api/v1/inventory/movements" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -15389,7 +9447,7 @@ inventory.stock_out. A stock-out cannot exceed what is on hand.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/inventory/movements"
+    "http://localhost:8000/api/v1/inventory/movements"
 );
 
 const headers = {
@@ -15639,7 +9697,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/notifications" \
+    --get "http://localhost:8000/api/v1/notifications" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15647,7 +9705,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/notifications"
+    "http://localhost:8000/api/v1/notifications"
 );
 
 const headers = {
@@ -15666,7 +9724,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-notifications">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -15679,175 +9737,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 139,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;low_stock&quot;,
-                &quot;message&quot;: &quot;Detergent powder is critically low (2 kg left).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-10T12:15:29.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: null
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 141,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;low_stock&quot;,
-                &quot;message&quot;: &quot;Plastic laundry bags are below their reorder level (40 pcs left).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-09T12:55:29.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: null
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 87,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;ready_for_pickup&quot;,
-                &quot;message&quot;: &quot;LF-261109-0019 is ready for pickup (Joy Mendoza).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-09T12:25:00.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1640
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 57,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;ready_for_pickup&quot;,
-                &quot;message&quot;: &quot;LF-261109-0013 is ready for pickup (Carmela Aquino).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-09T11:36:00.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1634
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 140,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;low_stock&quot;,
-                &quot;message&quot;: &quot;Fabric conditioner is below its reorder level (3.5 L left).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-08T12:55:29.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: null
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;ready_for_pickup&quot;,
-                &quot;message&quot;: &quot;LF-261107-0013 is ready for pickup (Lorna Dela Cruz).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-07T10:40:00.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1594
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;notification&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;type&quot;: &quot;ready_for_pickup&quot;,
-                &quot;message&quot;: &quot;LF-261106-0009 is ready for pickup (Arnel Pascual).&quot;,
-                &quot;sentAt&quot;: &quot;2026-11-06T06:28:00.000Z&quot;,
-                &quot;readAt&quot;: null,
-                &quot;channel&quot;: &quot;in_app&quot;,
-                &quot;status&quot;: &quot;recorded&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;order&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;order&quot;,
-                        &quot;id&quot;: 1574
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/notifications?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/notifications?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/notifications?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/notifications&quot;,
-        &quot;per_page&quot;: 20,
-        &quot;to&quot;: 7,
-        &quot;total&quot;: 7,
-        &quot;unread&quot;: 7
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -15950,7 +9846,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/notifications/1/read" \
+    "http://localhost:8000/api/v1/notifications/1/read" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -15958,7 +9854,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/notifications/1/read"
+    "http://localhost:8000/api/v1/notifications/1/read"
 );
 
 const headers = {
@@ -16095,7 +9991,7 @@ list rows.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/orders?search=santos&amp;status=received%2Cwashing&amp;paymentStatus=unpaid&amp;receivedAt=2026-11-01%2C2026-11-08&amp;customer=1&amp;waitingMin=3&amp;waitingMax=1&amp;due=overdue&amp;sort=-receivedAt&amp;include=customer%2Cbaskets%2Citems%2CreceivedBy&amp;page=1&amp;perPage=8" \
+    --get "http://localhost:8000/api/v1/orders?search=santos&amp;status=received%2Cwashing&amp;paymentStatus=unpaid&amp;receivedAt=2026-11-01%2C2026-11-08&amp;customer=1&amp;waitingMin=3&amp;waitingMax=1&amp;due=overdue&amp;sort=-receivedAt&amp;include=customer%2Cbaskets%2Citems%2CreceivedBy&amp;page=1&amp;perPage=8" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16103,7 +9999,7 @@ list rows.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders"
+    "http://localhost:8000/api/v1/orders"
 );
 
 const params = {
@@ -16139,7 +10035,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-orders">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -16152,53 +10048,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/orders?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/orders?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: null,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/orders?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/orders&quot;,
-        &quot;per_page&quot;: 8,
-        &quot;to&quot;: null,
-        &quot;total&quot;: 0,
-        &quot;statusCounts&quot;: {
-            &quot;received&quot;: 0,
-            &quot;washing&quot;: 0,
-            &quot;drying&quot;: 0,
-            &quot;folding&quot;: 0,
-            &quot;ready_for_pickup&quot;: 0,
-            &quot;released&quot;: 0,
-            &quot;all&quot;: 0
-        },
-        &quot;monthTotal&quot;: 183,
-        &quot;activeTotal&quot;: 39
-    }
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -16438,8 +10294,9 @@ You can check the Dev Tools console for debugging information.</code></pre>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>One transaction: locked baskets, the day's order number, items with frozen prices, the first
-history row, the optional payment, the customer's notice and the audit log.</p>
+<p>One transaction: locked baskets, the day's order number, items with frozen prices, the wash
+type with its frozen surcharge and the soap it deducts from stock (409 when the shop blocks
+orders on a soap shortage), the first history row, the optional payment, the customer's notice and the audit log.</p>
 
 <span id="example-requests-POSTapi-v1-orders">
 <blockquote>Example request:</blockquote>
@@ -16447,7 +10304,7 @@ history row, the optional payment, the customer's notice and the audit log.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/orders" \
+    "http://localhost:8000/api/v1/orders" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -16478,7 +10335,7 @@ history row, the optional payment, the customer's notice and the audit log.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders"
+    "http://localhost:8000/api/v1/orders"
 );
 
 const headers = {
@@ -16692,7 +10549,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/orders/1" \
+    --get "http://localhost:8000/api/v1/orders/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -16700,7 +10557,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders/1"
+    "http://localhost:8000/api/v1/orders/1"
 );
 
 const headers = {
@@ -16719,7 +10576,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-orders--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -16732,429 +10589,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;order&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;orderNumber&quot;: &quot;LF-260714-0001&quot;,
-            &quot;status&quot;: &quot;released&quot;,
-            &quot;statusLabel&quot;: &quot;Completed&quot;,
-            &quot;statusSince&quot;: &quot;2026-07-15T23:09:00.000Z&quot;,
-            &quot;receivedAt&quot;: &quot;2026-07-14T00:00:00.000Z&quot;,
-            &quot;promisedAt&quot;: &quot;2026-07-15T00:00:00.000Z&quot;,
-            &quot;releasedAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;,
-            &quot;notes&quot;: null,
-            &quot;totalCents&quot;: 31950,
-            &quot;paidCents&quot;: 31950,
-            &quot;balanceCents&quot;: 0,
-            &quot;paymentStatus&quot;: &quot;paid&quot;,
-            &quot;isOverdue&quot;: false,
-            &quot;createdAt&quot;: &quot;2026-07-14T00:00:00.000Z&quot;,
-            &quot;updatedAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;
-        },
-        &quot;relationships&quot;: {
-            &quot;customer&quot;: {
-                &quot;data&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 41
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/41&quot;
-                }
-            },
-            &quot;receivedBy&quot;: {
-                &quot;data&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 4
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                }
-            }
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1&quot;
-        },
-        &quot;includes&quot;: {
-            &quot;customer&quot;: {
-                &quot;type&quot;: &quot;customer&quot;,
-                &quot;id&quot;: 41,
-                &quot;attributes&quot;: {
-                    &quot;fullName&quot;: &quot;Fernando Manalo&quot;,
-                    &quot;contactNumber&quot;: &quot;09881438017&quot;,
-                    &quot;barangayName&quot;: &quot;Orconuma&quot;,
-                    &quot;streetAddress&quot;: null,
-                    &quot;ordersCount&quot;: 8,
-                    &quot;createdAt&quot;: &quot;2026-07-13T23:51:00.000Z&quot;,
-                    &quot;updatedAt&quot;: &quot;2026-07-13T23:51:00.000Z&quot;
-                },
-                &quot;relationships&quot;: {
-                    &quot;barangay&quot;: {
-                        &quot;data&quot;: {
-                            &quot;type&quot;: &quot;barangay&quot;,
-                            &quot;id&quot;: 27
-                        }
-                    }
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/41&quot;
-                }
-            },
-            &quot;baskets&quot;: [
-                {
-                    &quot;type&quot;: &quot;basket&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;basketNumber&quot;: &quot;BSK-0001&quot;,
-                        &quot;qrToken&quot;: &quot;EUB90MOU1lMdVeWqd6vKaX1CPg-5EaJu&quot;,
-                        &quot;label&quot;: &quot;Blue, large&quot;,
-                        &quot;status&quot;: &quot;in_use&quot;,
-                        &quot;notes&quot;: null,
-                        &quot;createdBy&quot;: 1,
-                        &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                    }
-                }
-            ],
-            &quot;items&quot;: [
-                {
-                    &quot;type&quot;: &quot;orderItem&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;weightKg&quot;: 5.7,
-                        &quot;quantity&quot;: null,
-                        &quot;unitPriceCents&quot;: 3500,
-                        &quot;subtotalCents&quot;: 19950,
-                        &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                        &quot;pricingType&quot;: &quot;per_kg&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;order&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;order&quot;,
-                                &quot;id&quot;: 1
-                            }
-                        },
-                        &quot;service&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;service&quot;,
-                                &quot;id&quot;: 1
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;orderItem&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;weightKg&quot;: null,
-                        &quot;quantity&quot;: 8,
-                        &quot;unitPriceCents&quot;: 1500,
-                        &quot;subtotalCents&quot;: 12000,
-                        &quot;serviceName&quot;: &quot;Ironing&quot;,
-                        &quot;pricingType&quot;: &quot;per_piece&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;order&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;order&quot;,
-                                &quot;id&quot;: 1
-                            }
-                        },
-                        &quot;service&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;service&quot;,
-                                &quot;id&quot;: 4
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/4&quot;
-                            }
-                        }
-                    }
-                }
-            ],
-            &quot;receivedBy&quot;: {
-                &quot;type&quot;: &quot;user&quot;,
-                &quot;id&quot;: 4,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                    &quot;username&quot;: &quot;jessa.l&quot;,
-                    &quot;role&quot;: &quot;staff&quot;
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                }
-            },
-            &quot;payments&quot;: [
-                {
-                    &quot;type&quot;: &quot;payment&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;method&quot;: &quot;cash&quot;,
-                        &quot;methodLabel&quot;: &quot;Cash&quot;,
-                        &quot;amountCents&quot;: 31950,
-                        &quot;referenceNumber&quot;: null,
-                        &quot;receiptNumber&quot;: &quot;OR-000201&quot;,
-                        &quot;paidAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;,
-                        &quot;voidedAt&quot;: null,
-                        &quot;voidReason&quot;: null
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;order&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;order&quot;,
-                                &quot;id&quot;: 1
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1&quot;
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/payments/1&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;receivedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        },
-                        &quot;voidedBy&quot;: null
-                    }
-                }
-            ],
-            &quot;statusHistory&quot;: [
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 6,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;toStatus&quot;: &quot;released&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 5,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: &quot;folding&quot;,
-                        &quot;toStatus&quot;: &quot;ready_for_pickup&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-14T23:50:00.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 4,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                                &quot;username&quot;: &quot;jessa.l&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 4,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: &quot;drying&quot;,
-                        &quot;toStatus&quot;: &quot;folding&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-14T23:45:00.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 2,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                                &quot;username&quot;: &quot;kevin.m&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: &quot;washing&quot;,
-                        &quot;toStatus&quot;: &quot;drying&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-14T09:37:56.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: &quot;received&quot;,
-                        &quot;toStatus&quot;: &quot;washing&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-14T00:49:09.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 3,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                                &quot;username&quot;: &quot;aira.d&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                            }
-                        }
-                    }
-                },
-                {
-                    &quot;type&quot;: &quot;statusChange&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fromStatus&quot;: null,
-                        &quot;toStatus&quot;: &quot;received&quot;,
-                        &quot;note&quot;: null,
-                        &quot;changedAt&quot;: &quot;2026-07-14T00:00:00.000Z&quot;
-                    },
-                    &quot;includes&quot;: {
-                        &quot;changedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 4,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                                &quot;username&quot;: &quot;jessa.l&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                            }
-                        }
-                    }
-                }
-            ],
-            &quot;basketHistory&quot;: [
-                {
-                    &quot;type&quot;: &quot;basketAssignment&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;assignedAt&quot;: &quot;2026-07-14T00:00:00.000Z&quot;,
-                        &quot;releasedAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;order&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;order&quot;,
-                                &quot;id&quot;: 1
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1&quot;
-                            }
-                        },
-                        &quot;basket&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;basket&quot;,
-                                &quot;id&quot;: 1
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                            }
-                        }
-                    },
-                    &quot;includes&quot;: {
-                        &quot;basket&quot;: {
-                            &quot;type&quot;: &quot;basket&quot;,
-                            &quot;id&quot;: 1,
-                            &quot;attributes&quot;: {
-                                &quot;basketNumber&quot;: &quot;BSK-0001&quot;,
-                                &quot;qrToken&quot;: &quot;EUB90MOU1lMdVeWqd6vKaX1CPg-5EaJu&quot;,
-                                &quot;label&quot;: &quot;Blue, large&quot;,
-                                &quot;status&quot;: &quot;in_use&quot;,
-                                &quot;notes&quot;: null,
-                                &quot;createdBy&quot;: 1,
-                                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/1&quot;
-                            }
-                        },
-                        &quot;assignedBy&quot;: {
-                            &quot;type&quot;: &quot;user&quot;,
-                            &quot;id&quot;: 4,
-                            &quot;attributes&quot;: {
-                                &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                                &quot;username&quot;: &quot;jessa.l&quot;,
-                                &quot;role&quot;: &quot;staff&quot;
-                            },
-                            &quot;links&quot;: {
-                                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-                            }
-                        }
-                    }
-                }
-            ],
-            &quot;shop&quot;: {
-                &quot;type&quot;: &quot;shopSettings&quot;,
-                &quot;id&quot;: 1,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;LaundryFlow&quot;,
-                    &quot;address&quot;: &quot;Brgy. Poblacion, Bongabong, Oriental Mindoro&quot;,
-                    &quot;contactNumber&quot;: &quot;[SHOP CONTACT NO.]&quot;,
-                    &quot;receiptFooter&quot;: &quot;Salamat po! Unclaimed items after 30 days are the customer&#039;s responsibility.&quot;
-                }
-            }
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -17270,7 +10711,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/orders/1" \
+    "http://localhost:8000/api/v1/orders/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17287,7 +10728,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders/1"
+    "http://localhost:8000/api/v1/orders/1"
 );
 
 const headers = {
@@ -17476,7 +10917,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/orders/1" \
+    "http://localhost:8000/api/v1/orders/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17493,7 +10934,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders/1"
+    "http://localhost:8000/api/v1/orders/1"
 );
 
 const headers = {
@@ -17684,7 +11125,7 @@ order or a stale scan; 403 for a move back without orders.revert; 422 for a move
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/orders/1/status" \
+    "http://localhost:8000/api/v1/orders/1/status" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17707,7 +11148,7 @@ order or a stale scan; 403 for a move back without orders.revert; 422 for a move
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders/1/status"
+    "http://localhost:8000/api/v1/orders/1/status"
 );
 
 const headers = {
@@ -17957,7 +11398,7 @@ whole order, so the page shows the new balance at once.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/orders/1/payments" \
+    "http://localhost:8000/api/v1/orders/1/payments" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -17971,7 +11412,7 @@ whole order, so the page shows the new balance at once.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/orders/1/payments"
+    "http://localhost:8000/api/v1/orders/1/payments"
 );
 
 const headers = {
@@ -18126,7 +11567,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 </p>
 
 <p>Newest first. <code>meta</code> sums the payments that match the filters, voided ones excluded:
-collectedCents, cashCents, gcashCents and count. For the same range it equals the sales
+collectedCents, cashCents, gcashCents, mayaCents and count. For the same range it equals the sales
 figure on the dashboard and in the reports.</p>
 
 <span id="example-requests-GETapi-v1-payments">
@@ -18135,7 +11576,7 @@ figure on the dashboard and in the reports.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/payments?paidAt=2026-11-01%2C2026-11-08&amp;method=gcash&amp;search=OR-0002&amp;voided=&amp;sort=-paidAt&amp;page=1" \
+    --get "http://localhost:8000/api/v1/payments?paidAt=2026-11-01%2C2026-11-08&amp;method=maya&amp;search=OR-0002&amp;voided=&amp;sort=-paidAt&amp;page=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18143,12 +11584,12 @@ figure on the dashboard and in the reports.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/payments"
+    "http://localhost:8000/api/v1/payments"
 );
 
 const params = {
     "paidAt": "2026-11-01,2026-11-08",
-    "method": "gcash",
+    "method": "maya",
     "search": "OR-0002",
     "voided": "0",
     "sort": "-paidAt",
@@ -18173,7 +11614,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-payments">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -18186,46 +11627,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/payments?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/payments?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: null,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/payments?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/payments&quot;,
-        &quot;per_page&quot;: 15,
-        &quot;to&quot;: null,
-        &quot;total&quot;: 0,
-        &quot;collectedCents&quot;: 0,
-        &quot;cashCents&quot;: 0,
-        &quot;gcashCents&quot;: 0,
-        &quot;count&quot;: 0
-    }
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -18332,10 +11740,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="method"                data-endpoint="GETapi-v1-payments"
-               value="gcash"
+               value="maya"
                data-component="query">
     <br>
-<p>cash or gcash. Example: <code>gcash</code></p>
+<p>cash, gcash or maya. Example: <code>maya</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>search</code></b>&nbsp;&nbsp;
@@ -18411,7 +11819,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/payments/1" \
+    --get "http://localhost:8000/api/v1/payments/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18419,7 +11827,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/payments/1"
+    "http://localhost:8000/api/v1/payments/1"
 );
 
 const headers = {
@@ -18438,7 +11846,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-payments--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -18451,51 +11859,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;payment&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;orderNumber&quot;: &quot;LF-260714-0001&quot;,
-            &quot;customerName&quot;: &quot;Fernando Manalo&quot;,
-            &quot;method&quot;: &quot;cash&quot;,
-            &quot;methodLabel&quot;: &quot;Cash&quot;,
-            &quot;amountCents&quot;: 31950,
-            &quot;referenceNumber&quot;: null,
-            &quot;receiptNumber&quot;: &quot;OR-000201&quot;,
-            &quot;paidAt&quot;: &quot;2026-07-15T23:09:00.000Z&quot;,
-            &quot;voidedAt&quot;: null,
-            &quot;voidReason&quot;: null
-        },
-        &quot;relationships&quot;: {
-            &quot;order&quot;: {
-                &quot;data&quot;: {
-                    &quot;type&quot;: &quot;order&quot;,
-                    &quot;id&quot;: 1
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1&quot;
-                }
-            }
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/payments/1&quot;
-        },
-        &quot;includes&quot;: {
-            &quot;receivedBy&quot;: {
-                &quot;type&quot;: &quot;user&quot;,
-                &quot;id&quot;: 3,
-                &quot;attributes&quot;: {
-                    &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                    &quot;username&quot;: &quot;aira.d&quot;,
-                    &quot;role&quot;: &quot;staff&quot;
-                },
-                &quot;links&quot;: {
-                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                }
-            },
-            &quot;voidedBy&quot;: null
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -18612,7 +11982,7 @@ Answers 409 on a completed order.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/payments/1/void" \
+    "http://localhost:8000/api/v1/payments/1/void" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -18628,7 +11998,7 @@ Answers 409 on a completed order.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/payments/1/void"
+    "http://localhost:8000/api/v1/payments/1/void"
 );
 
 const headers = {
@@ -18805,7 +12175,7 @@ outstanding, the number of orders and how many are ready.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/balances?search=santos&amp;include=customer%2Cbaskets%2Citems%2CreceivedBy&amp;page=1" \
+    --get "http://localhost:8000/api/v1/balances?search=santos&amp;include=customer%2Cbaskets%2Citems%2CreceivedBy&amp;page=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -18813,7 +12183,7 @@ outstanding, the number of orders and how many are ready.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/balances"
+    "http://localhost:8000/api/v1/balances"
 );
 
 const params = {
@@ -18840,7 +12210,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-balances">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -18853,236 +12223,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;order&quot;,
-            &quot;id&quot;: 1652,
-            &quot;attributes&quot;: {
-                &quot;orderNumber&quot;: &quot;LF-261110-0009&quot;,
-                &quot;status&quot;: &quot;washing&quot;,
-                &quot;statusLabel&quot;: &quot;Washing&quot;,
-                &quot;statusSince&quot;: &quot;2026-11-10T02:54:00.000Z&quot;,
-                &quot;receivedAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-                &quot;promisedAt&quot;: &quot;2026-11-11T02:00:00.000Z&quot;,
-                &quot;releasedAt&quot;: null,
-                &quot;notes&quot;: &quot;Separate white uniforms. Unscented conditioner.&quot;,
-                &quot;totalCents&quot;: 36750,
-                &quot;paidCents&quot;: 20000,
-                &quot;balanceCents&quot;: 16750,
-                &quot;paymentStatus&quot;: &quot;partial&quot;,
-                &quot;isOverdue&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-11-10T01:20:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-11-10T02:54:00.000Z&quot;
-            },
-            &quot;relationships&quot;: {
-                &quot;customer&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;customer&quot;,
-                        &quot;id&quot;: 1
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;receivedBy&quot;: {
-                    &quot;data&quot;: {
-                        &quot;type&quot;: &quot;user&quot;,
-                        &quot;id&quot;: 2
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/orders/1652&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;customer&quot;: {
-                    &quot;type&quot;: &quot;customer&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;fullName&quot;: &quot;Maria Santos&quot;,
-                        &quot;contactNumber&quot;: &quot;09178452210&quot;,
-                        &quot;barangayName&quot;: &quot;Poblacion&quot;,
-                        &quot;streetAddress&quot;: null,
-                        &quot;ordersCount&quot;: 4,
-                        &quot;createdAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;,
-                        &quot;updatedAt&quot;: &quot;2026-07-25T00:30:00.000Z&quot;
-                    },
-                    &quot;relationships&quot;: {
-                        &quot;barangay&quot;: {
-                            &quot;data&quot;: {
-                                &quot;type&quot;: &quot;barangay&quot;,
-                                &quot;id&quot;: 28
-                            }
-                        }
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/customers/1&quot;
-                    }
-                },
-                &quot;baskets&quot;: [
-                    {
-                        &quot;type&quot;: &quot;basket&quot;,
-                        &quot;id&quot;: 20,
-                        &quot;attributes&quot;: {
-                            &quot;basketNumber&quot;: &quot;BSK-0020&quot;,
-                            &quot;qrToken&quot;: &quot;PZlhj_IT-QbVvd7fFOD92Vi3kl8lxIWn&quot;,
-                            &quot;label&quot;: &quot;Red, small&quot;,
-                            &quot;status&quot;: &quot;in_use&quot;,
-                            &quot;notes&quot;: null,
-                            &quot;createdBy&quot;: 1,
-                            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-                        },
-                        &quot;links&quot;: {
-                            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/baskets/20&quot;
-                        }
-                    }
-                ],
-                &quot;items&quot;: [
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2170,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: 6.5,
-                            &quot;quantity&quot;: null,
-                            &quot;unitPriceCents&quot;: 3500,
-                            &quot;subtotalCents&quot;: 22750,
-                            &quot;serviceName&quot;: &quot;Wash-Dry-Fold&quot;,
-                            &quot;pricingType&quot;: &quot;per_kg&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 1
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2171,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 6,
-                            &quot;unitPriceCents&quot;: 1500,
-                            &quot;subtotalCents&quot;: 9000,
-                            &quot;serviceName&quot;: &quot;Ironing&quot;,
-                            &quot;pricingType&quot;: &quot;per_piece&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 4
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/4&quot;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        &quot;type&quot;: &quot;orderItem&quot;,
-                        &quot;id&quot;: 2172,
-                        &quot;attributes&quot;: {
-                            &quot;weightKg&quot;: null,
-                            &quot;quantity&quot;: 1,
-                            &quot;unitPriceCents&quot;: 5000,
-                            &quot;subtotalCents&quot;: 5000,
-                            &quot;serviceName&quot;: &quot;Express (same day)&quot;,
-                            &quot;pricingType&quot;: &quot;flat&quot;
-                        },
-                        &quot;relationships&quot;: {
-                            &quot;order&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;order&quot;,
-                                    &quot;id&quot;: 1652
-                                }
-                            },
-                            &quot;service&quot;: {
-                                &quot;data&quot;: {
-                                    &quot;type&quot;: &quot;service&quot;,
-                                    &quot;id&quot;: 5
-                                },
-                                &quot;links&quot;: {
-                                    &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-                                }
-                            }
-                        }
-                    }
-                ],
-                &quot;receivedBy&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/balances?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/balances?page=1&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: null
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 1,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/balances?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/balances&quot;,
-        &quot;per_page&quot;: 15,
-        &quot;to&quot;: 1,
-        &quot;total&quot;: 1,
-        &quot;outstandingCents&quot;: 606400,
-        &quot;ordersCount&quot;: 29,
-        &quot;readyCount&quot;: 13
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -19228,7 +12375,7 @@ sales total equals the dashboard KPI and GET /payments meta.collectedCents.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/reports/sales?from=2026-10-10&amp;to=2026-11-08&amp;compare=previous&amp;service=1&amp;method=gcash&amp;status=ready_for_pickup&amp;staff=2&amp;barangay=Poblacion&amp;item=1" \
+    --get "http://localhost:8000/api/v1/reports/sales?from=2026-10-10&amp;to=2026-11-08&amp;compare=previous&amp;service=1&amp;method=maya&amp;status=ready_for_pickup&amp;staff=2&amp;barangay=Poblacion&amp;item=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -19236,7 +12383,7 @@ sales total equals the dashboard KPI and GET /payments meta.collectedCents.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/reports/sales"
+    "http://localhost:8000/api/v1/reports/sales"
 );
 
 const params = {
@@ -19244,7 +12391,7 @@ const params = {
     "to": "2026-11-08",
     "compare": "previous",
     "service": "1",
-    "method": "gcash",
+    "method": "maya",
     "status": "ready_for_pickup",
     "staff": "2",
     "barangay": "Poblacion",
@@ -19269,7 +12416,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-reports--kind-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -19282,613 +12429,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;range&quot;: {
-            &quot;from&quot;: &quot;2026-10-10&quot;,
-            &quot;to&quot;: &quot;2026-11-08&quot;
-        },
-        &quot;compare_range&quot;: {
-            &quot;from&quot;: &quot;2026-09-10&quot;,
-            &quot;to&quot;: &quot;2026-10-09&quot;
-        },
-        &quot;generated_at&quot;: &quot;2026-11-10T12:57:04.453Z&quot;,
-        &quot;kpis&quot;: [
-            {
-                &quot;key&quot;: &quot;sales&quot;,
-                &quot;label&quot;: &quot;Sales&quot;,
-                &quot;format&quot;: &quot;money&quot;,
-                &quot;value&quot;: 0,
-                &quot;previous&quot;: 0,
-                &quot;delta_pct&quot;: null,
-                &quot;spark&quot;: [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ],
-                &quot;hint&quot;: &quot;Payments collected&quot;
-            },
-            {
-                &quot;key&quot;: &quot;orders&quot;,
-                &quot;label&quot;: &quot;Orders&quot;,
-                &quot;format&quot;: &quot;count&quot;,
-                &quot;value&quot;: 1,
-                &quot;previous&quot;: 0,
-                &quot;delta_pct&quot;: null,
-                &quot;spark&quot;: [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ]
-            },
-            {
-                &quot;key&quot;: &quot;aov&quot;,
-                &quot;label&quot;: &quot;Average order value&quot;,
-                &quot;format&quot;: &quot;money&quot;,
-                &quot;value&quot;: 25900,
-                &quot;previous&quot;: null,
-                &quot;delta_pct&quot;: null,
-                &quot;hint&quot;: &quot;Billed per order&quot;
-            },
-            {
-                &quot;key&quot;: &quot;kilos&quot;,
-                &quot;label&quot;: &quot;Kilos processed&quot;,
-                &quot;format&quot;: &quot;kg&quot;,
-                &quot;value&quot;: 7.4,
-                &quot;previous&quot;: 0,
-                &quot;delta_pct&quot;: null,
-                &quot;spark&quot;: [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    7.4,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-                ]
-            }
-        ],
-        &quot;series&quot;: {
-            &quot;sales&quot;: [
-                {
-                    &quot;date&quot;: &quot;2026-10-10&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-11&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-12&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-13&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-14&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-15&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-16&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-17&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-18&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-19&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-20&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-21&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-22&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-23&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-24&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-25&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-26&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-27&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-28&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-29&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-30&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-31&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-01&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-02&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-03&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-04&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-05&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-06&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-07&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-08&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;previous&quot;: 0
-                }
-            ],
-            &quot;revenue_by_service&quot;: [],
-            &quot;payment_mix&quot;: [
-                {
-                    &quot;key&quot;: &quot;cash&quot;,
-                    &quot;label&quot;: &quot;Cash&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;share&quot;: 0,
-                    &quot;extra&quot;: {
-                        &quot;count&quot;: 0
-                    }
-                },
-                {
-                    &quot;key&quot;: &quot;gcash&quot;,
-                    &quot;label&quot;: &quot;GCash&quot;,
-                    &quot;value&quot;: 0,
-                    &quot;share&quot;: 0,
-                    &quot;extra&quot;: {
-                        &quot;count&quot;: 0
-                    }
-                }
-            ]
-        },
-        &quot;table&quot;: {
-            &quot;columns&quot;: [
-                {
-                    &quot;key&quot;: &quot;date&quot;,
-                    &quot;label&quot;: &quot;Date&quot;,
-                    &quot;format&quot;: &quot;date&quot;
-                },
-                {
-                    &quot;key&quot;: &quot;orders&quot;,
-                    &quot;label&quot;: &quot;Orders&quot;,
-                    &quot;format&quot;: &quot;count&quot;
-                },
-                {
-                    &quot;key&quot;: &quot;kilos&quot;,
-                    &quot;label&quot;: &quot;Kilos&quot;,
-                    &quot;format&quot;: &quot;kg&quot;
-                },
-                {
-                    &quot;key&quot;: &quot;cash&quot;,
-                    &quot;label&quot;: &quot;Cash&quot;,
-                    &quot;format&quot;: &quot;money&quot;,
-                    &quot;optional&quot;: true
-                },
-                {
-                    &quot;key&quot;: &quot;gcash&quot;,
-                    &quot;label&quot;: &quot;GCash&quot;,
-                    &quot;format&quot;: &quot;money&quot;,
-                    &quot;optional&quot;: true
-                },
-                {
-                    &quot;key&quot;: &quot;sales&quot;,
-                    &quot;label&quot;: &quot;Sales&quot;,
-                    &quot;format&quot;: &quot;money&quot;
-                }
-            ],
-            &quot;rows&quot;: [
-                {
-                    &quot;date&quot;: &quot;2026-11-08&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-07&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-06&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-05&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-04&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-03&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-02&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-11-01&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-31&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-30&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-29&quot;,
-                    &quot;orders&quot;: 1,
-                    &quot;kilos&quot;: 7.4,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-28&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-27&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-26&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-25&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-24&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-23&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-22&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-21&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-20&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-19&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-18&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-17&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-16&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-15&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-14&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-13&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-12&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-11&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                },
-                {
-                    &quot;date&quot;: &quot;2026-10-10&quot;,
-                    &quot;orders&quot;: 0,
-                    &quot;kilos&quot;: 0,
-                    &quot;cash&quot;: 0,
-                    &quot;gcash&quot;: 0,
-                    &quot;sales&quot;: 0
-                }
-            ],
-            &quot;totals&quot;: {
-                &quot;date&quot;: &quot;Total&quot;,
-                &quot;orders&quot;: 1,
-                &quot;kilos&quot;: 7.4,
-                &quot;cash&quot;: 0,
-                &quot;gcash&quot;: 0,
-                &quot;sales&quot;: 0
-            }
-        },
-        &quot;insights&quot;: []
-    },
-    &quot;message&quot;: &quot;Report&quot;,
-    &quot;status&quot;: 200
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -20044,10 +12591,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="method"                data-endpoint="GETapi-v1-reports--kind-"
-               value="gcash"
+               value="maya"
                data-component="query">
     <br>
-<p>cash or gcash. Example: <code>gcash</code></p>
+<p>cash, gcash or maya. Example: <code>maya</code></p>
             </div>
                                     <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>status</code></b>&nbsp;&nbsp;
@@ -20117,7 +12664,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/services?active=1" \
+    --get "http://localhost:8000/api/v1/services?active=1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -20125,7 +12672,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/services"
+    "http://localhost:8000/api/v1/services"
 );
 
 const params = {
@@ -20150,7 +12697,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-services">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -20163,108 +12710,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Wash-Dry-Fold&quot;,
-                &quot;description&quot;: &quot;Regular, 24-hour turnaround&quot;,
-                &quot;pricingType&quot;: &quot;per_kg&quot;,
-                &quot;rateCents&quot;: 3500,
-                &quot;minimumQty&quot;: 3,
-                &quot;isActive&quot;: true,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Wash only&quot;,
-                &quot;description&quot;: &quot;Customer dries at home&quot;,
-                &quot;pricingType&quot;: &quot;per_kg&quot;,
-                &quot;rateCents&quot;: 2500,
-                &quot;minimumQty&quot;: 3,
-                &quot;isActive&quot;: true,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/2&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Comforter / Blanket&quot;,
-                &quot;description&quot;: &quot;Single or double size&quot;,
-                &quot;pricingType&quot;: &quot;per_piece&quot;,
-                &quot;rateCents&quot;: 15000,
-                &quot;minimumQty&quot;: null,
-                &quot;isActive&quot;: true,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/3&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 4,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Ironing&quot;,
-                &quot;description&quot;: &quot;Shirts, uniforms, slacks&quot;,
-                &quot;pricingType&quot;: &quot;per_piece&quot;,
-                &quot;rateCents&quot;: 1500,
-                &quot;minimumQty&quot;: null,
-                &quot;isActive&quot;: true,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/4&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 5,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Express (same day)&quot;,
-                &quot;description&quot;: &quot;Flat add-on per order&quot;,
-                &quot;pricingType&quot;: &quot;flat&quot;,
-                &quot;rateCents&quot;: 5000,
-                &quot;minimumQty&quot;: null,
-                &quot;isActive&quot;: true,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/5&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;service&quot;,
-            &quot;id&quot;: 6,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Dry cleaning&quot;,
-                &quot;description&quot;: &quot;Not offered yet&quot;,
-                &quot;pricingType&quot;: &quot;per_piece&quot;,
-                &quot;rateCents&quot;: 12000,
-                &quot;minimumQty&quot;: null,
-                &quot;isActive&quot;: false,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/6&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -20392,7 +12842,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/services" \
+    "http://localhost:8000/api/v1/services" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -20413,7 +12863,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/services"
+    "http://localhost:8000/api/v1/services"
 );
 
 const headers = {
@@ -20653,7 +13103,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/services/1" \
+    --get "http://localhost:8000/api/v1/services/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -20661,7 +13111,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/services/1"
+    "http://localhost:8000/api/v1/services/1"
 );
 
 const headers = {
@@ -20680,7 +13130,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-services--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -20693,23 +13143,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;service&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;name&quot;: &quot;Wash-Dry-Fold&quot;,
-            &quot;description&quot;: &quot;Regular, 24-hour turnaround&quot;,
-            &quot;pricingType&quot;: &quot;per_kg&quot;,
-            &quot;rateCents&quot;: 3500,
-            &quot;minimumQty&quot;: 3,
-            &quot;isActive&quot;: true,
-            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-            &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/services/1&quot;
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -20825,7 +13265,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/services/1" \
+    "http://localhost:8000/api/v1/services/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -20846,7 +13286,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/services/1"
+    "http://localhost:8000/api/v1/services/1"
 );
 
 const headers = {
@@ -21099,7 +13539,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/services/1" \
+    "http://localhost:8000/api/v1/services/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -21120,7 +13560,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/services/1"
+    "http://localhost:8000/api/v1/services/1"
 );
 
 const headers = {
@@ -21377,7 +13817,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/settings/shop" \
+    --get "http://localhost:8000/api/v1/settings/shop" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -21385,7 +13825,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/settings/shop"
+    "http://localhost:8000/api/v1/settings/shop"
 );
 
 const headers = {
@@ -21404,7 +13844,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-settings-shop">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -21417,18 +13857,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;shopSettings&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;name&quot;: &quot;LaundryFlow&quot;,
-            &quot;address&quot;: &quot;Brgy. Poblacion, Bongabong, Oriental Mindoro&quot;,
-            &quot;contactNumber&quot;: &quot;[SHOP CONTACT NO.]&quot;,
-            &quot;receiptFooter&quot;: &quot;Salamat po! Unclaimed items after 30 days are the customer&#039;s responsibility.&quot;,
-            &quot;openingHours&quot;: &quot;Open daily 7:00 AM &ndash; 7:00 PM&quot;,
-            &quot;claimPolicyDays&quot;: 30
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -21531,7 +13966,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/settings/shop" \
+    "http://localhost:8000/api/v1/settings/shop" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -21540,7 +13975,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/settings/shop"
+    "http://localhost:8000/api/v1/settings/shop"
 );
 
 const headers = {
@@ -21741,6 +14176,180 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
+                    <h2 id="settings-PUTapi-v1-settings-stock-rule">Set the soap stock rule</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PUTapi-v1-settings-stock-rule">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost:8000/api/v1/settings/stock-rule" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/settings/stock-rule"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "PUT",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PUTapi-v1-settings-stock-rule">
+</span>
+<span id="execution-results-PUTapi-v1-settings-stock-rule" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PUTapi-v1-settings-stock-rule"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-v1-settings-stock-rule"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-v1-settings-stock-rule" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-v1-settings-stock-rule">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PUTapi-v1-settings-stock-rule" data-method="PUT"
+      data-path="api/v1/settings/stock-rule"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-v1-settings-stock-rule', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-v1-settings-stock-rule"
+                    onclick="tryItOut('PUTapi-v1-settings-stock-rule');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-v1-settings-stock-rule"
+                    onclick="cancelTryOut('PUTapi-v1-settings-stock-rule');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-v1-settings-stock-rule"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/v1/settings/stock-rule</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PUTapi-v1-settings-stock-rule"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-v1-settings-stock-rule"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-v1-settings-stock-rule"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>data</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>blockOrdersOnLowSoap</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <label data-endpoint="PUTapi-v1-settings-stock-rule" style="display: none">
+            <input type="radio" name="data.attributes.blockOrdersOnLowSoap"
+                   value="true"
+                   data-endpoint="PUTapi-v1-settings-stock-rule"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PUTapi-v1-settings-stock-rule" style="display: none">
+            <input type="radio" name="data.attributes.blockOrdersOnLowSoap"
+                   value="false"
+                   data-endpoint="PUTapi-v1-settings-stock-rule"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Example: <code>false</code></p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
+        </div>
+        </form>
+
                     <h2 id="settings-GETapi-v1-activity-logs">Activity log</h2>
 
 <p>
@@ -21755,7 +14364,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/activity-logs?user=2&amp;entity=order&amp;action=LF-26&amp;createdAt=2026-11-01%2C2026-11-08" \
+    --get "http://localhost:8000/api/v1/activity-logs?user=2&amp;entity=order&amp;action=LF-26&amp;createdAt=2026-11-01%2C2026-11-08" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -21763,7 +14372,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/activity-logs"
+    "http://localhost:8000/api/v1/activity-logs"
 );
 
 const params = {
@@ -21791,7 +14400,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-activity-logs">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -21804,720 +14413,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1564,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1601,
-                &quot;summary&quot;: &quot;changed LF-261107-0020 from Folding to Ready for Pickup&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;ready_for_pickup&quot;,
-                    &quot;from&quot;: &quot;folding&quot;,
-                    &quot;order_number&quot;: &quot;LF-261107-0020&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:58:47.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1563,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1620,
-                &quot;summary&quot;: &quot;changed LF-261108-0018 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0018&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:57:18.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1562,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1610,
-                &quot;summary&quot;: &quot;changed LF-261108-0008 from Folding to Ready for Pickup&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;ready_for_pickup&quot;,
-                    &quot;from&quot;: &quot;folding&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0008&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:53:44.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1561,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1604,
-                &quot;summary&quot;: &quot;changed LF-261108-0002 from Washing to Drying&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;drying&quot;,
-                    &quot;from&quot;: &quot;washing&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0002&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:52:57.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1553,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1621,
-                &quot;summary&quot;: &quot;created order LF-261108-0019&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0019&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:44:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1551,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1618,
-                &quot;summary&quot;: &quot;changed LF-261108-0016 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0016&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:37:28.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1550,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1620,
-                &quot;summary&quot;: &quot;created order LF-261108-0018&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0018&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:36:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1548,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1596,
-                &quot;summary&quot;: &quot;changed LF-261107-0015 from Ready for Pickup to Completed&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;released&quot;,
-                    &quot;from&quot;: &quot;ready_for_pickup&quot;,
-                    &quot;order_number&quot;: &quot;LF-261107-0015&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:33:39.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 1,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Liza Ramos&quot;,
-                        &quot;username&quot;: &quot;liza.ramos&quot;,
-                        &quot;role&quot;: &quot;admin&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1547,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1619,
-                &quot;summary&quot;: &quot;changed LF-261108-0017 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0017&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T10:18:53.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1545,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1619,
-                &quot;summary&quot;: &quot;created order LF-261108-0017&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0017&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:53:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1544,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1618,
-                &quot;summary&quot;: &quot;created order LF-261108-0016&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0016&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:43:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1543,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1610,
-                &quot;summary&quot;: &quot;changed LF-261108-0008 from Drying to Folding&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;folding&quot;,
-                    &quot;from&quot;: &quot;drying&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0008&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:34:33.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1542,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1617,
-                &quot;summary&quot;: &quot;changed LF-261108-0015 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0015&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:21:13.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1541,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1616,
-                &quot;summary&quot;: &quot;changed LF-261108-0014 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0014&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:07:59.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1540,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1617,
-                &quot;summary&quot;: &quot;created order LF-261108-0015&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0015&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T09:00:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1539,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1615,
-                &quot;summary&quot;: &quot;changed LF-261108-0013 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0013&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T08:59:41.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1538,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1616,
-                &quot;summary&quot;: &quot;created order LF-261108-0014&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0014&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T08:52:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1537,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1614,
-                &quot;summary&quot;: &quot;changed LF-261108-0012 from Received to Washing&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;washing&quot;,
-                    &quot;from&quot;: &quot;received&quot;,
-                    &quot;order_number&quot;: &quot;LF-261108-0012&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T08:43:27.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1536,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.created&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1615,
-                &quot;summary&quot;: &quot;created order LF-261108-0013&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;order_number&quot;: &quot;LF-261108-0013&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T08:34:00.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 3,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                        &quot;username&quot;: &quot;aira.d&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-                    }
-                }
-            }
-        },
-        {
-            &quot;type&quot;: &quot;activityLog&quot;,
-            &quot;id&quot;: 1534,
-            &quot;attributes&quot;: {
-                &quot;action&quot;: &quot;order.status_changed&quot;,
-                &quot;auditableType&quot;: &quot;order&quot;,
-                &quot;auditableId&quot;: 1570,
-                &quot;summary&quot;: &quot;changed LF-261106-0005 from Ready for Pickup to Completed&quot;,
-                &quot;oldValues&quot;: null,
-                &quot;newValues&quot;: {
-                    &quot;to&quot;: &quot;released&quot;,
-                    &quot;from&quot;: &quot;ready_for_pickup&quot;,
-                    &quot;order_number&quot;: &quot;LF-261106-0005&quot;
-                },
-                &quot;createdAt&quot;: &quot;2026-11-08T08:20:43.000Z&quot;
-            },
-            &quot;includes&quot;: {
-                &quot;user&quot;: {
-                    &quot;type&quot;: &quot;user&quot;,
-                    &quot;id&quot;: 2,
-                    &quot;attributes&quot;: {
-                        &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                        &quot;username&quot;: &quot;kevin.m&quot;,
-                        &quot;role&quot;: &quot;staff&quot;
-                    },
-                    &quot;links&quot;: {
-                        &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-                    }
-                }
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    ],
-    &quot;links&quot;: {
-        &quot;first&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=1&quot;,
-        &quot;last&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=43&quot;,
-        &quot;prev&quot;: null,
-        &quot;next&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=2&quot;
-    },
-    &quot;meta&quot;: {
-        &quot;current_page&quot;: 1,
-        &quot;from&quot;: 1,
-        &quot;last_page&quot;: 43,
-        &quot;links&quot;: [
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
-                &quot;page&quot;: null,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=1&quot;,
-                &quot;label&quot;: &quot;1&quot;,
-                &quot;page&quot;: 1,
-                &quot;active&quot;: true
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=2&quot;,
-                &quot;label&quot;: &quot;2&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=3&quot;,
-                &quot;label&quot;: &quot;3&quot;,
-                &quot;page&quot;: 3,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=4&quot;,
-                &quot;label&quot;: &quot;4&quot;,
-                &quot;page&quot;: 4,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=5&quot;,
-                &quot;label&quot;: &quot;5&quot;,
-                &quot;page&quot;: 5,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=6&quot;,
-                &quot;label&quot;: &quot;6&quot;,
-                &quot;page&quot;: 6,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=7&quot;,
-                &quot;label&quot;: &quot;7&quot;,
-                &quot;page&quot;: 7,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=8&quot;,
-                &quot;label&quot;: &quot;8&quot;,
-                &quot;page&quot;: 8,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=9&quot;,
-                &quot;label&quot;: &quot;9&quot;,
-                &quot;page&quot;: 9,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=10&quot;,
-                &quot;label&quot;: &quot;10&quot;,
-                &quot;page&quot;: 10,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: null,
-                &quot;label&quot;: &quot;...&quot;,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=42&quot;,
-                &quot;label&quot;: &quot;42&quot;,
-                &quot;page&quot;: 42,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=43&quot;,
-                &quot;label&quot;: &quot;43&quot;,
-                &quot;page&quot;: 43,
-                &quot;active&quot;: false
-            },
-            {
-                &quot;url&quot;: &quot;http://laundryflow.test/api/v1/activity-logs?page=2&quot;,
-                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
-                &quot;page&quot;: 2,
-                &quot;active&quot;: false
-            }
-        ],
-        &quot;path&quot;: &quot;http://laundryflow.test/api/v1/activity-logs&quot;,
-        &quot;per_page&quot;: 20,
-        &quot;to&quot;: 20,
-        &quot;total&quot;: 853
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -22674,7 +14576,7 @@ their name on the history they made.</p>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/users" \
+    --get "http://localhost:8000/api/v1/users" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -22682,7 +14584,7 @@ their name on the history they made.</p>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users"
+    "http://localhost:8000/api/v1/users"
 );
 
 const headers = {
@@ -22701,7 +14603,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-users">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -22714,91 +14616,11 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: [
+    &quot;errors&quot;: [
         {
-            &quot;type&quot;: &quot;user&quot;,
-            &quot;id&quot;: 1,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Liza Ramos&quot;,
-                &quot;username&quot;: &quot;liza.ramos&quot;,
-                &quot;role&quot;: &quot;admin&quot;,
-                &quot;permissions&quot;: [
-                    &quot;payments.record&quot;,
-                    &quot;inventory.stock_out&quot;,
-                    &quot;payments.void&quot;
-                ],
-                &quot;isActive&quot;: true,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;user&quot;,
-            &quot;id&quot;: 2,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Kevin Manalo&quot;,
-                &quot;username&quot;: &quot;kevin.m&quot;,
-                &quot;role&quot;: &quot;staff&quot;,
-                &quot;permissions&quot;: [
-                    &quot;payments.record&quot;,
-                    &quot;inventory.stock_out&quot;
-                ],
-                &quot;isActive&quot;: true,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-11-10T09:45:29.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/2&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;user&quot;,
-            &quot;id&quot;: 3,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Aira Dimaculangan&quot;,
-                &quot;username&quot;: &quot;aira.d&quot;,
-                &quot;role&quot;: &quot;staff&quot;,
-                &quot;permissions&quot;: [
-                    &quot;payments.record&quot;,
-                    &quot;inventory.stock_out&quot;
-                ],
-                &quot;isActive&quot;: true,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-11-09T12:55:29.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/3&quot;
-            }
-        },
-        {
-            &quot;type&quot;: &quot;user&quot;,
-            &quot;id&quot;: 4,
-            &quot;attributes&quot;: {
-                &quot;name&quot;: &quot;Jessa Lopez&quot;,
-                &quot;username&quot;: &quot;jessa.l&quot;,
-                &quot;role&quot;: &quot;staff&quot;,
-                &quot;permissions&quot;: [
-                    &quot;payments.record&quot;,
-                    &quot;inventory.stock_out&quot;
-                ],
-                &quot;isActive&quot;: false,
-                &quot;mustChangePassword&quot;: false,
-                &quot;lastLoginAt&quot;: &quot;2026-09-22T12:55:29.000Z&quot;,
-                &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-                &quot;updatedAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;
-            },
-            &quot;links&quot;: {
-                &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/4&quot;
-            }
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
     ]
 }</code>
@@ -22903,7 +14725,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/users" \
+    "http://localhost:8000/api/v1/users" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -22923,7 +14745,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users"
+    "http://localhost:8000/api/v1/users"
 );
 
 const headers = {
@@ -23150,7 +14972,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/users/1" \
+    --get "http://localhost:8000/api/v1/users/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -23158,7 +14980,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users/1"
+    "http://localhost:8000/api/v1/users/1"
 );
 
 const headers = {
@@ -23177,7 +14999,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-users--id-">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -23190,28 +15012,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;type&quot;: &quot;user&quot;,
-        &quot;id&quot;: 1,
-        &quot;attributes&quot;: {
-            &quot;name&quot;: &quot;Liza Ramos&quot;,
-            &quot;username&quot;: &quot;liza.ramos&quot;,
-            &quot;role&quot;: &quot;admin&quot;,
-            &quot;permissions&quot;: [
-                &quot;payments.record&quot;,
-                &quot;inventory.stock_out&quot;,
-                &quot;payments.void&quot;
-            ],
-            &quot;isActive&quot;: true,
-            &quot;mustChangePassword&quot;: false,
-            &quot;lastLoginAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;,
-            &quot;createdAt&quot;: &quot;2026-07-13T01:00:00.000Z&quot;,
-            &quot;updatedAt&quot;: &quot;2026-11-10T12:55:34.000Z&quot;
-        },
-        &quot;links&quot;: {
-            &quot;self&quot;: &quot;http://laundryflow.test/api/v1/users/1&quot;
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
         }
-    }
+    ]
 }</code>
  </pre>
     </span>
@@ -23327,7 +15134,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/users/1" \
+    "http://localhost:8000/api/v1/users/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -23347,7 +15154,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users/1"
+    "http://localhost:8000/api/v1/users/1"
 );
 
 const headers = {
@@ -23587,7 +15394,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PATCH \
-    "http://laundryflow.test/api/v1/users/1" \
+    "http://localhost:8000/api/v1/users/1" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -23607,7 +15414,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users/1"
+    "http://localhost:8000/api/v1/users/1"
 );
 
 const headers = {
@@ -23847,7 +15654,7 @@ Must be one of:
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/users/1/disable" \
+    "http://localhost:8000/api/v1/users/1/disable" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -23855,7 +15662,7 @@ Must be one of:
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users/1/disable"
+    "http://localhost:8000/api/v1/users/1/disable"
 );
 
 const headers = {
@@ -23988,7 +15795,7 @@ password at their next sign-in: until then every route but <code>me</code>, <cod
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://laundryflow.test/api/v1/users/1/reset-password" \
+    "http://localhost:8000/api/v1/users/1/reset-password" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -23996,7 +15803,7 @@ password at their next sign-in: until then every route but <code>me</code>, <cod
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/users/1/reset-password"
+    "http://localhost:8000/api/v1/users/1/reset-password"
 );
 
 const headers = {
@@ -24127,7 +15934,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://laundryflow.test/api/v1/roles/permissions" \
+    --get "http://localhost:8000/api/v1/roles/permissions" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -24135,7 +15942,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/roles/permissions"
+    "http://localhost:8000/api/v1/roles/permissions"
 );
 
 const headers = {
@@ -24154,7 +15961,7 @@ fetch(url, {
 
 <span id="example-responses-GETapi-v1-roles-permissions">
             <blockquote>
-            <p>Example response (200):</p>
+            <p>Example response (401):</p>
         </blockquote>
                 <details class="annotation">
             <summary style="cursor: pointer;">
@@ -24167,28 +15974,13 @@ access-control-expose-headers: Retry-After
  </code></pre></details>         <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;data&quot;: {
-        &quot;available&quot;: [
-            {
-                &quot;code&quot;: &quot;payments.record&quot;,
-                &quot;label&quot;: &quot;Record payments&quot;
-            },
-            {
-                &quot;code&quot;: &quot;inventory.stock_out&quot;,
-                &quot;label&quot;: &quot;Record stock-out of supplies&quot;
-            },
-            {
-                &quot;code&quot;: &quot;payments.void&quot;,
-                &quot;label&quot;: &quot;Void or edit a saved payment&quot;
-            }
-        ],
-        &quot;staff&quot;: [
-            &quot;payments.record&quot;,
-            &quot;inventory.stock_out&quot;
-        ]
-    },
-    &quot;message&quot;: &quot;Permissions retrieved&quot;,
-    &quot;status&quot;: 200
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
 }</code>
  </pre>
     </span>
@@ -24292,7 +16084,7 @@ immediately; a newly granted one arrives with each staff member's next sign-in o
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request PUT \
-    "http://laundryflow.test/api/v1/roles/staff/permissions" \
+    "http://localhost:8000/api/v1/roles/staff/permissions" \
     --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
@@ -24301,7 +16093,7 @@ immediately; a newly granted one arrives with each staff member's next sign-in o
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://laundryflow.test/api/v1/roles/staff/permissions"
+    "http://localhost:8000/api/v1/roles/staff/permissions"
 );
 
 const headers = {
@@ -24437,6 +16229,1185 @@ You can check the Dev Tools console for debugging information.</code></pre>
                data-component="body">
     <br>
 <p>The codes to switch on.</p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
+        </div>
+        </form>
+
+                <h1 id="wash-types">Wash types</h1>
+
+    <p>How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
+Staff read them to take orders; only the owner changes them (Settings &gt; Pricing &amp; Usage).
+Changes apply to new orders only: an order freezes its wash type surcharge when it is made.</p>
+
+                                <h2 id="wash-types-GETapi-v1-wash-types">List wash types</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>In the order they are shown (sortOrder). <code>meta.blockOrdersOnLowSoap</code> is the shop's stock rule.</p>
+
+<span id="example-requests-GETapi-v1-wash-types">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/v1/wash-types?active=1" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/wash-types"
+);
+
+const params = {
+    "active": "1",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-wash-types">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: http://localhost:5173
+access-control-expose-headers: Retry-After
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-wash-types" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-wash-types"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-wash-types"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-wash-types" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-wash-types">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-wash-types" data-method="GET"
+      data-path="api/v1/wash-types"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-wash-types', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-wash-types"
+                    onclick="tryItOut('GETapi-v1-wash-types');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-wash-types"
+                    onclick="cancelTryOut('GETapi-v1-wash-types');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-wash-types"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/wash-types</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-v1-wash-types"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-wash-types"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-wash-types"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>active</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="GETapi-v1-wash-types" style="display: none">
+            <input type="radio" name="active"
+                   value="1"
+                   data-endpoint="GETapi-v1-wash-types"
+                   data-component="query"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="GETapi-v1-wash-types" style="display: none">
+            <input type="radio" name="active"
+                   value="0"
+                   data-endpoint="GETapi-v1-wash-types"
+                   data-component="query"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Only active (1) or inactive (0) wash types. Example: <code>true</code></p>
+            </div>
+                </form>
+
+                    <h2 id="wash-types-POSTapi-v1-wash-types">Add a wash type</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-POSTapi-v1-wash-types">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/v1/wash-types" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"data\": {
+        \"attributes\": {
+            \"name\": \"Tough stains\",
+            \"description\": \"Heavy-duty treatment for stubborn stains.\",
+            \"surchargePerKgCents\": 500,
+            \"sortOrder\": 5,
+            \"isActive\": true,
+            \"supplies\": [
+                {
+                    \"inventoryItemId\": 6,
+                    \"usagePerKgSmallUnit\": 0.25
+                }
+            ]
+        }
+    }
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/wash-types"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "data": {
+        "attributes": {
+            "name": "Tough stains",
+            "description": "Heavy-duty treatment for stubborn stains.",
+            "surchargePerKgCents": 500,
+            "sortOrder": 5,
+            "isActive": true,
+            "supplies": [
+                {
+                    "inventoryItemId": 6,
+                    "usagePerKgSmallUnit": 0.25
+                }
+            ]
+        }
+    }
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-v1-wash-types">
+</span>
+<span id="execution-results-POSTapi-v1-wash-types" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-POSTapi-v1-wash-types"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-v1-wash-types"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-v1-wash-types" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-v1-wash-types">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-POSTapi-v1-wash-types" data-method="POST"
+      data-path="api/v1/wash-types"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-v1-wash-types', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-v1-wash-types"
+                    onclick="tryItOut('POSTapi-v1-wash-types');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-v1-wash-types"
+                    onclick="cancelTryOut('POSTapi-v1-wash-types');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-v1-wash-types"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/v1/wash-types</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="POSTapi-v1-wash-types"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-v1-wash-types"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-v1-wash-types"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>data</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.name"                data-endpoint="POSTapi-v1-wash-types"
+               value="Tough stains"
+               data-component="body">
+    <br>
+<p>Unique name. Must not be greater than 100 characters. Example: <code>Tough stains</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.description"                data-endpoint="POSTapi-v1-wash-types"
+               value="Heavy-duty treatment for stubborn stains."
+               data-component="body">
+    <br>
+<p>Short note for staff. Must not be greater than 255 characters. Example: <code>Heavy-duty treatment for stubborn stains.</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>surchargePerKgCents</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.surchargePerKgCents"                data-endpoint="POSTapi-v1-wash-types"
+               value="500"
+               data-component="body">
+    <br>
+<p>Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000. Example: <code>500</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>sortOrder</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.sortOrder"                data-endpoint="POSTapi-v1-wash-types"
+               value="5"
+               data-component="body">
+    <br>
+<p>Position in the list. Must be at least 0. Must not be greater than 65535. Example: <code>5</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>isActive</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="POSTapi-v1-wash-types" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="true"
+                   data-endpoint="POSTapi-v1-wash-types"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="POSTapi-v1-wash-types" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="false"
+                   data-endpoint="POSTapi-v1-wash-types"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Inactive wash types stay on old orders but cannot be chosen. Example: <code>true</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>supplies</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.supplies"                data-endpoint="POSTapi-v1-wash-types"
+               value=""
+               data-component="body">
+    <br>
+<p>Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.</p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
+        </div>
+        </form>
+
+                    <h2 id="wash-types-GETapi-v1-wash-types--washType_id-">Show a wash type</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-GETapi-v1-wash-types--washType_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/v1/wash-types/1" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/wash-types/1"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-v1-wash-types--washType_id-">
+            <blockquote>
+            <p>Example response (401):</p>
+        </blockquote>
+                <details class="annotation">
+            <summary style="cursor: pointer;">
+                <small onclick="textContent = parentElement.parentElement.open ? 'Show headers' : 'Hide headers'">Show headers</small>
+            </summary>
+            <pre><code class="language-http">cache-control: no-cache, private
+content-type: application/json
+access-control-allow-origin: http://localhost:5173
+access-control-expose-headers: Retry-After
+ </code></pre></details>         <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;errors&quot;: [
+        {
+            &quot;status&quot;: 401,
+            &quot;message&quot;: &quot;Unauthenticated&quot;,
+            &quot;source&quot;: &quot;&quot;
+        }
+    ]
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-GETapi-v1-wash-types--washType_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-v1-wash-types--washType_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-GETapi-v1-wash-types--washType_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-GETapi-v1-wash-types--washType_id-" data-method="GET"
+      data-path="api/v1/wash-types/{washType_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-v1-wash-types--washType_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-v1-wash-types--washType_id-"
+                    onclick="tryItOut('GETapi-v1-wash-types--washType_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-v1-wash-types--washType_id-"
+                    onclick="cancelTryOut('GETapi-v1-wash-types--washType_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-v1-wash-types--washType_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/v1/wash-types/{washType_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="GETapi-v1-wash-types--washType_id-"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>washType_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="washType_id"                data-endpoint="GETapi-v1-wash-types--washType_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the washType. Example: <code>1</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="wash-types-PUTapi-v1-wash-types--washType_id-">Replace a wash type (fields sent; `supplies` replaces the whole list)</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PUTapi-v1-wash-types--washType_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost:8000/api/v1/wash-types/1" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"data\": {
+        \"attributes\": {
+            \"name\": \"Tough stains\",
+            \"description\": \"Heavy-duty treatment for stubborn stains.\",
+            \"surchargePerKgCents\": 500,
+            \"sortOrder\": 5,
+            \"isActive\": true,
+            \"supplies\": [
+                {
+                    \"inventoryItemId\": 6,
+                    \"usagePerKgSmallUnit\": 0.25
+                }
+            ]
+        }
+    }
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/wash-types/1"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "data": {
+        "attributes": {
+            "name": "Tough stains",
+            "description": "Heavy-duty treatment for stubborn stains.",
+            "surchargePerKgCents": 500,
+            "sortOrder": 5,
+            "isActive": true,
+            "supplies": [
+                {
+                    "inventoryItemId": 6,
+                    "usagePerKgSmallUnit": 0.25
+                }
+            ]
+        }
+    }
+};
+
+fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PUTapi-v1-wash-types--washType_id-">
+</span>
+<span id="execution-results-PUTapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PUTapi-v1-wash-types--washType_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-v1-wash-types--washType_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-v1-wash-types--washType_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PUTapi-v1-wash-types--washType_id-" data-method="PUT"
+      data-path="api/v1/wash-types/{washType_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-v1-wash-types--washType_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-v1-wash-types--washType_id-"
+                    onclick="tryItOut('PUTapi-v1-wash-types--washType_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-v1-wash-types--washType_id-"
+                    onclick="cancelTryOut('PUTapi-v1-wash-types--washType_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-v1-wash-types--washType_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/v1/wash-types/{washType_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>washType_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="washType_id"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the washType. Example: <code>1</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>data</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.name"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="Tough stains"
+               data-component="body">
+    <br>
+<p>Unique name. Must not be greater than 100 characters. Example: <code>Tough stains</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.description"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="Heavy-duty treatment for stubborn stains."
+               data-component="body">
+    <br>
+<p>Short note for staff. Must not be greater than 255 characters. Example: <code>Heavy-duty treatment for stubborn stains.</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>surchargePerKgCents</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.surchargePerKgCents"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="500"
+               data-component="body">
+    <br>
+<p>Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000. Example: <code>500</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>sortOrder</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.sortOrder"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value="5"
+               data-component="body">
+    <br>
+<p>Position in the list. Must be at least 0. Must not be greater than 65535. Example: <code>5</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>isActive</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="PUTapi-v1-wash-types--washType_id-" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="true"
+                   data-endpoint="PUTapi-v1-wash-types--washType_id-"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PUTapi-v1-wash-types--washType_id-" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="false"
+                   data-endpoint="PUTapi-v1-wash-types--washType_id-"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Inactive wash types stay on old orders but cannot be chosen. Example: <code>true</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>supplies</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.supplies"                data-endpoint="PUTapi-v1-wash-types--washType_id-"
+               value=""
+               data-component="body">
+    <br>
+<p>Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.</p>
+                    </div>
+                                    </details>
+        </div>
+                                        </details>
+        </div>
+        </form>
+
+                    <h2 id="wash-types-PATCHapi-v1-wash-types--washType_id-">Update a wash type (fields sent)</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+
+
+<span id="example-requests-PATCHapi-v1-wash-types--washType_id-">
+<blockquote>Example request:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost:8000/api/v1/wash-types/1" \
+    --header "Authorization: Bearer {YOUR_AUTH_KEY}" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"data\": {
+        \"attributes\": {
+            \"name\": \"Tough stains\",
+            \"description\": \"Heavy-duty treatment for stubborn stains.\",
+            \"surchargePerKgCents\": 500,
+            \"sortOrder\": 5,
+            \"isActive\": true,
+            \"supplies\": [
+                {
+                    \"inventoryItemId\": 6,
+                    \"usagePerKgSmallUnit\": 0.25
+                }
+            ]
+        }
+    }
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/v1/wash-types/1"
+);
+
+const headers = {
+    "Authorization": "Bearer {YOUR_AUTH_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "data": {
+        "attributes": {
+            "name": "Tough stains",
+            "description": "Heavy-duty treatment for stubborn stains.",
+            "surchargePerKgCents": 500,
+            "sortOrder": 5,
+            "isActive": true,
+            "supplies": [
+                {
+                    "inventoryItemId": 6,
+                    "usagePerKgSmallUnit": 0.25
+                }
+            ]
+        }
+    }
+};
+
+fetch(url, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-v1-wash-types--washType_id-">
+</span>
+<span id="execution-results-PATCHapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Received response<span
+                id="execution-response-status-PATCHapi-v1-wash-types--washType_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-v1-wash-types--washType_id-"
+      data-empty-response-text="<Empty response>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-v1-wash-types--washType_id-" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-v1-wash-types--washType_id-">
+
+Tip: Check that you&#039;re properly connected to the network.
+If you&#039;re a maintainer of ths API, verify that your API is running and you&#039;ve enabled CORS.
+You can check the Dev Tools console for debugging information.</code></pre>
+</span>
+<form id="form-PATCHapi-v1-wash-types--washType_id-" data-method="PATCH"
+      data-path="api/v1/wash-types/{washType_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-v1-wash-types--washType_id-', this);">
+    <h3>
+        Request&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-v1-wash-types--washType_id-"
+                    onclick="tryItOut('PATCHapi-v1-wash-types--washType_id-');">Try it out ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-v1-wash-types--washType_id-"
+                    onclick="cancelTryOut('PATCHapi-v1-wash-types--washType_id-');" hidden>Cancel 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-v1-wash-types--washType_id-"
+                    data-initial-text="Send Request 💥"
+                    data-loading-text="⏱ Sending..."
+                    hidden>Send Request 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/v1/wash-types/{washType_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Headers</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Authorization</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Authorization" class="auth-value"               data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="Bearer {YOUR_AUTH_KEY}"
+               data-component="header">
+    <br>
+<p>Example: <code>Bearer {YOUR_AUTH_KEY}</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>washType_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="washType_id"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>The ID of the washType. Example: <code>1</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>data</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style=" margin-left: 14px; clear: unset;">
+        <details>
+            <summary style="padding-bottom: 10px;">
+                <b style="line-height: 2;"><code>attributes</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+ &nbsp;
+ &nbsp;
+<br>
+
+            </summary>
+                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.name"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="Tough stains"
+               data-component="body">
+    <br>
+<p>Unique name. Must not be greater than 100 characters. Example: <code>Tough stains</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>description</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.description"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="Heavy-duty treatment for stubborn stains."
+               data-component="body">
+    <br>
+<p>Short note for staff. Must not be greater than 255 characters. Example: <code>Heavy-duty treatment for stubborn stains.</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>surchargePerKgCents</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.surchargePerKgCents"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="500"
+               data-component="body">
+    <br>
+<p>Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000. Example: <code>500</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>sortOrder</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="data.attributes.sortOrder"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value="5"
+               data-component="body">
+    <br>
+<p>Position in the list. Must be at least 0. Must not be greater than 65535. Example: <code>5</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>isActive</code></b>&nbsp;&nbsp;
+<small>boolean</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <label data-endpoint="PATCHapi-v1-wash-types--washType_id-" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="true"
+                   data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+                   data-component="body"             >
+            <code>true</code>
+        </label>
+        <label data-endpoint="PATCHapi-v1-wash-types--washType_id-" style="display: none">
+            <input type="radio" name="data.attributes.isActive"
+                   value="false"
+                   data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+                   data-component="body"             >
+            <code>false</code>
+        </label>
+    <br>
+<p>Inactive wash types stay on old orders but cannot be chosen. Example: <code>true</code></p>
+                    </div>
+                                                                <div style="margin-left: 28px; clear: unset;">
+                        <b style="line-height: 2;"><code>supplies</code></b>&nbsp;&nbsp;
+<small>object</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="data.attributes.supplies"                data-endpoint="PATCHapi-v1-wash-types--washType_id-"
+               value=""
+               data-component="body">
+    <br>
+<p>Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.</p>
                     </div>
                                     </details>
         </div>

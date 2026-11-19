@@ -4,6 +4,7 @@ namespace App\Http\Resources\V1;
 
 use App\Models\Order;
 use App\Models\ShopSetting;
+use App\Support\WashRules;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\MissingValue;
 
@@ -30,6 +31,9 @@ class OrderResource extends ApiResource
                 'promisedAt' => $this->iso($this->promised_at),
                 'releasedAt' => $this->iso($this->released_at),
                 'notes' => $this->notes,
+                'washSurchargePerKgCents' => (int) $this->wash_surcharge_per_kg_cents,
+                'washSurchargeCents' => $this->washSurchargeCents(),
+                'perKgWeightKg' => $this->perKgTenths() / 10,
                 'totalCents' => $this->totalCents(),
                 'paidCents' => $this->paidCents(),
                 'balanceCents' => $this->balanceCents(),
@@ -41,6 +45,7 @@ class OrderResource extends ApiResource
             'relationships' => [
                 'customer' => $this->ref('customer', $this->customer_id, 'customers.show', ['customer' => $this->customer_id]),
                 'receivedBy' => $this->ref('user', $this->received_by, 'users.show', ['user' => $this->received_by]),
+                'washType' => $this->ref('washType', $this->wash_type_id),
             ],
             'links' => [
                 'self' => route('orders.show', ['order' => $this->id]),
@@ -50,6 +55,14 @@ class OrderResource extends ApiResource
             'baskets' => $this->loadedMany('baskets', BasketResource::class),
             'items' => $this->loadedMany('items', OrderItemResource::class),
             'receivedBy' => $this->loadedOne('receivedBy', UserResource::class),
+            'washType' => $this->loadedOne('washType', WashTypeResource::class),
+            'soapUsage' => $this->resource->relationLoaded('usageMovements') ? $this->resource->usageMovements->map(fn ($m) => [
+                'itemName' => $m->item?->name ?? '',
+                'unitCode' => $m->item?->unit?->code ?? '',
+                'quantity' => (float) $m->quantity,
+                'requiredQuantity' => (float) ($m->required_quantity ?? $m->quantity),
+                'label' => ($m->item?->name ?? '').' '.WashRules::formatAmount($m->item?->unit?->code ?? '', (float) ($m->required_quantity ?? $m->quantity)),
+            ])->values() : new MissingValue,
             'payments' => $this->loadedMany('payments', PaymentResource::class),
             'statusHistory' => $this->loadedMany('statusHistory', StatusHistoryResource::class),
             'basketHistory' => $this->loadedMany('basketAssignments', BasketAssignmentResource::class),

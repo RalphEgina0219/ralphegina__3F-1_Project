@@ -7,7 +7,7 @@ use App\Models\InventoryMovement;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\InventoryRules;
-use App\Support\Notifier;
+use App\Support\StockAlerts;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -39,12 +39,7 @@ final class RecordStockMovement
             ]);
 
             $after = InventoryRules::round($current + InventoryRules::signedQuantity($type, $quantity));
-            $before = InventoryRules::stockStatus($current, (float) $item->reorder_level);
-            $now = InventoryRules::stockStatus($after, (float) $item->reorder_level);
-            if ($now !== 'ok' && $now !== $before) {
-                $level = $now === 'critical' ? 'critically low' : 'below its reorder level';
-                Notifier::staff('low_stock', "{$item->name} is {$level} (".InventoryRules::format($after).' '.($item->unit?->code ?? '').' left).');
-            }
+            StockAlerts::afterChange($item, $current, $after);
 
             Audit::record($staff->id, 'inventory.movement', 'inventory_item', $item->id, [
                 'item_name' => $item->name,

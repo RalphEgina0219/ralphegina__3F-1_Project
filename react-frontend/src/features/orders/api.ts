@@ -29,6 +29,9 @@ export function invalidateOrderData(queryClient: QueryClient) {
     'reports',
     'baskets',
     'scan',
+    // The order deducts soap from stock.
+    'inventory',
+    'wash-types',
   ]) {
     void queryClient.invalidateQueries({ queryKey: [key] });
   }

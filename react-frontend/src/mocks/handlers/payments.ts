@@ -25,16 +25,20 @@ export function validatePayment(body: Record<string, unknown>, balance: number) 
   } else if (amount > balance) {
     errors.amount_cents = 'The amount cannot be more than the balance.';
   }
-  if (method !== 'cash' && method !== 'gcash') errors.payment_method = 'Choose Cash or GCash.';
-  if (method === 'gcash' && !reference)
-    errors.reference_number = 'Enter the GCash reference number.';
+  if (method !== 'cash' && method !== 'gcash' && method !== 'maya') {
+    errors.payment_method = 'Choose Cash, GCash or Maya.';
+  }
+  // GCash and Maya both need the customer's reference number.
+  if ((method === 'gcash' || method === 'maya') && !reference) {
+    errors.reference_number = `Enter the ${method === 'maya' ? 'Maya' : 'GCash'} reference number.`;
+  }
 
   return {
     errors,
     values: {
       amount_cents: amount ?? 0,
       method,
-      reference_number: method === 'gcash' ? reference : null,
+      reference_number: method === 'gcash' || method === 'maya' ? reference : null,
     },
   };
 }
@@ -126,6 +130,7 @@ export const paymentHandlers = [
         collected_cents: sum(counted),
         cash_cents: sum(counted.filter((p) => p.method === 'cash')),
         gcash_cents: sum(counted.filter((p) => p.method === 'gcash')),
+        maya_cents: sum(counted.filter((p) => p.method === 'maya')),
         count: counted.length,
       }),
     );

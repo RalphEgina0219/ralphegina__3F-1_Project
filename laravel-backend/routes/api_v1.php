@@ -28,7 +28,9 @@ use App\Http\Controllers\Api\V1\RolePermissionController;
 use App\Http\Controllers\Api\V1\ScanController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\ShopSettingController;
+use App\Http\Controllers\Api\V1\StockRuleController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\WashTypeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,6 +94,11 @@ Route::middleware(['auth:api', 'account.usable:api'])->group(function () {
     Route::put('services/{service}', [ServiceController::class, 'replace'])->name('services.replace');
     Route::patch('services/{service}', [ServiceController::class, 'update'])->name('services.update');
 
+    // Wash types: staff read them to take orders, the owner edits them (Settings > Pricing & Usage)
+    Route::apiResource('wash-types', WashTypeController::class)->only(['index', 'store', 'show'])->parameters(['wash-types' => 'washType']);
+    Route::put('wash-types/{washType}', [WashTypeController::class, 'replace'])->name('wash-types.replace');
+    Route::patch('wash-types/{washType}', [WashTypeController::class, 'update'])->name('wash-types.update');
+
     // Baskets and scanning. "available" is registered before {basket} so it is not read as an id.
     Route::get('baskets/available', [BasketController::class, 'available'])->name('baskets.available');
     Route::apiResource('baskets', BasketController::class)->only(['index', 'store', 'show']);
@@ -132,6 +139,7 @@ Route::middleware(['auth:api', 'account.usable:api'])->group(function () {
     Route::put('roles/staff/permissions', [RolePermissionController::class, 'replace'])->name('roles.permissions.replace');
     Route::get('settings/shop', [ShopSettingController::class, 'show'])->name('settings.shop.show');
     Route::put('settings/shop', [ShopSettingController::class, 'replace'])->name('settings.shop.replace');
+    Route::put('settings/stock-rule', [StockRuleController::class, 'replace'])->name('settings.stock-rule.replace');
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     // Staff notifications

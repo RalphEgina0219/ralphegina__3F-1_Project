@@ -99,7 +99,7 @@ test('counter to pickup: register, take in, scan every stage, pay, complete, reu
   await shown.getByRole('button', { name: 'Done' }).click();
   await expect(page.getByText(temporary)).toHaveCount(0);
 
-  // Staff: take in an order with a basket, to pay later.
+  // Staff: take in an order with a basket, to pay at pickup.
   await page.goto('/orders/new');
   await page.getByPlaceholder('Name, email or contact number').fill(name);
   await page.getByRole('listbox', { name: 'Matching customers' }).getByText(name).click();
@@ -112,7 +112,7 @@ test('counter to pickup: register, take in, scan every stage, pay, complete, reu
     basketNumber,
   );
   await page.getByRole('button', { name: 'Add service' }).filter({ visible: true }).first().click();
-  await page.getByLabel('Pay later').check();
+  await page.getByLabel('Pay at pickup').check();
   await page.getByRole('button', { name: 'Save order' }).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/orders\/\d+$/);
   const orderId = Number(new URL(page.url()).pathname.split('/').at(-1));

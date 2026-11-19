@@ -34,6 +34,11 @@ class PortalOrderResource extends ApiResource
                 'paidCents' => $this->paidCents(),
                 'balanceCents' => $this->balanceCents(),
                 'paymentStatus' => $this->paymentStatus(),
+                // The wash type and what it costs, as frozen on the order. Never soap quantities.
+                'washTypeName' => $this->relationLoaded('washType') ? $this->washType?->name : null,
+                'washSurchargePerKgCents' => (int) $this->wash_surcharge_per_kg_cents,
+                'washSurchargeCents' => $this->washSurchargeCents(),
+                'perKgWeightKg' => $this->perKgTenths() / 10,
                 $this->mergeWhen($detail, fn () => [
                     'customer' => [
                         'fullName' => $this->customer->full_name,

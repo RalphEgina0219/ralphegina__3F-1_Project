@@ -40,7 +40,7 @@ flowchart TD
     B -- Yes --> D
     C --> D[Staff takes in the order:<br/>customer, one or more free baskets,<br/>services and weight, promised time]
     D --> E{Pays now?}
-    E -- Yes, part or all --> F[Payment recorded<br/>OR-000201, cash or GCash]
+    E -- Yes, part or all --> F[Payment recorded<br/>OR-000201, cash, GCash or Maya]
     E -- Later --> G
     F --> G[Order LF-YYMMDD-NNNN saved<br/>status Received, baskets In use,<br/>customer notified]
     G --> H[Staff scans the basket label<br/>and moves the order one stage]
@@ -109,6 +109,51 @@ stateDiagram-v2
 - A scan sends the basket along, so a stale screen whose basket no longer holds the order gets
   **409 "This basket has no active laundry session."**
 - Every move is written to the status history, the activity log and the customer's notifications.
+
+## Wash types and soap usage
+
+A **wash type** says how the customer's laundry is washed: Regular washing, Colored clothes,
+Softness and fragrance, Stain removal and Tough stains (the owner can add, rename, reorder and
+deactivate them). It is not a service: an order still has its services and load, plus exactly one wash
+type (Regular washing unless chosen). It applies to the order's **per-kg weight**, the total kilos of
+its per-kg service lines; an order with only comforters or ironing has no surcharge and uses no soap.
+
+- **Charge.** Each wash type has an optional surcharge per kilo (₱0 by default). The charge is
+  surcharge per kg × per-kg weight, in centavos, shown as its own bill line ("Wash type: Tough stains —
+  ₱5.00/kg × 6.5 kg = ₱32.50", or "— no extra charge"). The surcharge is frozen on the order
+  (`orders.wash_surcharge_per_kg_cents`), exactly like a service's `unit_price_cents`, so changing it later
+  never changes an old order.
+- **Soap.** The owner assigns inventory items to each wash type with an amount per kilo in the item's
+  small unit: grams for kg items, millilitres for L items, pieces for pcs items
+  (`usage_per_kg_small_unit`). The amount an order uses is that × the per-kg weight, converted to the
+  item's unit (g ÷ 1000 → kg, mL ÷ 1000 → L). kg and L keep three decimals (1 g or 1 mL); pcs round **up**
+  per order and per item.
+- **Deduction.** In the same transaction that creates the order, each assigned item gets an inventory
+  movement of type `usage`, linked to the order and made by the staff member who took it in ("Order
+  LF-… · Tough stains · 6.5 kg"). Stock stays computed from movements. Orders cannot be edited
+  (only their notes and estimated completion), so there are no usage adjustments; movements are never
+  edited or deleted.
+- **Not enough stock.** Off (default): the New Order form warns ("Fabric conditioner: needs 130 mL, only
+  80 mL recorded"), staff can still save, only what is recorded is deducted (never below zero), the
+  shortfall goes into the movement's remarks and the staff bell says "Record a stock-in for …". On
+  (Settings > Pricing & Usage > Stock rule): the API answers 409 with the same message and nothing is saved.
+- **Who sees what.** Staff see the soap preview on New Order, the soap on the order page and, most
+  prominently, on the QR scan result ("Use: Detergent pods 2 pcs, Stain remover 163 mL"). Customers see the
+  wash type name and its charge, never soap quantities.
+
+**Worked example: 6.5 kg of Wash-Dry-Fold as Tough stains** (₱5/kg; Detergent pods 0.25 pcs/kg; Stain
+remover 25 mL/kg):
+
+| | Calculation | Result |
+| --- | --- | --- |
+| Wash-Dry-Fold | 6.5 kg × ₱35 | ₱227.50 |
+| Wash type surcharge | 6.5 kg × ₱5.00 | ₱32.50 |
+| **Total** | | **₱260.00** |
+| Detergent pods | 0.25 × 6.5 = 1.625 pcs, rounded up | **2 pcs** |
+| Stain remover | 25 mL × 6.5 = 162.5 mL, kept at 1 mL precision | **163 mL** (0.163 L) |
+
+The rules live in one place on each side (`laravel-backend/app/Support/WashRules.php` and
+`react-frontend/src/lib/wash.ts`) and both are tested with the same cases in `shared/wash-cases.json`.
 
 ## Business rules
 

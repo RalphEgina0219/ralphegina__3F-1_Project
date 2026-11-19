@@ -1,6 +1,8 @@
 import type { AnalyticsFacts } from '@/lib/analytics/build';
-import type { OrderFact } from '@/lib/analytics/types';
+import { SURCHARGE_SERVICE_ID, SURCHARGE_SERVICE_NAME } from '@/lib/analytics/build';
+import type { OrderFact, OrderLineFact } from '@/lib/analytics/types';
 import { amountPaidCents } from '@/lib/billing';
+import { perKgTenths, washSurchargeCents } from '@/lib/wash';
 import type { StatusCode } from '@/types/entities';
 import { db } from './db';
 import { lookup } from './lookup';
@@ -17,6 +19,7 @@ export function analyticsFacts(): AnalyticsFacts {
   const barangays = new Map(data.barangays.map((b) => [b.id, b.name]));
   const statuses = new Map(data.order_statuses.map((s) => [s.id, s.code]));
   const methods = new Map(data.payment_methods.map((m) => [m.id, m.code]));
+  const washTypes = new Map(data.wash_types.map((w) => [w.id, w.name]));
   const code = (id: number): StatusCode => statuses.get(id) ?? 'received';
 
   const orders: OrderFact[] = data.orders.map((order) => {
@@ -25,7 +28,7 @@ export function analyticsFacts(): AnalyticsFacts {
       a.changed_at.localeCompare(b.changed_at),
     );
     const customer = index.customerById.get(order.customer_id);
-    const lines = items.map((item) => {
+    const lines: OrderLineFact[] = items.map((item) => {
       const service = services.get(item.service_id);
       return {
         service_id: item.service_id,
@@ -35,6 +38,27 @@ export function analyticsFacts(): AnalyticsFacts {
         pieces: service?.pricing_type === 'per_piece' ? (item.quantity ?? 0) : 0,
       };
     });
+    const kilos = Math.round(lines.reduce((sum, line) => sum + line.kilos, 0) * 10) / 10;
+    // The wash type surcharge is its own revenue category, so totals still reconcile.
+    const surcharge = washSurchargeCents(
+      perKgTenths(
+        items.map((item) => ({
+          pricing_type: item.weight_kg === null ? 'flat' : 'per_kg',
+          weight_kg: item.weight_kg,
+        })),
+      ),
+      order.wash_surcharge_per_kg_cents,
+    );
+    if (surcharge > 0) {
+      lines.push({
+        service_id: SURCHARGE_SERVICE_ID,
+        service_name: SURCHARGE_SERVICE_NAME,
+        subtotal_cents: surcharge,
+        kilos: 0,
+        pieces: 0,
+        surcharge: true,
+      });
+    }
     const total = lines.reduce((sum, line) => sum + line.subtotal_cents, 0);
     return {
       id: order.id,
@@ -42,6 +66,8 @@ export function analyticsFacts(): AnalyticsFacts {
       customer_id: order.customer_id,
       customer_name: customer?.full_name ?? '',
       barangay: barangays.get(customer?.barangay_id ?? 0) ?? '',
+      wash_type_id: order.wash_type_id,
+      wash_type: washTypes.get(order.wash_type_id) ?? 'Regular washing',
       received_at: order.received_at,
       received_by: order.received_by,
       promised_at: order.promised_at,
@@ -51,7 +77,7 @@ export function analyticsFacts(): AnalyticsFacts {
       status_since: history[history.length - 1]?.changed_at ?? order.received_at,
       total_cents: total,
       paid_cents: amountPaidCents(index.paymentsByOrder.get(order.id) ?? []),
-      kilos: Math.round(lines.reduce((sum, line) => sum + line.kilos, 0) * 10) / 10,
+      kilos,
       pieces: lines.reduce((sum, line) => sum + line.pieces, 0),
       express: items.some((item) => services.get(item.service_id)?.pricing_type === 'flat'),
       lines,
@@ -77,6 +103,7 @@ export function analyticsFacts(): AnalyticsFacts {
     })),
     movements: data.inventory_movements.map((m) => ({
       item_id: m.item_id,
+      order_id: m.order_id,
       type: m.type,
       quantity: m.quantity,
       moved_at: m.moved_at,

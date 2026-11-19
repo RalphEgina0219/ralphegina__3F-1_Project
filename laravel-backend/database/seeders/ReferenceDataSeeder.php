@@ -103,6 +103,7 @@ class ReferenceDataSeeder extends Seeder
         DB::table('payment_methods')->insert([
             ['id' => 1, 'code' => 'cash', 'label' => 'Cash'],
             ['id' => 2, 'code' => 'gcash', 'label' => 'GCash'],
+            ['id' => 3, 'code' => 'maya', 'label' => 'Maya'],
         ]);
 
         DB::table('services')->insert(array_map(fn ($s) => [
@@ -147,5 +148,8 @@ class ReferenceDataSeeder extends Seeder
         ]);
 
         DB::table('receipt_sequences')->insert(['id' => 1, 'last_number' => 200]);
+
+        // The five wash types (no soap assigned: the owner does that in Settings > Pricing & Usage).
+        (new WashTypeReferenceSeeder)->run();
     }
 }

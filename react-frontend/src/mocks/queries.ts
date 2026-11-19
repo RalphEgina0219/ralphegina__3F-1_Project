@@ -3,6 +3,7 @@ import { amountPaidCents, balanceCents, paymentStatus } from '@/lib/billing';
 import { onHand, stockLevelPercent, stockStatus } from '@/lib/inventory';
 import { formatMoney } from '@/lib/money';
 import { STATUS_META, STATUS_ORDER, statusIndex } from '@/lib/status';
+import { formatAmount, perKgTenths, washSurchargeCents } from '@/lib/wash';
 import type {
   ActivityLogDto,
   AuthUser,
@@ -19,6 +20,7 @@ import type {
   PortalOrderDetailDto,
   PortalOrderDto,
   ShopInfoDto,
+  SoapUsageDto,
   TimelineStepDto,
   UserDto,
   UserRef,
@@ -81,12 +83,27 @@ export function toUserDto(user: User): UserDto {
   return { ...rest, role: roleName(user) };
 }
 
+/** The wash type surcharge of an order: its frozen per-kg rate × the weight of its per-kg lines. */
+export function orderWash(order: Order) {
+  const items = lookup().itemsByOrder.get(order.id) ?? [];
+  // Only per-kg lines carry a weight.
+  const tenths = perKgTenths(
+    items.map((item) => ({
+      pricing_type: item.weight_kg === null ? 'flat' : 'per_kg',
+      weight_kg: item.weight_kg,
+    })),
+  );
+  return {
+    tenths,
+    surchargeCents: washSurchargeCents(tenths, order.wash_surcharge_per_kg_cents),
+  };
+}
+
 export function orderMoney(order: Order) {
   const { itemsByOrder, paymentsByOrder } = lookup();
-  const total = (itemsByOrder.get(order.id) ?? []).reduce(
-    (sum, item) => sum + item.subtotal_cents,
-    0,
-  );
+  const total =
+    (itemsByOrder.get(order.id) ?? []).reduce((sum, item) => sum + item.subtotal_cents, 0) +
+    orderWash(order).surchargeCents;
   const paid = amountPaidCents(paymentsByOrder.get(order.id) ?? []);
   return { total, paid, balance: balanceCents(total, paid), status: paymentStatus(total, paid) };
 }
@@ -127,6 +144,8 @@ export function toOrderDto(order: Order): OrderDto {
   const customer = customerById.get(order.customer_id) as Customer;
   const code = statusCode(order.current_status_id);
   const money = orderMoney(order);
+  const wash = orderWash(order);
+  const washType = db().wash_types.find((w) => w.id === order.wash_type_id);
   const lastChange = (historyByOrder.get(order.id) ?? []).reduce(
     (latest, h) => (h.changed_at > latest ? h.changed_at : latest),
     order.received_at,
@@ -144,6 +163,10 @@ export function toOrderDto(order: Order): OrderDto {
       orders_count: ordersByCustomer.get(customer.id)?.length ?? 0,
     },
     baskets: orderBaskets(order.id),
+    wash_type: { id: order.wash_type_id, name: washType?.name ?? 'Regular washing' },
+    wash_surcharge_per_kg_cents: order.wash_surcharge_per_kg_cents,
+    wash_surcharge_cents: wash.surchargeCents,
+    per_kg_weight_kg: wash.tenths / 10,
     status: code,
     status_label: STATUS_META[code].label,
     status_since: lastChange,
@@ -207,11 +230,31 @@ export function basketHistory(orderId: number): BasketAssignmentDto[] {
     }));
 }
 
+/** The soap an order deducted, for staff. */
+export function soapUsage(orderId: number): SoapUsageDto[] {
+  const { inventory_items, units, inventory_movements } = db();
+  return inventory_movements
+    .filter((m) => m.type === 'usage' && m.order_id === orderId)
+    .map((m) => {
+      const item = inventory_items.find((i) => i.id === m.item_id);
+      const unit = units.find((u) => u.id === item?.unit_id)?.code ?? '';
+      const required = m.required_quantity ?? m.quantity;
+      return {
+        item_name: item?.name ?? '',
+        unit_code: unit,
+        quantity: m.quantity,
+        required_quantity: required,
+        label: `${item?.name ?? ''} ${formatAmount(unit, required)}`,
+      };
+    });
+}
+
 export function toOrderDetailDto(order: Order): OrderDetailDto {
   const { payments, order_status_history } = db();
   return {
     ...toOrderDto(order),
     basket_history: basketHistory(order.id),
+    soap_usage: soapUsage(order.id),
     shop: shopInfo(),
     payments: payments
       .filter((p) => p.order_id === order.id)
@@ -281,11 +324,12 @@ export function toMovementDto(movement: InventoryMovement): InventoryMovementDto
   const { inventory_items, units } = db();
   const item = inventory_items.find((i) => i.id === movement.item_id);
   const signed =
-    movement.type === 'out'
+    movement.type === 'out' || movement.type === 'usage'
       ? -Math.abs(movement.quantity)
       : movement.type === 'in'
         ? Math.abs(movement.quantity)
         : movement.quantity;
+  const order = movement.order_id ? db().orders.find((o) => o.id === movement.order_id) : undefined;
   return {
     id: movement.id,
     item_id: movement.item_id,
@@ -293,6 +337,9 @@ export function toMovementDto(movement: InventoryMovement): InventoryMovementDto
     unit_code: units.find((u) => u.id === item?.unit_id)?.code ?? '',
     type: movement.type,
     quantity: movement.quantity,
+    required_quantity: movement.required_quantity,
+    order_id: movement.order_id,
+    order_number: order?.order_number ?? null,
     signed_quantity: signed,
     remarks: movement.remarks,
     user: userRef(movement.user_id),
@@ -364,6 +411,10 @@ export function toPortalOrderDto(order: Order): PortalOrderDto {
     status_label: dto.status_label,
     baskets: dto.baskets,
     items: dto.items,
+    wash_type_name: dto.wash_type.name,
+    wash_surcharge_per_kg_cents: dto.wash_surcharge_per_kg_cents,
+    wash_surcharge_cents: dto.wash_surcharge_cents,
+    per_kg_weight_kg: dto.per_kg_weight_kg,
     total_cents: dto.total_cents,
     paid_cents: dto.paid_cents,
     balance_cents: dto.balance_cents,

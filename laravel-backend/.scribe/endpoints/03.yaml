@@ -1,22 +1,239 @@
-name: Dashboard
-description: ''
+name: 'Customer portal: authentication'
+description: |-
+
+  The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+  every staff route, and a staff token by every customer route.
 endpoints:
   -
     custom: []
     httpMethods:
-      - GET
-    uri: api/v1/dashboard/summary
+      - POST
+    uri: api/v1/customer/auth/register
     metadata:
       custom: []
-      groupName: Dashboard
-      groupDescription: ''
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Today at a glance'
-      description: |-
-        Today's work for the counter: KPIs, the flow per stage, recent orders, low stock and what
-        needs action. Sales figures are added only for users who may see them (sales.view): staff
-        responses contain no money from payments.
+      title: Register
+      description: 'Creates the customer profile and its account in one transaction and signs the customer in.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      full_name:
+        custom: []
+        name: full_name
+        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Juan Dela Cruz'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      contact_number:
+        custom: []
+        name: contact_number
+        description: 'A PH mobile number. Must match the regex /^09\d{9}$/.'
+        required: true
+        example: '0917 555 0101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      email:
+        custom: []
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: juan.delacruz@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'At least 8 characters, with a letter and a number.'
+        required: true
+        example: laundry123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password_confirmation:
+        custom: []
+        name: password_confirmation
+        description: 'The value and <code>password</code> must match.'
+        required: true
+        example: laundry123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      barangay_id:
+        custom: []
+        name: barangay_id
+        description: 'Must match an existing stored value.'
+        required: true
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      street_address:
+        custom: []
+        name: street_address
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'Purok 3'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      full_name: 'Juan Dela Cruz'
+      contact_number: '0917 555 0101'
+      email: juan.delacruz@example.com
+      password: laundry123
+      password_confirmation: laundry123
+      barangay_id: 28
+      street_address: 'Purok 3'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/login
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Log in'
+      description: 'Five failed attempts a minute for the same email and IP answer 429.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        custom: []
+        name: email
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: maria.santos@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: ''
+        required: true
+        example: password123
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      email: maria.santos@example.com
+      password: password123
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/customer/auth/refresh
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Refresh the token'
+      description: 'An expired token is accepted within JWT_REFRESH_TTL.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/customer/auth/me
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Current customer'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -34,40 +251,33 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"kpis":{"ordersToday":19,"ordersVsLastWeek":4,"inProcess":20,"readyForPickup":15,"readyOver2Days":4,"unpaidCents":606400,"unpaidOrders":29,"salesTodayCents":566350,"salesTodayCashCents":402750,"salesTodayGcashCents":163600},"flowCounts":{"received":4,"washing":14,"drying":4,"folding":2,"ready_for_pickup":15,"released":1623,"released_today":19},"recentOrders":[{"type":"order","id":1662,"attributes":{"orderNumber":"LF-261110-0019","status":"received","statusLabel":"Received","statusSince":"2026-11-10T10:56:00.000Z","receivedAt":"2026-11-10T10:56:00.000Z","promisedAt":"2026-11-10T23:26:00.000Z","releasedAt":null,"notes":null,"totalCents":20000,"paidCents":0,"balanceCents":20000,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-11-10T10:56:00.000Z","updatedAt":"2026-11-10T10:56:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":36},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1662"},"includes":{"customer":{"type":"customer","id":36,"attributes":{"fullName":"Pia Francisco","contactNumber":"09264405517","barangayName":"Luna","streetAddress":"Purok 5","ordersCount":362,"createdAt":"2026-07-14T00:30:00.000Z","updatedAt":"2026-07-14T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":20}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"baskets":[{"type":"basket","id":35,"attributes":{"basketNumber":"BSK-0035","qrToken":"8mDXzg0PPoWP-utqeZAt0sFIZbFhWEAk","label":"Red, small","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/35"}}],"items":[{"type":"orderItem","id":2186,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":15000,"subtotalCents":15000,"serviceName":"Comforter \/ Blanket","pricingType":"per_piece"},"relationships":{"order":{"data":{"type":"order","id":1662}},"service":{"data":{"type":"service","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/3"}}}},{"type":"orderItem","id":2187,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1662}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"order","id":1661,"attributes":{"orderNumber":"LF-261110-0018","status":"washing","statusLabel":"Washing","statusSince":"2026-11-10T10:46:56.000Z","receivedAt":"2026-11-10T10:10:00.000Z","promisedAt":"2026-11-11T10:10:00.000Z","releasedAt":null,"notes":null,"totalCents":19950,"paidCents":19950,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-10T10:10:00.000Z","updatedAt":"2026-11-10T10:46:56.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":892},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/892"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1661"},"includes":{"customer":{"type":"customer","id":892,"attributes":{"fullName":"Alvin Zamora","contactNumber":"09153401088","barangayName":"Mina de Oro","streetAddress":null,"ordersCount":1,"createdAt":"2026-11-10T10:02:00.000Z","updatedAt":"2026-11-10T10:02:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":24}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/892"}},"baskets":[{"type":"basket","id":34,"attributes":{"basketNumber":"BSK-0034","qrToken":"Yiz9xh1VqIjC6vliiaWdPxlSx_WIlEIj","label":"Yellow, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/34"}}],"items":[{"type":"orderItem","id":2185,"attributes":{"weightKg":5.7,"quantity":null,"unitPriceCents":3500,"subtotalCents":19950,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1661}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"order","id":1660,"attributes":{"orderNumber":"LF-261110-0017","status":"washing","statusLabel":"Washing","statusSince":"2026-11-10T10:49:17.000Z","receivedAt":"2026-11-10T10:00:00.000Z","promisedAt":"2026-11-11T10:00:00.000Z","releasedAt":null,"notes":null,"totalCents":32550,"paidCents":0,"balanceCents":32550,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-11-10T10:00:00.000Z","updatedAt":"2026-11-10T10:49:17.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":891},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/891"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1660"},"includes":{"customer":{"type":"customer","id":891,"attributes":{"fullName":"Daisy Lacson","contactNumber":"09424362553","barangayName":"Poblacion","streetAddress":"Purok 2","ordersCount":1,"createdAt":"2026-11-10T09:53:00.000Z","updatedAt":"2026-11-10T09:53:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":28}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/891"}},"baskets":[{"type":"basket","id":33,"attributes":{"basketNumber":"BSK-0033","qrToken":"nfcglvhBhu2Dm2HLbOxhgehr145aDXtp","label":"Green, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/33"}}],"items":[{"type":"orderItem","id":2184,"attributes":{"weightKg":9.3,"quantity":null,"unitPriceCents":3500,"subtotalCents":32550,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1660}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},{"type":"order","id":1659,"attributes":{"orderNumber":"LF-261110-0016","status":"washing","statusLabel":"Washing","statusSince":"2026-11-10T10:07:32.000Z","receivedAt":"2026-11-10T09:35:00.000Z","promisedAt":"2026-11-10T23:20:00.000Z","releasedAt":null,"notes":null,"totalCents":29850,"paidCents":29850,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-10T09:35:00.000Z","updatedAt":"2026-11-10T10:07:32.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":664},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/664"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1659"},"includes":{"customer":{"type":"customer","id":664,"attributes":{"fullName":"Jonathan Macaraeg","contactNumber":"09963735348","barangayName":"Poblacion","streetAddress":null,"ordersCount":2,"createdAt":"2026-10-09T09:22:00.000Z","updatedAt":"2026-10-09T09:22:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":28}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/664"}},"baskets":[{"type":"basket","id":32,"attributes":{"basketNumber":"BSK-0032","qrToken":"mSS8avBN5wHWxj_fQcYdZiKd18S47jkW","label":"Blue, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/32"}}],"items":[{"type":"orderItem","id":2182,"attributes":{"weightKg":7.1,"quantity":null,"unitPriceCents":3500,"subtotalCents":24850,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1659}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}},{"type":"orderItem","id":2183,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1659}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"order","id":1658,"attributes":{"orderNumber":"LF-261110-0015","status":"washing","statusLabel":"Washing","statusSince":"2026-11-10T09:20:50.000Z","receivedAt":"2026-11-10T09:04:00.000Z","promisedAt":"2026-11-10T23:17:00.000Z","releasedAt":null,"notes":null,"totalCents":20000,"paidCents":0,"balanceCents":20000,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-11-10T09:04:00.000Z","updatedAt":"2026-11-10T09:20:50.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":36},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1658"},"includes":{"customer":{"type":"customer","id":36,"attributes":{"fullName":"Pia Francisco","contactNumber":"09264405517","barangayName":"Luna","streetAddress":"Purok 5","ordersCount":362,"createdAt":"2026-07-14T00:30:00.000Z","updatedAt":"2026-07-14T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":20}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"baskets":[{"type":"basket","id":31,"attributes":{"basketNumber":"BSK-0031","qrToken":"dgDD2fFT82Vwe_2hFWHlzkqiWSqq7k2J","label":"Blue, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/31"}}],"items":[{"type":"orderItem","id":2180,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":15000,"subtotalCents":15000,"serviceName":"Comforter \/ Blanket","pricingType":"per_piece"},"relationships":{"order":{"data":{"type":"order","id":1658}},"service":{"data":{"type":"service","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/3"}}}},{"type":"orderItem","id":2181,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1658}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"order","id":1657,"attributes":{"orderNumber":"LF-261110-0014","status":"washing","statusLabel":"Washing","statusSince":"2026-11-10T09:03:08.000Z","receivedAt":"2026-11-10T08:41:00.000Z","promisedAt":"2026-11-10T23:27:00.000Z","releasedAt":null,"notes":null,"totalCents":19750,"paidCents":0,"balanceCents":19750,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-11-10T08:41:00.000Z","updatedAt":"2026-11-10T09:03:08.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":36},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1657"},"includes":{"customer":{"type":"customer","id":36,"attributes":{"fullName":"Pia Francisco","contactNumber":"09264405517","barangayName":"Luna","streetAddress":"Purok 5","ordersCount":362,"createdAt":"2026-07-14T00:30:00.000Z","updatedAt":"2026-07-14T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":20}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"baskets":[{"type":"basket","id":28,"attributes":{"basketNumber":"BSK-0028","qrToken":"QNwtAI0bIFD1VRqH6oeIst2WoRm-QKJB","label":"Green, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/28"}}],"items":[{"type":"orderItem","id":2178,"attributes":{"weightKg":5.9,"quantity":null,"unitPriceCents":2500,"subtotalCents":14750,"serviceName":"Wash only","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1657}},"service":{"data":{"type":"service","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/2"}}}},{"type":"orderItem","id":2179,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1657}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}}],"lowStock":[{"type":"inventoryItem","id":1,"attributes":{"name":"Detergent powder","unitCode":"kg","unitLabel":"Kilogram","reorderLevel":5,"isActive":true,"onHand":2,"stockStatus":"critical","levelPercent":20},"relationships":{"unit":{"data":{"type":"unit","id":1}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/inventory\/items\/1"}},{"type":"inventoryItem","id":3,"attributes":{"name":"Plastic laundry bags","unitCode":"pcs","unitLabel":"Piece","reorderLevel":50,"isActive":true,"onHand":40,"stockStatus":"low","levelPercent":40},"relationships":{"unit":{"data":{"type":"unit","id":3}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/inventory\/items\/3"}},{"type":"inventoryItem","id":2,"attributes":{"name":"Fabric conditioner","unitCode":"L","unitLabel":"Liter","reorderLevel":4,"isActive":true,"onHand":3.5,"stockStatus":"low","levelPercent":44},"relationships":{"unit":{"data":{"type":"unit","id":2}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/inventory\/items\/2"}}],"weeklySales":[{"date":"2026-11-04","salesCents":335350},{"date":"2026-11-05","salesCents":423000},{"date":"2026-11-06","salesCents":334950},{"date":"2026-11-07","salesCents":382300},{"date":"2026-11-08","salesCents":313300},{"date":"2026-11-09","salesCents":578500},{"date":"2026-11-10","salesCents":566350}],"needsAction":[{"order":{"type":"order","id":1646,"attributes":{"orderNumber":"LF-261110-0003","status":"received","statusLabel":"Received","statusSince":"2026-11-09T23:05:00.000Z","receivedAt":"2026-11-09T23:05:00.000Z","promisedAt":"2026-11-11T03:05:00.000Z","releasedAt":null,"notes":null,"totalCents":15000,"paidCents":15000,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-09T23:05:00.000Z","updatedAt":"2026-11-09T23:05:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":11},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/11"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1646"},"includes":{"customer":{"type":"customer","id":11,"attributes":{"fullName":"Paolo Mendoza","contactNumber":"09267730145","barangayName":"Lisap","streetAddress":null,"ordersCount":1,"createdAt":"2026-07-15T00:30:00.000Z","updatedAt":"2026-07-15T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":19}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/11"}},"baskets":[{"type":"basket","id":10,"attributes":{"basketNumber":"BSK-0010","qrToken":"n-uYb73oWesRgmVlyKAUc3eT7mI4b-_t","label":"Red, small","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/10"}}],"items":[{"type":"orderItem","id":2163,"attributes":{"weightKg":6,"quantity":null,"unitPriceCents":2500,"subtotalCents":15000,"serviceName":"Wash only","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1646}},"service":{"data":{"type":"service","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/2"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},"kind":"waiting","reason":"Received 13 hr"},{"order":{"type":"order","id":1623,"attributes":{"orderNumber":"LF-261109-0002","status":"washing","statusLabel":"Washing","statusSince":"2026-11-09T02:04:00.000Z","receivedAt":"2026-11-09T00:30:00.000Z","promisedAt":"2026-11-09T10:30:00.000Z","releasedAt":null,"notes":null,"totalCents":17500,"paidCents":0,"balanceCents":17500,"paymentStatus":"unpaid","isOverdue":true,"createdAt":"2026-11-09T00:30:00.000Z","updatedAt":"2026-11-09T02:04:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":14},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/14"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1623"},"includes":{"customer":{"type":"customer","id":14,"attributes":{"fullName":"Ben Soriano","contactNumber":"09352214876","barangayName":"Hagan","streetAddress":"Purok 6","ordersCount":2,"createdAt":"2026-07-27T00:30:00.000Z","updatedAt":"2026-07-27T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":12}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/14"}},"baskets":[{"type":"basket","id":44,"attributes":{"basketNumber":"BSK-0044","qrToken":"zluWjO3PFVlrWuIJojP5Rc8x2c9fM0k_","label":"Yellow, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/44"}}],"items":[{"type":"orderItem","id":2134,"attributes":{"weightKg":7,"quantity":null,"unitPriceCents":2500,"subtotalCents":17500,"serviceName":"Wash only","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1623}},"service":{"data":{"type":"service","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/2"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},"kind":"waiting","reason":"Washing 1 day"},{"order":{"type":"order","id":1633,"attributes":{"orderNumber":"LF-261109-0012","status":"drying","statusLabel":"Drying","statusSince":"2026-11-09T08:02:00.000Z","receivedAt":"2026-11-09T06:05:00.000Z","promisedAt":"2026-11-11T02:00:00.000Z","releasedAt":null,"notes":null,"totalCents":29750,"paidCents":10000,"balanceCents":19750,"paymentStatus":"partial","isOverdue":false,"createdAt":"2026-11-09T06:05:00.000Z","updatedAt":"2026-11-09T08:02:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":15},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/15"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1633"},"includes":{"customer":{"type":"customer","id":15,"attributes":{"fullName":"Cris Navarro","contactNumber":"09161007723","barangayName":"Labasan","streetAddress":null,"ordersCount":1,"createdAt":"2026-07-24T00:30:00.000Z","updatedAt":"2026-07-24T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":16}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/15"}},"baskets":[{"type":"basket","id":60,"attributes":{"basketNumber":"BSK-0060","qrToken":"i3G8PF1RlocByAlFhV-ijRsa1h8VlXLY","label":"Red, small","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/60"}}],"items":[{"type":"orderItem","id":2147,"attributes":{"weightKg":8.5,"quantity":null,"unitPriceCents":3500,"subtotalCents":29750,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1633}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},"kind":"waiting","reason":"Drying 1 day"},{"order":{"type":"order","id":1638,"attributes":{"orderNumber":"LF-261109-0017","status":"folding","statusLabel":"Folding","statusSince":"2026-11-09T11:01:00.000Z","receivedAt":"2026-11-09T08:25:00.000Z","promisedAt":"2026-11-11T02:00:00.000Z","releasedAt":null,"notes":null,"totalCents":23500,"paidCents":23500,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-09T08:25:00.000Z","updatedAt":"2026-11-09T11:01:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":16},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/16"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1638"},"includes":{"customer":{"type":"customer","id":16,"attributes":{"fullName":"Elena Cruz","contactNumber":"09473356192","barangayName":"Poblacion","streetAddress":"Purok 4","ordersCount":5,"createdAt":"2026-07-29T00:30:00.000Z","updatedAt":"2026-07-29T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":28}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/16"}},"baskets":[{"type":"basket","id":66,"attributes":{"basketNumber":"BSK-0066","qrToken":"LJWYxLnBA0S_VdOz0HMrcPkL-fHvP8B1","label":"Blue, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/66"}}],"items":[{"type":"orderItem","id":2153,"attributes":{"weightKg":5,"quantity":null,"unitPriceCents":3500,"subtotalCents":17500,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1638}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}},{"type":"orderItem","id":2154,"attributes":{"weightKg":null,"quantity":4,"unitPriceCents":1500,"subtotalCents":6000,"serviceName":"Ironing","pricingType":"per_piece"},"relationships":{"order":{"data":{"type":"order","id":1638}},"service":{"data":{"type":"service","id":4},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/4"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},"kind":"waiting","reason":"Folding 1 day"},{"order":{"type":"order","id":1080,"attributes":{"orderNumber":"LF-261007-0001","status":"ready_for_pickup","statusLabel":"Ready for Pickup","statusSince":"2026-10-07T06:19:41.000Z","receivedAt":"2026-10-06T23:27:00.000Z","promisedAt":"2026-10-07T05:27:00.000Z","releasedAt":null,"notes":"Unclaimed. Customer was texted twice.","totalCents":21250,"paidCents":0,"balanceCents":21250,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-10-06T23:27:00.000Z","updatedAt":"2026-10-07T06:19:41.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":36},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1080"},"includes":{"customer":{"type":"customer","id":36,"attributes":{"fullName":"Pia Francisco","contactNumber":"09264405517","barangayName":"Luna","streetAddress":"Purok 5","ordersCount":362,"createdAt":"2026-07-14T00:30:00.000Z","updatedAt":"2026-07-14T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":20}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/36"}},"baskets":[{"type":"basket","id":24,"attributes":{"basketNumber":"BSK-0024","qrToken":"r81mapLNAE_PK2ZHD0Oo2v9MPqm0losW","label":"Yellow, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/24"}}],"items":[{"type":"orderItem","id":1434,"attributes":{"weightKg":6.5,"quantity":null,"unitPriceCents":2500,"subtotalCents":16250,"serviceName":"Wash only","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1080}},"service":{"data":{"type":"service","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/2"}}}},{"type":"orderItem","id":1435,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1080}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},"kind":"unclaimed","reason":"Ready 34 days, not claimed"},{"order":{"type":"order","id":1428,"attributes":{"orderNumber":"LF-261029-0001","status":"ready_for_pickup","statusLabel":"Ready for Pickup","statusSince":"2026-10-29T23:42:00.000Z","receivedAt":"2026-10-28T23:24:00.000Z","promisedAt":"2026-10-29T23:24:00.000Z","releasedAt":null,"notes":"Unclaimed. Customer was texted twice.","totalCents":25900,"paidCents":15000,"balanceCents":10900,"paymentStatus":"partial","isOverdue":false,"createdAt":"2026-10-28T23:24:00.000Z","updatedAt":"2026-10-29T23:42:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":24},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/24"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1428"},"includes":{"customer":{"type":"customer","id":24,"attributes":{"fullName":"Cherry Lim","contactNumber":"09778214409","barangayName":"Poblacion","streetAddress":null,"ordersCount":2,"createdAt":"2026-07-21T00:30:00.000Z","updatedAt":"2026-07-21T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":28}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/24"}},"baskets":[{"type":"basket","id":38,"attributes":{"basketNumber":"BSK-0038","qrToken":"0_XIWjdGgnMr1dXg_VwKlmq36PN-Ynd9","label":"Green, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/38"}}],"items":[{"type":"orderItem","id":1883,"attributes":{"weightKg":7.4,"quantity":null,"unitPriceCents":3500,"subtotalCents":25900,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1428}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},"kind":"unclaimed","reason":"Ready 11 days, not claimed"},{"order":{"type":"order","id":1574,"attributes":{"orderNumber":"LF-261106-0009","status":"ready_for_pickup","statusLabel":"Ready for Pickup","statusSince":"2026-11-06T06:28:00.000Z","receivedAt":"2026-11-06T02:15:00.000Z","promisedAt":"2026-11-07T06:15:00.000Z","releasedAt":null,"notes":null,"totalCents":15750,"paidCents":0,"balanceCents":15750,"paymentStatus":"unpaid","isOverdue":false,"createdAt":"2026-11-06T02:15:00.000Z","updatedAt":"2026-11-06T06:28:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":17},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/17"}},"receivedBy":{"data":{"type":"user","id":3},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1574"},"includes":{"customer":{"type":"customer","id":17,"attributes":{"fullName":"Arnel Pascual","contactNumber":"09215580346","barangayName":"Masaguisi","streetAddress":null,"ordersCount":68,"createdAt":"2026-07-15T00:30:00.000Z","updatedAt":"2026-07-15T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":23}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/17"}},"baskets":[{"type":"basket","id":15,"attributes":{"basketNumber":"BSK-0015","qrToken":"s36lQNBBctmCbZ6Iy7GREfTgjaZAVBa1","label":"Red, small","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/15"}}],"items":[{"type":"orderItem","id":2071,"attributes":{"weightKg":4.5,"quantity":null,"unitPriceCents":3500,"subtotalCents":15750,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1574}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}}],"receivedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},"kind":"unclaimed","reason":"Ready 4 days, not claimed"},{"order":{"type":"order","id":1594,"attributes":{"orderNumber":"LF-261107-0013","status":"ready_for_pickup","statusLabel":"Ready for Pickup","statusSince":"2026-11-07T10:40:00.000Z","receivedAt":"2026-11-07T05:40:00.000Z","promisedAt":"2026-11-08T09:40:00.000Z","releasedAt":null,"notes":null,"totalCents":15000,"paidCents":15000,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-07T05:40:00.000Z","updatedAt":"2026-11-07T10:40:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":18},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/18"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1594"},"includes":{"customer":{"type":"customer","id":18,"attributes":{"fullName":"Lorna Dela Cruz","contactNumber":"09175523018","barangayName":"Poblacion","streetAddress":null,"ordersCount":1,"createdAt":"2026-07-28T00:30:00.000Z","updatedAt":"2026-07-28T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":28}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/18"}},"baskets":[{"type":"basket","id":55,"attributes":{"basketNumber":"BSK-0055","qrToken":"3JczJmNg1oG24k7M2a-b6rl9jRSMNpcv","label":"Red, small","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/55"}}],"items":[{"type":"orderItem","id":2098,"attributes":{"weightKg":6,"quantity":null,"unitPriceCents":2500,"subtotalCents":15000,"serviceName":"Wash only","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1594}},"service":{"data":{"type":"service","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/2"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},"kind":"unclaimed","reason":"Ready 3 days, not claimed"}]},"message":"Dashboard","status":200}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
+        content: '{"data":{"customer":{"type":"customerAccount","id":1,"attributes":{"fullName":"Maria Santos","email":"maria.santos@example.com","contactNumber":"09178452210","barangayId":28,"barangayName":"Poblacion","streetAddress":null,"mustChangePassword":false},"links":{"self":"http://laundryflow.test/api/v1/customer/auth/me"}}},"message":"Customer retrieved","status":200}'
+        headers: []
+        description: ''
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
   -
     custom: []
     httpMethods:
-      - GET
-    uri: api/v1/analytics/dashboard
+      - POST
+    uri: api/v1/customer/auth/logout
     metadata:
       custom: []
-      groupName: Dashboard
-      groupDescription: ''
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Dashboard analytics'
-      description: |-
-        The dashboard's KPIs and charts for a Manila date range, compared with the range of the same
-        length just before it. Users with sales.view get the admin document; everyone else gets the
-        staff document, which is built without a single peso field (not hidden: never sent).
-
-        The document is not a model resource: it is the analytics envelope
-        { range, compare_range, generated_at, kpis, series, table, insights }, inside ok().
+      title: 'Log out'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -76,63 +286,91 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters:
-      from:
-        custom: []
-        name: from
-        description: 'First Manila day (Y-m-d). Defaults to 29 days ago.'
-        required: false
-        example: '2026-10-10'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      to:
-        custom: []
-        name: to
-        description: 'Last Manila day, inclusive. Defaults to today.'
-        required: false
-        example: '2026-11-08'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      compare:
-        custom: []
-        name: compare
-        description: 'previous (default) or none.'
-        required: false
-        example: previous
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanQueryParameters:
-      from: '2026-10-10'
-      to: '2026-11-08'
-      compare: previous
+    queryParameters: []
+    cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"range":{"from":"2026-10-10","to":"2026-11-08"},"compare_range":{"from":"2026-09-10","to":"2026-10-09"},"generated_at":"2026-11-10T12:57:04.047Z","kpis":[{"key":"sales","label":"Sales","format":"money","value":11097650,"previous":9824700,"delta_pct":13,"spark":[327550,418850,436350,319450,446950,351350,284150,474900,325200,333000,313950,168400,423950,307650,322100,674600,449450,270650,328100,347400,318800,429200,353950,400550,482250,335350,423000,334950,382300,313300],"hint":"Payments collected"},{"key":"orders","label":"Orders","format":"count","value":502,"previous":440,"delta_pct":14.1,"spark":[18,19,16,15,15,16,13,17,22,13,13,15,16,14,22,20,13,16,15,17,14,21,24,14,15,16,17,16,21,19],"hint":"Received in this period"},{"key":"kilos","label":"Kilos processed","format":"kg","value":2494.1,"previous":2164.8,"delta_pct":15.2,"spark":[84.7,99.8,96.1,83.3,66.8,75.4,54,63.3,113.6,59.9,77.8,81.1,58.7,72,136.8,98.3,58.6,76.5,76.5,73,81.8,107.4,120,88.9,64,71.1,45.6,79.5,113,116.6],"hint":"Wash-Dry-Fold and Wash only"},{"key":"aov","label":"Average order value","format":"money","value":22419,"previous":22846,"delta_pct":-1.9,"spark":[22692,24242,22278,22770,24753,23763,20031,18344,20855,21265,22362,19870,23997,21921,24809,23393,24292,22022,20083,19835,21729,20419,24967,22389,22727,25491,19012,20997,21386,27684],"hint":"Billed per order"},{"key":"unpaid","label":"Unpaid balances","format":"money","value":761250,"previous":604350,"delta_pct":26,"spark":[685250,727000,647100,669200,593550,622400,598650,435600,569200,512650,489400,619050,579050,578300,802000,595250,461600,543300,516450,506250,491650,491250,736500,649400,508050,580550,480750,481750,548550,761250],"tone":"warn","inverse":true,"hint":"Across 8 orders"}],"series":{"role":"admin","sales":[{"date":"2026-10-10","value":327550,"previous":236750},{"date":"2026-10-11","value":418850,"previous":285850},{"date":"2026-10-12","value":436350,"previous":269950},{"date":"2026-10-13","value":319450,"previous":330700},{"date":"2026-10-14","value":446950,"previous":457800},{"date":"2026-10-15","value":351350,"previous":250350},{"date":"2026-10-16","value":284150,"previous":140050},{"date":"2026-10-17","value":474900,"previous":314300},{"date":"2026-10-18","value":325200,"previous":421000},{"date":"2026-10-19","value":333000,"previous":373500},{"date":"2026-10-20","value":313950,"previous":351050},{"date":"2026-10-21","value":168400,"previous":314150},{"date":"2026-10-22","value":423950,"previous":372250},{"date":"2026-10-23","value":307650,"previous":344400},{"date":"2026-10-24","value":322100,"previous":312700},{"date":"2026-10-25","value":674600,"previous":212500},{"date":"2026-10-26","value":449450,"previous":336650},{"date":"2026-10-27","value":270650,"previous":411900},{"date":"2026-10-28","value":328100,"previous":407400},{"date":"2026-10-29","value":347400,"previous":321650},{"date":"2026-10-30","value":318800,"previous":302900},{"date":"2026-10-31","value":429200,"previous":406800},{"date":"2026-11-01","value":353950,"previous":318200},{"date":"2026-11-02","value":400550,"previous":317850},{"date":"2026-11-03","value":482250,"previous":331200},{"date":"2026-11-04","value":335350,"previous":420600},{"date":"2026-11-05","value":423000,"previous":444200},{"date":"2026-11-06","value":334950,"previous":325450},{"date":"2026-11-07","value":382300,"previous":244600},{"date":"2026-11-08","value":313300,"previous":248000}],"revenue_by_service":[{"key":"1","label":"Wash-Dry-Fold","value":7163203,"share":0.6454702572166179},{"key":"3","label":"Comforter \/ Blanket","value":1371000,"share":0.12353966830815533},{"key":"2","label":"Wash only","value":1044500,"share":0.09411902519902862},{"key":"4","label":"Ironing","value":1024000,"share":0.09227178727027795},{"key":"5","label":"Express (same day)","value":494947,"share":0.044599262005920175}],"pipeline":[{"key":"received","label":"Received","value":4,"share":0.10256410256410256},{"key":"washing","label":"Washing","value":14,"share":0.358974358974359},{"key":"drying","label":"Drying","value":4,"share":0.10256410256410256},{"key":"folding","label":"Folding","value":2,"share":0.05128205128205128},{"key":"ready_for_pickup","label":"Ready for Pickup","value":15,"share":0.38461538461538464}],"payment_mix":[{"key":"cash","label":"Cash","value":7696700,"share":0.693543227620262,"extra":{"count":413}},{"key":"gcash","label":"GCash","value":3400950,"share":0.30645677237973806,"extra":{"count":185}}],"heatmap":{"weekdays":[0,1,2,3,4,5,6],"hours":[7,8,9,10,11,12,13,14,15,16,17,18],"cells":[[10,8,10,4,4,1,4,2,5,1,5,2],[7,7,8,7,5,5,1,2,3,4,7,3],[6,5,5,5,4,2,4,2,3,8,13,4],[5,14,4,6,4,2,1,3,7,6,11,3],[4,9,7,7,5,1,3,1,5,3,5,7],[16,10,18,9,2,2,9,5,8,4,8,8],[12,15,11,8,3,1,4,12,8,13,15,2]],"max":18,"total":502},"turnaround":[{"date":"2026-10-10","value":24.9,"count":14},{"date":"2026-10-11","value":23.2,"count":19},{"date":"2026-10-12","value":21.4,"count":20},{"date":"2026-10-13","value":18.7,"count":15},{"date":"2026-10-14","value":24.9,"count":15},{"date":"2026-10-15","value":22.1,"count":12},{"date":"2026-10-16","value":24.8,"count":17},{"date":"2026-10-17","value":22.5,"count":13},{"date":"2026-10-18","value":23.2,"count":19},{"date":"2026-10-19","value":21.6,"count":23},{"date":"2026-10-20","value":24.5,"count":10},{"date":"2026-10-21","value":24.1,"count":14},{"date":"2026-10-22","value":22,"count":12},{"date":"2026-10-23","value":26.5,"count":18},{"date":"2026-10-24","value":22.7,"count":18},{"date":"2026-10-25","value":21.9,"count":19},{"date":"2026-10-26","value":22.7,"count":21},{"date":"2026-10-27","value":21,"count":14},{"date":"2026-10-28","value":19.5,"count":14},{"date":"2026-10-29","value":24.5,"count":14},{"date":"2026-10-30","value":22.6,"count":18},{"date":"2026-10-31","value":24.7,"count":12},{"date":"2026-11-01","value":23.3,"count":26},{"date":"2026-11-02","value":22.5,"count":19},{"date":"2026-11-03","value":24.5,"count":16},{"date":"2026-11-04","value":20.9,"count":17},{"date":"2026-11-05","value":19.2,"count":16},{"date":"2026-11-06","value":24.1,"count":15},{"date":"2026-11-07","value":21.9,"count":19},{"date":"2026-11-08","value":22.6,"count":16}],"turnaround_target":24,"new_vs_returning":[{"key":"2026-10-10","label":"Week of Oct 10","values":{"new":16,"returning":9}},{"key":"2026-10-12","label":"Week of Oct 12","values":{"new":51,"returning":29}},{"key":"2026-10-19","label":"Week of Oct 19","values":{"new":49,"returning":30}},{"key":"2026-10-26","label":"Week of Oct 26","values":{"new":43,"returning":30}},{"key":"2026-11-02","label":"Week of Nov 2","values":{"new":58,"returning":22}}],"collected":{"billed":11254550,"collected":11121500,"outstanding":133050,"unpaid_orders":7}},"table":null,"insights":["Sales rose 13.0% compared with the previous 30 days.","Wash-Dry-Fold brought in 65% of revenue.","The busiest hour is 8 AM\u20139 AM; the busiest single slot is Saturday at 9 AM."]},"message":"Dashboard analytics","status":200}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
+    responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/customer/account/password
+    metadata:
+      custom: []
+      groupName: 'Customer portal: authentication'
+      groupDescription: |-
+
+        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
+        every staff route, and a staff token by every customer route.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Change my password'
+      description: 'Allowed while a password change is pending; clears must_change_password.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      current_password:
+        custom: []
+        name: current_password
+        description: 'The current password, or the temporary one the owner or shop gave.'
+        required: true
+        example: k7m2p9qx4t
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'At least 8 characters, with a letter and a number, different from the current one.'
+        required: true
+        example: laundry2026
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password_confirmation:
+        custom: []
+        name: password_confirmation
+        description: 'The new password again. The value and <code>password</code> must match.'
+        required: true
+        example: laundry2026
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      current_password: k7m2p9qx4t
+      password: laundry2026
+      password_confirmation: laundry2026
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null

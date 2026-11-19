@@ -187,7 +187,7 @@ test.describe('reports', () => {
     );
     const csv = fs.readFileSync(await file.path(), 'utf8');
     // Every column, optional ones included, with units in the headings and a totals row.
-    expect(csv).toContain('Date,Orders,Kilos (kg),Cash (PHP),GCash (PHP),Sales (PHP)');
+    expect(csv).toContain('Date,Orders,Kilos (kg),Cash (PHP),GCash (PHP),Maya (PHP),Sales (PHP)');
     expect(csv.trim().split(/\r?\n/).at(-1)).toMatch(/^Total,/);
 
     await page.evaluate(() => {

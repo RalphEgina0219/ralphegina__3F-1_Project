@@ -8,9 +8,10 @@ export type PermissionCode = 'payments.record' | 'inventory.stock_out' | 'paymen
 export type StatusCode =
   'received' | 'washing' | 'drying' | 'folding' | 'ready_for_pickup' | 'released';
 export type PricingType = 'per_kg' | 'per_piece' | 'flat';
-export type PaymentMethodCode = 'cash' | 'gcash';
+export type PaymentMethodCode = 'cash' | 'gcash' | 'maya';
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
-export type InventoryMovementType = 'in' | 'out' | 'adjust';
+/** usage is soap deducted by an order (written by the system); the others are recorded by hand. */
+export type InventoryMovementType = 'in' | 'out' | 'adjust' | 'usage';
 export type NotificationType = 'ready_for_pickup' | 'low_stock';
 export type CustomerNotificationType = 'order_received' | 'status_changed' | 'ready_for_pickup';
 /** in_use is kept in sync with the active order_baskets row, inside the same transaction. */
@@ -103,6 +104,10 @@ export interface Order {
   customer_id: number;
   current_status_id: number;
   received_by: number;
+  /** How the laundry is washed. Required; every order has exactly one. */
+  wash_type_id: number;
+  /** The wash type's surcharge per kilo when the order was made. Frozen like unit_price_cents. */
+  wash_surcharge_per_kg_cents: number;
   received_at: string;
   /** Shown as "Estimated completion". */
   promised_at: string;
@@ -149,6 +154,34 @@ export interface OrderItem {
   quantity: number | null;
   unit_price_cents: number;
   subtotal_cents: number;
+}
+
+/**
+ * How the laundry is washed (not a service). The surcharge applies per kilo of the order's per-kg
+ * laundry; the owner can add, rename, reorder and deactivate wash types.
+ */
+export interface WashType {
+  id: number;
+  /** UNIQUE */
+  name: string;
+  description: string | null;
+  /** 0 = no extra charge. */
+  surcharge_per_kg_cents: number;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * A soap a wash type uses. usage_per_kg_small_unit is per kilo of laundry in the item's small unit:
+ * g for kg items, mL for L items, pieces for pcs items. UNIQUE(wash_type_id, inventory_item_id).
+ */
+export interface WashTypeSupply {
+  id: number;
+  wash_type_id: number;
+  inventory_item_id: number;
+  usage_per_kg_small_unit: number;
 }
 
 export interface PaymentMethod {
@@ -199,8 +232,12 @@ export interface InventoryMovement {
   id: number;
   item_id: number;
   user_id: number;
+  /** Set on usage movements: the order that used the soap. */
+  order_id: number | null;
   type: InventoryMovementType;
   quantity: number;
+  /** What the order needed. quantity is what was deducted: stock never goes below zero. */
+  required_quantity: number | null;
   remarks: string | null;
   moved_at: string;
 }
@@ -234,6 +271,8 @@ export interface ShopSettings {
   opening_hours: string;
   receipt_footer: string;
   claim_policy_days: number;
+  /** When on, an order whose soap is not in stock is refused (409). Off: saved, stock clamped at zero. */
+  block_orders_on_low_soap: boolean;
 }
 
 export interface AuditLog {

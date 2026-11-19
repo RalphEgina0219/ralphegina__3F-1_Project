@@ -21,11 +21,11 @@ class PaymentController extends APIController
      * List payments
      *
      * Newest first. `meta` sums the payments that match the filters, voided ones excluded:
-     * collectedCents, cashCents, gcashCents and count. For the same range it equals the sales
+     * collectedCents, cashCents, gcashCents, mayaCents and count. For the same range it equals the sales
      * figure on the dashboard and in the reports.
      *
      * @queryParam paidAt string A Manila day, or from,to. Example: 2026-11-01,2026-11-08
-     * @queryParam method string cash or gcash. Example: gcash
+     * @queryParam method string cash, gcash or maya. Example: maya
      * @queryParam search string Receipt number, order number or customer name. Example: OR-0002
      * @queryParam voided boolean Only voided (true) or valid (false) payments. Example: false
      * @queryParam sort string paidAt, amountCents or receiptNumber; - for descending. Example: -paidAt
@@ -55,6 +55,7 @@ class PaymentController extends APIController
             'collectedCents' => (int) $sums->sum('total'),
             'cashCents' => $sum('cash'),
             'gcashCents' => $sum('gcash'),
+            'mayaCents' => $sum('maya'),
             'count' => (int) $sums->sum('rows_count'),
         ]]);
     }

@@ -9,6 +9,7 @@ import { StatusProgress } from '@/features/orders/components/StatusTimeline';
 import { cn } from '@/lib/cn';
 import { formatRelativeDay, formatTime } from '@/lib/dates';
 import { loadSummary, servicesSummary } from '@/lib/format';
+import { formatMoney } from '@/lib/money';
 import type { PortalOrderDto } from '@/types/api';
 
 /** "Last updated 9:41 AM" with a manual refresh. The data also refreshes every 15 seconds. */
@@ -45,6 +46,16 @@ export function LastUpdated({
 export const basketList = (order: Pick<PortalOrderDto, 'baskets'>) =>
   order.baskets.map((b) => b.basket_number).join(', ') || '—';
 
+/** "Tough stains · +₱32.50" or "Regular washing · no extra charge": the name and the charge only. */
+export function washTypeText(
+  order: Pick<PortalOrderDto, 'wash_type_name' | 'wash_surcharge_cents'>,
+) {
+  const name = order.wash_type_name ?? 'Regular washing';
+  return order.wash_surcharge_cents > 0
+    ? `${name} · +${formatMoney(order.wash_surcharge_cents)}`
+    : `${name} · no extra charge`;
+}
+
 /** One active order on the customer's dashboard. */
 export function ActiveOrderCard({ order }: { order: PortalOrderDto }) {
   const ready = order.status === 'ready_for_pickup';
@@ -79,6 +90,12 @@ export function ActiveOrderCard({ order }: { order: PortalOrderDto }) {
         <div>
           <dt className="text-xs text-muted">Weight</dt>
           <dd className="font-semibold">{loadSummary(order.items)}</dd>
+        </div>
+        <div className="min-w-0">
+          <dt className="text-xs text-muted">Wash type</dt>
+          <dd className="font-semibold" data-testid="portal-wash-type">
+            {washTypeText(order)}
+          </dd>
         </div>
         <div>
           <dt className="text-xs text-muted">Estimated completion</dt>

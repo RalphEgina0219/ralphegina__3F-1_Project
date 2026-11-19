@@ -10,6 +10,7 @@ import { paymentHandlers } from './payments';
 import { portalHandlers } from './portal';
 import { reportHandlers } from './reports';
 import { serviceHandlers } from './services';
+import { washTypeHandlers } from './washTypes';
 
 export const handlers = [
   ...authHandlers,
@@ -17,6 +18,7 @@ export const handlers = [
   ...dashboardHandlers,
   ...customerHandlers,
   ...serviceHandlers,
+  ...washTypeHandlers,
   ...basketHandlers,
   ...orderHandlers,
   ...paymentHandlers,

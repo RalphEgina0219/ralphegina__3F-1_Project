@@ -4,12 +4,17 @@ namespace App\Support;
 
 /**
  * Field rules shared by the new-order and record-payment endpoints, ported from the mock's
- * validatePayment(): an amount above zero and not above the balance, Cash or GCash, and a
- * reference number for GCash.
+ * validatePayment(): an amount above zero and not above the balance, Cash, GCash or Maya, and a
+ * reference number for GCash and Maya.
  */
 final class PaymentRules
 {
-    public const METHODS = ['cash', 'gcash'];
+    public const METHODS = ['cash', 'gcash', 'maya'];
+
+    /** Methods that need the customer's reference number. */
+    public const NEEDS_REFERENCE = ['gcash', 'maya'];
+
+    public const LABELS = ['cash' => 'Cash', 'gcash' => 'GCash', 'maya' => 'Maya'];
 
     /**
      * @param  array<string, mixed>  $payment  amountCents, paymentMethod, referenceNumber
@@ -33,11 +38,11 @@ final class PaymentRules
         }
 
         if (! in_array($method, self::METHODS, true)) {
-            $errors['paymentMethod'] = 'Choose Cash or GCash.';
+            $errors['paymentMethod'] = 'Choose Cash, GCash or Maya.';
         }
 
-        if ($method === 'gcash' && $reference === '') {
-            $errors['referenceNumber'] = 'Enter the GCash reference number.';
+        if (in_array($method, self::NEEDS_REFERENCE, true) && $reference === '') {
+            $errors['referenceNumber'] = 'Enter the '.self::LABELS[$method].' reference number.';
         }
 
         return [
@@ -45,7 +50,7 @@ final class PaymentRules
             'values' => [
                 'amount_cents' => (int) $amount,
                 'method' => $method,
-                'reference_number' => $method === 'gcash' ? $reference : null,
+                'reference_number' => in_array($method, self::NEEDS_REFERENCE, true) ? $reference : null,
             ],
         ];
     }

@@ -17,7 +17,8 @@
     "test:e2e": "node node_modules/@playwright/test/cli.js test --project=demo --project=real",
     "test:contract": "node node_modules/@playwright/test/cli.js test --config=playwright.contract.config.ts",
     "screenshots": "node node_modules/@playwright/test/cli.js test --project=screenshots",
-    "icons": "node node_modules/@vite-pwa/assets-generator/dist/cli.mjs"
+    "icons": "node node_modules/@vite-pwa/assets-generator/dist/cli.mjs",
+    "release": "node ../scripts/build-hostinger.mjs --release"
   },
   "msw": {
     "workerDirectory": [

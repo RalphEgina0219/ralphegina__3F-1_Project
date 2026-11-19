@@ -1,6 +1,6 @@
 import { subDays, subMinutes } from 'date-fns';
 import { formatBasketNumber } from '@/lib/basket';
-import { lineSubtotalCents } from '@/lib/billing';
+import { kgToTenths, lineSubtotalCents } from '@/lib/billing';
 import {
   addDays,
   manilaDay,
@@ -9,6 +9,7 @@ import {
   weekdayOf,
   type DayKey,
 } from '@/lib/analytics/time';
+import { usageQuantity, washSurchargeCents } from '@/lib/wash';
 import type { Order, Payment, PaymentMethodCode, StatusCode } from '@/types/entities';
 import { generateQrToken, type MockDb } from './db';
 import { customerNotice, demoEmail } from './messages';
@@ -132,6 +133,55 @@ const JESSA_LEFT_DAYS_AGO = 49;
 
 const SERVICE = { WDF: 1, WASH: 2, COMFORTER: 3, IRONING: 4, EXPRESS: 5, DRY_CLEAN: 6 } as const;
 const USER = { LIZA: 1, KEVIN: 2, AIRA: 3, JESSA: 4 } as const;
+
+/** The five wash types (name, description), in display order. Their ids are 1 to 5. */
+const WASH_TYPES = [
+  ['Regular washing', 'Standard wash for everyday clothes.'],
+  ['Colored clothes', 'Color-safe wash that protects dyes.'],
+  ['Softness and fragrance', 'Extra softener and scent.'],
+  ['Stain removal', 'Pre-treated for everyday stains.'],
+  ['Tough stains', 'Heavy-duty treatment for stubborn stains.'],
+] as const;
+
+/**
+ * Which soap each wash type uses and how much per kilo, in g (kg items), mL (L items) or pieces
+ * (pcs items): [item id, usage]. Items 9 to 11 are the demo's extra soaps (generic names the owner
+ * renames to brands).
+ */
+const WASH_SOAPS: Record<string, readonly (readonly [number, number])[]> = {
+  'Regular washing': [[1, 25]],
+  'Colored clothes': [[9, 30]],
+  'Softness and fragrance': [
+    [4, 30],
+    [2, 20],
+  ],
+  'Stain removal': [
+    [1, 25],
+    [10, 15],
+  ],
+  'Tough stains': [
+    [11, 0.25],
+    [10, 25],
+  ],
+};
+
+/** Unit code of each soap item. */
+const SOAP_UNITS: Record<number, string> = { 1: 'kg', 2: 'L', 4: 'L', 9: 'L', 10: 'L', 11: 'pcs' };
+
+/** The share of orders per wash type in the history. */
+const WASH_MIX = [
+  ['Regular washing', 0.55],
+  ['Colored clothes', 0.15],
+  ['Softness and fragrance', 0.15],
+  ['Stain removal', 0.1],
+  ['Tough stains', 0.05],
+] as const;
+
+/** Tough stains carries a surcharge to show the feature. */
+const TOUGH_STAINS_SURCHARGE_CENTS = 500;
+
+/** The share of GCash payments that were made with Maya instead. */
+const MAYA_SHARE_OF_GCASH = 0.35;
 const STAGES: readonly StatusCode[] = [
   'received',
   'washing',
@@ -525,6 +575,8 @@ interface PlannedOrder {
 
 export function createSeed(now: Date): MockDb {
   const rand = mulberry32(20261031);
+  // A second stream for the wash types and Maya, so the original history keeps its exact numbers.
+  const washRand = mulberry32(20261120);
   const pick = <T>(list: readonly T[]): T => list[Math.floor(rand() * list.length)] as T;
   const between = (min: number, max: number) => min + rand() * (max - min);
   const weighted = <T>(entries: readonly (readonly [T, number])[]): T => {
@@ -609,6 +661,24 @@ export function createSeed(now: Date): MockDb {
     customers: [],
     customer_accounts: [],
     customer_credentials: {},
+    wash_types: WASH_TYPES.map(([name, description], index) => ({
+      id: index + 1,
+      name,
+      description,
+      surcharge_per_kg_cents: name === 'Tough stains' ? TOUGH_STAINS_SURCHARGE_CENTS : 0,
+      sort_order: index + 1,
+      is_active: true,
+      created_at: seededAt,
+      updated_at: seededAt,
+    })),
+    wash_type_supplies: WASH_TYPES.flatMap(([name], index) =>
+      (WASH_SOAPS[name] ?? []).map(([itemId, usage]) => ({
+        id: 0,
+        wash_type_id: index + 1,
+        inventory_item_id: itemId,
+        usage_per_kg_small_unit: usage,
+      })),
+    ).map((row, index) => ({ ...row, id: index + 1 })),
     services: [
       {
         id: SERVICE.WDF,
@@ -692,6 +762,7 @@ export function createSeed(now: Date): MockDb {
     payment_methods: [
       { id: 1, code: 'cash', label: 'Cash' },
       { id: 2, code: 'gcash', label: 'GCash' },
+      { id: 3, code: 'maya', label: 'Maya' },
     ],
     payments: [],
     order_status_history: [],
@@ -710,6 +781,9 @@ export function createSeed(now: Date): MockDb {
       { id: 6, name: 'Hangers', unit_id: 3, reorder_level: 40, is_active: true },
       { id: 7, name: 'Thermal receipt rolls', unit_id: 4, reorder_level: 3, is_active: true },
       { id: 8, name: 'QR tag stickers', unit_id: 3, reorder_level: 100, is_active: true },
+      { id: 9, name: 'Color-safe detergent', unit_id: 2, reorder_level: 4, is_active: true },
+      { id: 10, name: 'Stain remover', unit_id: 2, reorder_level: 3, is_active: true },
+      { id: 11, name: 'Detergent pods', unit_id: 3, reorder_level: 40, is_active: true },
     ],
     inventory_movements: [],
     notifications: [],
@@ -722,6 +796,7 @@ export function createSeed(now: Date): MockDb {
       receipt_footer:
         "Salamat po! Unclaimed items after 30 days are the customer's responsibility.",
       claim_policy_days: 30,
+      block_orders_on_low_soap: false,
     },
     audit_logs: [],
   };
@@ -1103,6 +1178,28 @@ export function createSeed(now: Date): MockDb {
   // ---------------------------------------------------------------------------------------------
   // Write the orders.
 
+  interface Move {
+    item: number;
+    type: 'in' | 'out' | 'usage';
+    quantity: number;
+    at: number;
+    by: number;
+    remarks: string;
+    order?: number;
+    required?: number;
+  }
+  /** The soap each order used, and the daily totals the restocks are worked out from. */
+  const soapMoves: Move[] = [];
+  const soapDaily = new Map<number, Map<DayKey, number>>();
+  const pickWashType = () => {
+    let roll = washRand();
+    for (const [name, share] of WASH_MIX) {
+      roll -= share;
+      if (roll <= 0) return name;
+    }
+    return WASH_MIX[0][0];
+  };
+
   const sequences = new Map<string, number>();
   let receiptSeq = 200;
   const statusAt = (status: number) => STAGES[status - 1] as StatusCode;
@@ -1115,13 +1212,18 @@ export function createSeed(now: Date): MockDb {
     at: number,
   ) => {
     receiptSeq += 1;
+    // The reference number draws from the main stream exactly as before; whether a digital payment
+    // was Maya is decided on the second stream.
+    const reference =
+      method === 'gcash' ? `5012${Math.floor(100000000 + rand() * 899999999)}` : null;
+    const effective: PaymentMethodCode =
+      method === 'gcash' && washRand() < MAYA_SHARE_OF_GCASH ? 'maya' : method;
     const payment: Payment = {
       id: db.payments.length + 1,
       order_id: order.id,
-      payment_method_id: method === 'cash' ? 1 : 2,
+      payment_method_id: effective === 'cash' ? 1 : effective === 'gcash' ? 2 : 3,
       amount_cents: amount,
-      reference_number:
-        method === 'gcash' ? `5012${Math.floor(100000000 + rand() * 899999999)}` : null,
+      reference_number: reference,
       receipt_number: `OR-${String(receiptSeq).padStart(6, '0')}`,
       received_by: by,
       paid_at: iso(at),
@@ -1133,7 +1235,7 @@ export function createSeed(now: Date): MockDb {
     audit(at, by, 'payment.recorded', 'payment', payment.id, {
       order_number: order.order_number,
       amount_cents: amount,
-      method,
+      method: effective,
     });
     return payment;
   };
@@ -1152,6 +1254,15 @@ export function createSeed(now: Date): MockDb {
       by: plan.by,
     };
     const daysAgo = daysAgoOf(plan.receivedAt);
+    const washName = pickWashType();
+    const washType = db.wash_types.find(
+      (w) => w.name === washName,
+    ) as (typeof db.wash_types)[number];
+    let weighedTenths = 0;
+    for (const [serviceId, amount] of plan.items) {
+      if (serviceId === SERVICE.WDF || serviceId === SERVICE.WASH)
+        weighedTenths += kgToTenths(amount);
+    }
 
     const order: Order = {
       id,
@@ -1159,6 +1270,8 @@ export function createSeed(now: Date): MockDb {
       customer_id: customer.id,
       current_status_id: last.status,
       received_by: plan.by,
+      wash_type_id: washType.id,
+      wash_surcharge_per_kg_cents: washType.surcharge_per_kg_cents,
       received_at: iso(plan.receivedAt),
       promised_at: iso(plan.promisedAt),
       released_at: last.status === 6 ? iso(last.at) : null,
@@ -1187,6 +1300,27 @@ export function createSeed(now: Date): MockDb {
         quantity,
         unit_price_cents: service.rate_cents,
         subtotal_cents,
+      });
+    }
+
+    // The wash type surcharge and the soap this order used.
+    total += washSurchargeCents(weighedTenths, washType.surcharge_per_kg_cents);
+    for (const [itemId, usage] of WASH_SOAPS[washName] ?? []) {
+      const quantity = usageQuantity(SOAP_UNITS[itemId] as string, usage, weighedTenths);
+      if (quantity <= 0) continue;
+      const at = plan.receivedAt + MINUTE;
+      const days = soapDaily.get(itemId) ?? new Map<DayKey, number>();
+      days.set(manilaDay(at), (days.get(manilaDay(at)) ?? 0) + quantity);
+      soapDaily.set(itemId, days);
+      soapMoves.push({
+        item: itemId,
+        type: 'usage',
+        quantity,
+        required: quantity,
+        order: id,
+        at,
+        by: plan.by,
+        remarks: `Order ${order.order_number} · ${washName} · ${weighedTenths / 10} kg`,
       });
     }
 
@@ -1312,8 +1446,8 @@ export function createSeed(now: Date): MockDb {
 
   interface Supply {
     item: number;
-    /** Use per order, from its lines. */
-    use: (lines: { service: number; amount: number }[]) => number;
+    /** Use per order, from its lines. Null for the soaps: they are what the orders' wash types used. */
+    use: ((lines: { service: number; amount: number }[]) => number) | null;
     /** Today's on-hand level. */
     target: number;
     restock: number;
@@ -1324,22 +1458,13 @@ export function createSeed(now: Date): MockDb {
       .filter((line) => services.includes(line.service))
       .reduce((sum, line) => sum + line.amount, 0);
   const SUPPLIES: readonly Supply[] = [
-    {
-      item: 1,
-      use: (l) => kg(l, SERVICE.WDF, SERVICE.WASH) * 0.012,
-      target: 2,
-      restock: 25,
-      whole: false,
-    },
-    { item: 2, use: (l) => kg(l, SERVICE.WDF) * 0.007, target: 3.5, restock: 12, whole: false },
+    { item: 1, use: null, target: 2, restock: 25, whole: false },
+    { item: 2, use: null, target: 3.5, restock: 12, whole: false },
     { item: 3, use: () => 1, target: 40, restock: 300, whole: true },
-    {
-      item: 4,
-      use: (l) => kg(l, SERVICE.COMFORTER) * 0.3 + kg(l, SERVICE.WASH) * 0.004,
-      target: 12,
-      restock: 10,
-      whole: false,
-    },
+    { item: 4, use: null, target: 12, restock: 10, whole: false },
+    { item: 9, use: null, target: 9, restock: 10, whole: false },
+    { item: 10, use: null, target: 8, restock: 5, whole: false },
+    { item: 11, use: null, target: 120, restock: 100, whole: true },
     { item: 5, use: (l) => kg(l, SERVICE.WDF) * 0.0015, target: 6, restock: 4, whole: false },
     { item: 6, use: (l) => kg(l, SERVICE.IRONING) * 0.5, target: 120, restock: 150, whole: true },
     { item: 7, use: () => 1 / 80, target: 9, restock: 6, whole: true },
@@ -1357,25 +1482,26 @@ export function createSeed(now: Date): MockDb {
   const days: DayKey[] = [];
   for (let day = firstDay; day <= today; day = addDays(day, 1)) days.push(day);
 
-  const moves: {
-    item: number;
-    type: 'in' | 'out';
-    quantity: number;
-    at: number;
-    by: number;
-    remarks: string;
-  }[] = [];
+  const moves: Move[] = [];
   for (const supply of SUPPLIES) {
     const reorder = db.inventory_items.find((item) => item.id === supply.item)?.reorder_level ?? 0;
     const cap = reorder + supply.restock;
+    const use = supply.use;
     const round = (value: number) =>
-      supply.whole ? Math.round(value) : Math.round(value * 10) / 10;
+      supply.whole
+        ? Math.round(value)
+        : use === null
+          ? Math.round(value * 1000) / 1000
+          : Math.round(value * 10) / 10;
     // Daily use, with whole units carried over so that pieces add up.
     const usage: number[] = [];
     let carry = 0;
     for (const day of days) {
-      const raw =
-        (linesByDay.get(day) ?? []).reduce((sum, lines) => sum + supply.use(lines), 0) + carry;
+      if (use === null) {
+        usage.push(round(soapDaily.get(supply.item)?.get(day) ?? 0));
+        continue;
+      }
+      const raw = (linesByDay.get(day) ?? []).reduce((sum, lines) => sum + use(lines), 0) + carry;
       const used = round(raw);
       carry = raw - used;
       usage.push(Math.max(0, used));
@@ -1387,7 +1513,7 @@ export function createSeed(now: Date): MockDb {
       const daysAgo = HISTORY_DAYS - index;
       const closing =
         index === days.length - 1 ? nowMs - 40 * MINUTE : manilaInstant(day, 18, 45).getTime();
-      if (used > 0) {
+      if (used > 0 && use !== null) {
         moves.push({
           item: supply.item,
           type: 'out',
@@ -1420,17 +1546,21 @@ export function createSeed(now: Date): MockDb {
       remarks: 'Opening stock',
     });
   }
+  moves.push(...soapMoves);
   moves.sort((a, b) => a.at - b.at || (a.type === 'in' ? -1 : 1));
   moves.forEach((move, index) => {
     db.inventory_movements.push({
       id: index + 1,
       item_id: move.item,
       user_id: move.by,
+      order_id: move.order ?? null,
       type: move.type,
       quantity: move.quantity,
+      required_quantity: move.required ?? null,
       remarks: move.remarks,
       moved_at: iso(move.at),
     });
+    if (move.type === 'usage') return;
     audit(move.at, move.by, 'inventory.movement', 'inventory_item', move.item, {
       item_name: db.inventory_items.find((item) => item.id === move.item)?.name,
       type: move.type,

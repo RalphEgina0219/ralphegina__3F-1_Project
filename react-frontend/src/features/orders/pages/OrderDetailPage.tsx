@@ -156,6 +156,32 @@ function HistoryCard({ order }: { order: OrderDetailDto }) {
 }
 
 /** Which baskets hold this order now, and every basket it has used. */
+/** The soap this order deducted from stock. Staff only: a customer never sees soap quantities. */
+function SoapCard({ order }: { order: OrderDetailDto }) {
+  return (
+    <Card className="p-5" data-testid="soap-card">
+      <h2 className="text-[17px] font-bold">Soap used</h2>
+      <p className="text-[13px] text-muted">{order.wash_type.name}</p>
+      {order.soap_usage.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">
+          {order.per_kg_weight_kg > 0
+            ? 'No soap is assigned to this wash type, or the order was taken before wash types.'
+            : 'No laundry weighed by kilo, so no soap was deducted.'}
+        </p>
+      ) : (
+        <ul className="mt-2 divide-y divide-line text-sm">
+          {order.soap_usage.map((soap) => (
+            <li key={soap.item_name} className="flex items-center justify-between gap-3 py-2">
+              <span className="min-w-0 font-semibold">{soap.item_name}</span>
+              <span className="shrink-0">{soap.label.slice(soap.item_name.length + 1)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 function BasketsCard({ order }: { order: OrderDetailDto }) {
   const active = order.basket_history.filter((row) => !row.released_at);
   return (
@@ -348,6 +374,7 @@ export default function OrderDetailPage() {
 
         <aside className="min-w-0 space-y-5">
           <BasketsCard order={order} />
+          <SoapCard order={order} />
           <Card className="p-5">
             <h2 className="text-[17px] font-bold">Customer</h2>
             <p className="mt-2 font-bold">{order.customer.full_name}</p>

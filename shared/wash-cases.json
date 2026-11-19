@@ -1,0 +1,43 @@
+{
+  "_comment": "One set of cases for the wash type and soap rules. Read by laravel-backend/tests/Unit/WashRulesTest.php and react-frontend/src/lib/wash.test.ts, so both sides are held to the same answers.",
+  "perKgTenths": [
+    { "name": "sums the per-kg lines only", "lines": [{ "pricing_type": "per_kg", "weight_kg": 6 }, { "pricing_type": "per_piece", "weight_kg": null }, { "pricing_type": "per_kg", "weight_kg": 0.5 }], "expected": 65 },
+    { "name": "only per-piece and flat lines", "lines": [{ "pricing_type": "per_piece", "weight_kg": null }, { "pricing_type": "flat", "weight_kg": null }], "expected": 0 },
+    { "name": "no lines", "lines": [], "expected": 0 }
+  ],
+  "surcharge": [
+    { "name": "5 pesos a kilo on 6.5 kg", "perKgTenths": 65, "perKgCents": 500, "expected": 3250 },
+    { "name": "no extra charge by default", "perKgTenths": 65, "perKgCents": 0, "expected": 0 },
+    { "name": "no per-kg weight, no surcharge", "perKgTenths": 0, "perKgCents": 500, "expected": 0 },
+    { "name": "centavo rounding down", "perKgTenths": 33, "perKgCents": 333, "expected": 1099 },
+    { "name": "centavo rounding of a half rounds up", "perKgTenths": 15, "perKgCents": 335, "expected": 503 },
+    { "name": "half a kilo", "perKgTenths": 5, "perKgCents": 150, "expected": 75 }
+  ],
+  "usage": [
+    { "name": "grams per kilo of a kg item", "unit": "kg", "usagePerKg": 25, "perKgTenths": 65, "expected": 0.163 },
+    { "name": "millilitres per kilo of a L item", "unit": "L", "usagePerKg": 30, "perKgTenths": 65, "expected": 0.195 },
+    { "name": "round number of millilitres", "unit": "L", "usagePerKg": 20, "perKgTenths": 65, "expected": 0.13 },
+    { "name": "162.5 mL is recorded as 163 mL", "unit": "L", "usagePerKg": 25, "perKgTenths": 65, "expected": 0.163 },
+    { "name": "pieces round up: 1.625 -> 2", "unit": "pcs", "usagePerKg": 0.25, "perKgTenths": 65, "expected": 2 },
+    { "name": "pieces round up: 1.4 -> 2", "unit": "pcs", "usagePerKg": 0.25, "perKgTenths": 56, "expected": 2 },
+    { "name": "pieces exact: 2.0 -> 2", "unit": "pcs", "usagePerKg": 0.2, "perKgTenths": 100, "expected": 2 },
+    { "name": "pieces tiny: 0.1 -> 1", "unit": "pcs", "usagePerKg": 0.1, "perKgTenths": 10, "expected": 1 },
+    { "name": "pieces float noise does not add a piece: 3.0000000000000004 -> 3", "unit": "pcs", "usagePerKg": 0.3, "perKgTenths": 100, "expected": 3 },
+    { "name": "no per-kg weight, nothing used", "unit": "L", "usagePerKg": 30, "perKgTenths": 0, "expected": 0 }
+  ],
+  "format": [
+    { "unit": "kg", "quantity": 1.25, "expected": "1.250 kg" },
+    { "unit": "kg", "quantity": 0.025, "expected": "25 g" },
+    { "unit": "L", "quantity": 0.325, "expected": "325 mL" },
+    { "unit": "L", "quantity": 2, "expected": "2.000 L" },
+    { "unit": "pcs", "quantity": 2, "expected": "2 pcs" }
+  ],
+  "formatUsage": [
+    { "unit": "kg", "usagePerKg": 25, "expected": "25 g/kg" },
+    { "unit": "L", "usagePerKg": 30, "expected": "30 mL/kg" },
+    { "unit": "pcs", "usagePerKg": 0.25, "expected": "0.25 pcs/kg" }
+  ],
+  "shortage": [
+    { "item": "Fabric conditioner", "unit": "L", "needed": 0.13, "onHand": 0.08, "expected": "Fabric conditioner: needs 130 mL, only 80 mL recorded" }
+  ]
+}

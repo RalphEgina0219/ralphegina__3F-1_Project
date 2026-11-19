@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
-/** cash or gcash. */
+/** cash, gcash or maya. */
 #[Fillable(['code', 'label'])]
 #[WithoutTimestamps]
 class PaymentMethod extends Model

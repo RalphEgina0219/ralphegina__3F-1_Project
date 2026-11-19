@@ -20,6 +20,7 @@ export const newOrderSchema = z
         }),
       )
       .min(1, 'Add at least one service.'),
+    wash_type_id: z.number({ error: 'Choose a wash type.' }).int().positive('Choose a wash type.'),
     addons: z.array(z.number()),
     promised_at: z
       .string()
@@ -29,7 +30,8 @@ export const newOrderSchema = z
         'Estimated completion cannot be in the past.',
       ),
     notes: z.string().trim(),
-    payment_method: z.enum(['cash', 'gcash', 'later']),
+    // 'later' is the form's value for Pay at pickup: no payment is recorded now.
+    payment_method: z.enum(['cash', 'gcash', 'maya', 'later']),
     amount: amountOrEmpty,
     reference: z.string().trim(),
   })
@@ -39,14 +41,14 @@ export const newOrderSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['amount'],
-        message: 'Enter the amount received, or choose Pay later.',
+        message: 'Enter the amount received, or choose Pay at pickup.',
       });
     }
-    if (value.payment_method === 'gcash' && !value.reference) {
+    if ((value.payment_method === 'gcash' || value.payment_method === 'maya') && !value.reference) {
       ctx.addIssue({
         code: 'custom',
         path: ['reference'],
-        message: 'Enter the GCash reference number.',
+        message: `Enter the ${value.payment_method === 'maya' ? 'Maya' : 'GCash'} reference number.`,
       });
     }
   });

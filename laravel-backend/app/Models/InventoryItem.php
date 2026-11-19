@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class InventoryItem extends Model
 {
     /** The signed sum of the movements, as a correlated subquery. */
-    public const ON_HAND_SQL = "(SELECT COALESCE(SUM(CASE im.type WHEN 'out' THEN -ABS(im.quantity) WHEN 'in' THEN ABS(im.quantity) ELSE im.quantity END), 0) FROM inventory_movements im WHERE im.item_id = inventory_items.id)";
+    public const ON_HAND_SQL = "(SELECT COALESCE(SUM(CASE im.type WHEN 'out' THEN -ABS(im.quantity) WHEN 'usage' THEN -ABS(im.quantity) WHEN 'in' THEN ABS(im.quantity) ELSE im.quantity END), 0) FROM inventory_movements im WHERE im.item_id = inventory_items.id)";
 
     protected function casts(): array
     {
@@ -52,7 +52,7 @@ class InventoryItem extends Model
 
         return InventoryRules::round((float) DB::table('inventory_movements')
             ->where('item_id', $this->id)
-            ->selectRaw("COALESCE(SUM(CASE type WHEN 'out' THEN -ABS(quantity) WHEN 'in' THEN ABS(quantity) ELSE quantity END), 0) AS total")
+            ->selectRaw("COALESCE(SUM(CASE type WHEN 'out' THEN -ABS(quantity) WHEN 'usage' THEN -ABS(quantity) WHEN 'in' THEN ABS(quantity) ELSE quantity END), 0) AS total")
             ->value('total'));
     }
 

@@ -6,6 +6,7 @@ import { NavTabs } from '@/components/ui/Tabs';
 
 const TABS = [
   { to: '/settings/services', label: 'Services & rates' },
+  { to: '/settings/pricing', label: 'Pricing & Usage' },
   { to: '/settings/users', label: 'Users & roles' },
   { to: '/settings/baskets', label: 'Baskets' },
   { to: '/settings/shop', label: 'Shop profile' },

@@ -45,6 +45,8 @@ function order(partial: Partial<OrderFact> & { received_at: string }): OrderFact
     customer_id: 1,
     customer_name: 'Maria Santos',
     barangay: 'Poblacion',
+    wash_type_id: 1,
+    wash_type: 'Regular washing',
     received_by: 2,
     promised_at: partial.received_at,
     ready_at: null,
@@ -193,7 +195,7 @@ describe('money', () => {
     expect(revenue[0]?.share).toBeCloseTo(21000 / 26000);
   });
 
-  it('splits cash and GCash, both always listed', () => {
+  it('splits cash, GCash and Maya, all always listed', () => {
     const o = order({ received_at: at('2026-11-02', 9) });
     const mix = paymentMix(
       [
@@ -210,8 +212,9 @@ describe('money', () => {
     expect(mix.map((m) => [m.key, m.value, m.share])).toEqual([
       ['cash', 7000, 0.7],
       ['gcash', 3000, 0.3],
+      ['maya', 0, 0],
     ]);
-    expect(paymentMix([], WEEK).map((m) => m.share)).toEqual([0, 0]);
+    expect(paymentMix([], WEEK).map((m) => m.share)).toEqual([0, 0, 0]);
   });
 
   it('knows what was owed at the end of each day', () => {

@@ -151,6 +151,7 @@ export const adminHandlers = [
       opening_hours: asString(body.opening_hours),
       receipt_footer: asString(body.receipt_footer),
       claim_policy_days: days ?? 0,
+      block_orders_on_low_soap: before.block_orders_on_low_soap,
     };
     audit(user.id, 'settings.updated', 'shop_settings', 1, { ...database.shop_settings }, before);
     return ok(database.shop_settings);

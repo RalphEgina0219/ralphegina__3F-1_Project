@@ -69,7 +69,13 @@ export function serviceColor(serviceId: number | string): string {
   return index >= 0 ? (CATEGORICAL[index] as string) : OTHER_COLOR;
 }
 
-export const METHOD_COLORS = { cash: CATEGORICAL[0], gcash: CATEGORICAL[1] } as const;
+/** Cash and GCash keep their colours; Maya takes the next one in the fixed palette. */
+export const METHOD_COLORS = {
+  cash: CATEGORICAL[0],
+  gcash: CATEGORICAL[1],
+  maya: CATEGORICAL[2],
+} as const;
+export type MethodKey = keyof typeof METHOD_COLORS;
 export const CUSTOMER_COLORS = { new: CATEGORICAL[0], returning: CATEGORICAL[1] } as const;
 
 /** Colour for the n-th entry of a list without a fixed entity colour (barangays, staff). */

@@ -6,8 +6,10 @@ import {
   ALERT,
   CUSTOMER_COLORS,
   METHOD_COLORS,
+  type MethodKey,
   STAGE_COLORS,
   UI,
+  categoricalAt,
   serviceColor,
 } from '@/components/charts/chartTheme';
 import ColumnChart from '@/components/charts/ColumnChart';
@@ -30,6 +32,7 @@ import { formatDayLong, formatDayShort, formatRange, rangeLength } from '@/lib/a
 import type { CategoryValue, TimePoint } from '@/lib/analytics/types';
 import { formatPeso } from '@/lib/money';
 import { STATUS_META } from '@/lib/status';
+import { formatAmount } from '@/lib/wash';
 import type { StatusCode } from '@/types/entities';
 
 interface QueryLike<K extends ReportKind> {
@@ -164,11 +167,11 @@ export function SalesCharts({ query }: { query: QueryLike<'sales'> }) {
       <ChartCard
         className={half}
         title="By payment method"
-        subtitle={`Cash and GCash collected, ${period}`}
+        subtitle={`Cash, GCash and Maya collected, ${period}`}
         legend={mix.map((m) => ({
           key: m.key,
           label: m.label,
-          color: METHOD_COLORS[m.key as 'cash' | 'gcash'],
+          color: METHOD_COLORS[m.key as MethodKey],
           detail: `${formatPeso(m.value)} · ${shareLabel(m.share)}`,
         }))}
         status={chartStatus(query, total(mix) === 0)}
@@ -188,7 +191,7 @@ export function SalesCharts({ query }: { query: QueryLike<'sales'> }) {
             label: m.label,
             value: m.value,
             share: m.share,
-            color: METHOD_COLORS[m.key as 'cash' | 'gcash'],
+            color: METHOD_COLORS[m.key as MethodKey],
           }))}
         />
       </ChartCard>
@@ -203,6 +206,7 @@ export function OrdersCharts({ query }: { query: QueryLike<'orders'> }) {
   const orders = s?.orders ?? [];
   const status = s?.status ?? [];
   const turnaround = s?.turnaround ?? [];
+  const byWash = s?.by_wash_type ?? [];
   return (
     <>
       <ChartCard
@@ -268,6 +272,30 @@ export function OrdersCharts({ query }: { query: QueryLike<'orders'> }) {
       </ChartCard>
       <ChartCard
         className={half}
+        title="Orders by wash type"
+        subtitle={`Orders received ${period}, by how the laundry is washed`}
+        status={chartStatus(query, total(byWash) === 0)}
+        skeleton="bars"
+        summary={categorySummary('Orders by wash type', byWash, 'count')}
+        source="From recorded orders"
+        table={categoryTable(byWash, 'Wash type', 'Orders', 'count')}
+        filename={chartFilename('Orders by wash type', range)}
+        {...common}
+      >
+        <HBarChart
+          format="count"
+          data={byWash.map((i, index) => ({
+            key: i.key,
+            label: i.label,
+            value: i.value,
+            share: i.share,
+            color: categoricalAt(index),
+            detail: `${i.value} · ${shareLabel(i.share)}`,
+          }))}
+        />
+      </ChartCard>
+      <ChartCard
+        className={half}
         title="Average turnaround"
         subtitle={`Hours from Received to Ready, by day ready, ${period}`}
         legend={[
@@ -324,7 +352,7 @@ export function PaymentsCharts({ query }: { query: QueryLike<'payments'> }) {
     ? Math.round((collected.collected / collected.billed) * 100)
     : 0;
   const sumAll = collections.reduce(
-    (sum, p) => sum + (p.values.cash ?? 0) + (p.values.gcash ?? 0),
+    (sum, p) => sum + (p.values.cash ?? 0) + (p.values.gcash ?? 0) + (p.values.maya ?? 0),
     0,
   );
   return (
@@ -332,20 +360,23 @@ export function PaymentsCharts({ query }: { query: QueryLike<'payments'> }) {
       <ChartCard
         className={wide}
         title="Collections per day"
-        subtitle={`Cash and GCash collected each day, ${period}`}
+        subtitle={`Cash, GCash and Maya collected each day, ${period}`}
         headline={formatValue(sumAll, 'money')}
         delta={compare ? { pct: kpiDelta(query.data?.kpis, 'collected'), days } : undefined}
         legend={[
           { key: 'cash', label: 'Cash', color: METHOD_COLORS.cash },
           { key: 'gcash', label: 'GCash', color: METHOD_COLORS.gcash },
+          { key: 'maya', label: 'Maya', color: METHOD_COLORS.maya },
         ]}
         status={chartStatus(query, sumAll === 0)}
         emptyTitle="No payments in this period"
         skeleton="columns"
         summary={`Collections per day: ${formatPeso(sumAll)} in total, cash ${formatPeso(
           collections.reduce((a, p) => a + (p.values.cash ?? 0), 0),
-        )} and GCash ${formatPeso(
+        )}, GCash ${formatPeso(
           collections.reduce((a, p) => a + (p.values.gcash ?? 0), 0),
+        )} and Maya ${formatPeso(
+          collections.reduce((a, p) => a + (p.values.maya ?? 0), 0),
         )}, over ${collections.length} days.`}
         source="From recorded payments"
         table={{
@@ -353,11 +384,13 @@ export function PaymentsCharts({ query }: { query: QueryLike<'payments'> }) {
             { key: 'date', label: 'Date' },
             { key: 'cash', label: 'Cash', format: 'money' },
             { key: 'gcash', label: 'GCash', format: 'money' },
+            { key: 'maya', label: 'Maya', format: 'money' },
           ],
           rows: collections.map((p) => ({
             date: formatDayLong(p.key),
             cash: p.values.cash ?? 0,
             gcash: p.values.gcash ?? 0,
+            maya: p.values.maya ?? 0,
           })),
         }}
         filename={chartFilename('Collections per day', range)}
@@ -368,6 +401,7 @@ export function PaymentsCharts({ query }: { query: QueryLike<'payments'> }) {
           series={[
             { key: 'cash', label: 'Cash', color: METHOD_COLORS.cash },
             { key: 'gcash', label: 'GCash', color: METHOD_COLORS.gcash },
+            { key: 'maya', label: 'Maya', color: METHOD_COLORS.maya },
           ]}
           data={collections.map((p) => ({
             key: p.key,
@@ -712,6 +746,10 @@ export function InventoryCharts({
   const levels = s?.levels ?? [];
   const usage = s?.usage.find((u) => u.item_id === itemId) ?? s?.usage[0];
   const points = usage?.points ?? [];
+  const soapItem =
+    s?.soap_by_wash_type.find((u) => u.item_id === itemId) ?? s?.soap_by_wash_type[0];
+  const source = s?.soap_by_source.find((u) => u.item_id === (soapItem?.item_id ?? usage?.item_id));
+  const topSoaps = s?.top_soaps ?? [];
   return (
     <>
       <ChartCard
@@ -802,6 +840,119 @@ export function InventoryCharts({
           series={[{ key: 'value', label: usage?.label ?? 'Use', color: UI.flow, area: true }]}
           format="number"
           previousKey={compare ? 'previous' : undefined}
+        />
+      </ChartCard>
+      <ChartCard
+        className={half}
+        title={`Used by orders: ${soapItem?.label ?? 'soap'}`}
+        subtitle={`${soapItem?.unit ?? 'Units'} deducted by orders, by wash type, ${period}. Pick another item in the filters.`}
+        status={chartStatus(query, !soapItem)}
+        emptyTitle="No order used soap in this period"
+        skeleton="bars"
+        summary={`${soapItem?.label ?? 'Soap'} used by orders ${period}: ${formatAmount(soapItem?.unit ?? '', soapItem?.total ?? 0)}.`}
+        source="From soap usage movements"
+        table={{
+          columns: [
+            { key: 'label', label: 'Wash type' },
+            { key: 'value', label: `Used (${soapItem?.unit ?? ''})`, format: 'number' },
+            { key: 'share', label: 'Share', format: 'percent' },
+          ],
+          rows: (soapItem?.points ?? []).map((p) => ({
+            label: p.label,
+            value: p.value,
+            share: Math.round(p.share * 1000) / 10,
+          })),
+        }}
+        filename={chartFilename(`Soap by wash type ${soapItem?.label ?? ''}`, range)}
+        {...common}
+      >
+        <HBarChart
+          format="number"
+          data={(soapItem?.points ?? []).map((p, index) => ({
+            key: p.key,
+            label: p.label,
+            value: p.value,
+            share: p.share,
+            color: categoricalAt(index),
+            detail: formatAmount(soapItem?.unit ?? '', p.value),
+          }))}
+        />
+      </ChartCard>
+      <ChartCard
+        className={half}
+        title="Top soaps used"
+        subtitle={`Soaps used by the most orders, ${period}`}
+        status={chartStatus(query, topSoaps.length === 0)}
+        emptyTitle="No order used soap in this period"
+        skeleton="bars"
+        summary={`Top soaps used ${period}: ${topSoaps.map((t) => `${t.label} in ${t.value} orders`).join(', ')}.`}
+        source="From soap usage movements"
+        table={{
+          columns: [
+            { key: 'label', label: 'Soap' },
+            { key: 'value', label: 'Orders', format: 'count' },
+            { key: 'amount', label: 'Used', format: 'text' },
+          ],
+          rows: topSoaps.map((t) => ({
+            label: t.label,
+            value: t.value,
+            amount: formatAmount(t.unit, t.amount),
+          })),
+        }}
+        filename={chartFilename('Top soaps used', range)}
+        {...common}
+      >
+        <HBarChart
+          format="count"
+          data={topSoaps.map((t, index) => ({
+            key: t.key,
+            label: t.label,
+            value: t.value,
+            color: categoricalAt(index),
+            detail: `${t.value} orders · ${formatAmount(t.unit, t.amount)}`,
+          }))}
+        />
+      </ChartCard>
+      <ChartCard
+        className={wide}
+        title={`Orders vs. manual stock-outs: ${source?.label ?? 'supplies'}`}
+        subtitle={`${source?.unit ?? 'Units'} used ${period}: deducted by orders, and taken out by hand`}
+        status={chartStatus(query, !source || source.orders + source.manual === 0)}
+        emptyTitle="Nothing used in this period"
+        skeleton="bars"
+        summary={`${source?.label ?? 'Supply'}: ${formatAmount(source?.unit ?? '', source?.orders ?? 0)} used by orders and ${formatAmount(source?.unit ?? '', source?.manual ?? 0)} in manual stock-outs ${period}.`}
+        source="From stock movements"
+        table={{
+          columns: [
+            { key: 'label', label: 'Used by' },
+            { key: 'value', label: `Quantity (${source?.unit ?? ''})`, format: 'number' },
+          ],
+          rows: [
+            { label: 'Orders', value: source?.orders ?? 0 },
+            { label: 'Manual stock-outs', value: source?.manual ?? 0 },
+          ],
+        }}
+        filename={chartFilename(`Orders vs manual ${source?.label ?? ''}`, range)}
+        {...common}
+      >
+        <HBarChart
+          format="number"
+          data={[
+            {
+              key: 'orders',
+              label: 'Used by orders',
+              value: source?.orders ?? 0,
+              color: categoricalAt(0),
+              detail: formatAmount(source?.unit ?? '', source?.orders ?? 0),
+            },
+            {
+              key: 'manual',
+              label: 'Manual stock-outs',
+              value: source?.manual ?? 0,
+              color: categoricalAt(1),
+              detail: formatAmount(source?.unit ?? '', source?.manual ?? 0),
+            },
+          ]}
         />
       </ChartCard>
     </>

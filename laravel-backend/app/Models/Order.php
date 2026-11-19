@@ -6,6 +6,7 @@ use App\Models\Concerns\HasQueryFilter;
 use App\Support\Billing;
 use App\Support\Iso;
 use App\Support\StatusRules;
+use App\Support\WashRules;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,13 +19,19 @@ use Illuminate\Support\Facades\DB;
  * A laundry transaction. No totals are stored: they come from items and payments.
  * Orders are never deleted; a completed order is read-only.
  */
-#[Fillable(['order_number', 'customer_id', 'current_status_id', 'received_by', 'received_at', 'promised_at', 'released_at', 'notes'])]
+#[Fillable(['order_number', 'customer_id', 'current_status_id', 'received_by', 'wash_type_id', 'wash_surcharge_per_kg_cents', 'received_at', 'promised_at', 'released_at', 'notes'])]
 class Order extends Model
 {
     use HasQueryFilter;
 
-    /** The order's total, as a correlated subquery on `orders`. */
-    public const TOTAL_SQL = '(SELECT COALESCE(SUM(oi.subtotal_cents), 0) FROM order_items oi WHERE oi.order_id = orders.id)';
+    /**
+     * The order's total, as a correlated subquery on `orders`: the lines plus the wash type's
+     * surcharge (frozen per-kg rate × the weight of the per-kg lines; only those have a weight).
+     */
+    public const TOTAL_SQL = '(SELECT COALESCE(SUM(oi.subtotal_cents), 0) + ROUND(COALESCE(SUM(oi.weight_kg), 0) * orders.wash_surcharge_per_kg_cents) FROM order_items oi WHERE oi.order_id = orders.id)';
+
+    /** Just the wash type surcharge, for reports that show it as its own category. */
+    public const WASH_SURCHARGE_SQL = '(SELECT ROUND(COALESCE(SUM(oi.weight_kg), 0) * orders.wash_surcharge_per_kg_cents) FROM order_items oi WHERE oi.order_id = orders.id)';
 
     /** Paid so far, voided payments excluded. */
     public const PAID_SQL = '(SELECT COALESCE(SUM(op.amount_cents), 0) FROM payments op WHERE op.order_id = orders.id AND op.voided_at IS NULL)';
@@ -47,6 +54,17 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function washType(): BelongsTo
+    {
+        return $this->belongsTo(WashType::class);
+    }
+
+    /** The soap this order deducted from stock (inventory movements of type usage). */
+    public function usageMovements(): HasMany
+    {
+        return $this->hasMany(InventoryMovement::class)->where('type', InventoryMovement::USAGE)->orderBy('id');
     }
 
     public function status(): BelongsTo
@@ -88,10 +106,10 @@ class Order extends Model
     }
 
     /** What a list row shows (the frontend's OrderDto). */
-    public const LIST_INCLUDES = ['customer', 'baskets', 'items', 'receivedBy'];
+    public const LIST_INCLUDES = ['customer', 'baskets', 'items', 'receivedBy', 'washType'];
 
     /** What the order page shows (OrderDetailDto). */
-    public const DETAIL_INCLUDES = ['customer', 'baskets', 'items', 'receivedBy', 'payments', 'statusHistory', 'basketHistory'];
+    public const DETAIL_INCLUDES = ['customer', 'baskets', 'items', 'receivedBy', 'washType', 'payments', 'statusHistory', 'basketHistory', 'soapUsage'];
 
     /**
      * The Eloquent relations behind each ?include= name, eager loaded in a fixed number of queries.
@@ -106,6 +124,8 @@ class Order extends Model
             'baskets' => ['baskets'],
             'items' => ['items.service'],
             'receivedBy' => ['receivedBy.role'],
+            'washType' => ['washType'],
+            'soapUsage' => ['usageMovements.item.unit'],
             'payments' => [
                 'payments' => fn ($q) => $q->orderByDesc('paid_at')->orderByDesc('id'),
                 'payments.method', 'payments.receivedBy.role', 'payments.voidedBy.role',
@@ -173,9 +193,28 @@ class Order extends Model
             return (int) $this->attributes['total_cents'];
         }
 
-        return $this->relationLoaded('items')
+        $lines = $this->relationLoaded('items')
             ? Billing::orderTotalCents($this->items->pluck('subtotal_cents'))
             : (int) $this->items()->sum('subtotal_cents');
+
+        return $lines + $this->washSurchargeCents();
+    }
+
+    /** The weight of the per-kg lines in tenths of a kilo (only per-kg lines have a weight). */
+    public function perKgTenths(): int
+    {
+        $items = $this->relationLoaded('items') ? $this->items : $this->items()->get(['weight_kg']);
+
+        return WashRules::perKgTenths($items->map(fn ($item) => [
+            'pricing_type' => $item->weight_kg === null ? 'other' : 'per_kg',
+            'weight_kg' => $item->weight_kg,
+        ]));
+    }
+
+    /** Wash type surcharge: the frozen per-kg rate × the per-kg weight. */
+    public function washSurchargeCents(): int
+    {
+        return WashRules::surchargeCents($this->perKgTenths(), (int) $this->wash_surcharge_per_kg_cents);
     }
 
     public function paidCents(): int

@@ -37,6 +37,7 @@ const METHOD_OPTIONS = [
   { value: 'all', label: 'All methods' },
   { value: 'cash', label: 'Cash' },
   { value: 'gcash', label: 'GCash' },
+  { value: 'maya', label: 'Maya' },
 ];
 
 function readyLabel(order: OrderDto) {
@@ -336,11 +337,12 @@ export default function PaymentsPage() {
           hint={paid ? `${paid.count} ${paid.count === 1 ? 'payment' : 'payments'}` : undefined}
         />
         <KpiCard
-          label="Cash · GCash"
+          label="Cash · GCash · Maya"
           value={
             paid ? (
               <>
-                <Money cents={paid.cash_cents} whole /> · <Money cents={paid.gcash_cents} whole />
+                <Money cents={paid.cash_cents} whole /> · <Money cents={paid.gcash_cents} whole /> ·{' '}
+                <Money cents={paid.maya_cents} whole />
               </>
             ) : (
               <Skeleton className="h-8 w-40" />

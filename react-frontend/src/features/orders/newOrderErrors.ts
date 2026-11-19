@@ -16,7 +16,11 @@ export function newOrderField(field: string, rowCount: number): string | null {
     // The method and the amount share one message line, under the amount.
     return 'amount';
   }
-  if (['customer_id', 'basket_ids', 'items', 'promised_at', 'notes'].includes(field)) return field;
+  if (
+    ['customer_id', 'basket_ids', 'wash_type_id', 'items', 'promised_at', 'notes'].includes(field)
+  ) {
+    return field;
+  }
   return null;
 }
 
@@ -24,6 +28,6 @@ export function newOrderField(field: string, rowCount: number): string | null {
 export function stepOfField(name: string): number {
   if (name === 'customer_id') return 1;
   if (name === 'basket_ids') return 2;
-  if (name === 'items' || name.startsWith('items.')) return 3;
+  if (name === 'items' || name.startsWith('items.') || name === 'wash_type_id') return 3;
   return 4;
 }

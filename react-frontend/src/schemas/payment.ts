@@ -6,7 +6,7 @@ export function paymentSchema(balanceCents: number) {
   return z
     .object({
       amount: z.string(),
-      method: z.enum(['cash', 'gcash']),
+      method: z.enum(['cash', 'gcash', 'maya']),
       reference: z.string().trim(),
     })
     .superRefine((value, ctx) => {
@@ -20,11 +20,11 @@ export function paymentSchema(balanceCents: number) {
           message: `The amount cannot be more than the ${formatMoney(balanceCents)} balance.`,
         });
       }
-      if (value.method === 'gcash' && !value.reference) {
+      if ((value.method === 'gcash' || value.method === 'maya') && !value.reference) {
         ctx.addIssue({
           code: 'custom',
           path: ['reference'],
-          message: 'Enter the GCash reference number.',
+          message: `Enter the ${value.method === 'maya' ? 'Maya' : 'GCash'} reference number.`,
         });
       }
     });
@@ -32,6 +32,6 @@ export function paymentSchema(balanceCents: number) {
 
 export interface PaymentForm {
   amount: string;
-  method: 'cash' | 'gcash';
+  method: 'cash' | 'gcash' | 'maya';
   reference: string;
 }

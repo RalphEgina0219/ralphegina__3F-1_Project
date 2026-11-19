@@ -6,6 +6,7 @@ import { cn } from '@/lib/cn';
 import { formatDateTime, formatRelativeDay } from '@/lib/dates';
 import { formatKg, formatPhone, itemQuantityLabel, itemRateSuffix } from '@/lib/format';
 import { formatMoney } from '@/lib/money';
+import { washBillLine } from '@/lib/wash';
 import type { OrderSummaryData } from '@/types/api';
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -30,6 +31,7 @@ export function OrderSummary({
 }) {
   const payments = summary.payments.filter((payment) => !payment.voided_at);
   const completed = summary.status === 'released';
+  const washName = summary.wash_type?.name ?? summary.wash_type_name ?? 'Regular washing';
 
   return (
     <Card className={cn('p-4 md:p-5', className)}>
@@ -59,6 +61,7 @@ export function OrderSummary({
             {formatPhone(summary.customer.contact_number)}
           </span>
         </Row>
+        <Row label="Wash type">{washName}</Row>
         <Row label={summary.baskets.length === 1 ? 'Basket' : 'Baskets'}>
           {summary.baskets.length > 0 ? (
             <Mono>{summary.baskets.map((b) => b.basket_number).join(', ')}</Mono>
@@ -116,6 +119,31 @@ export function OrderSummary({
                 </tr>
               );
             })}
+            <tr className="border-b border-line" data-testid="wash-type-line">
+              <td colSpan={3} className="py-2.5 pr-2 font-semibold max-sm:hidden">
+                Wash type:{' '}
+                {washBillLine(
+                  washName,
+                  summary.wash_surcharge_per_kg_cents,
+                  Math.round(summary.per_kg_weight_kg * 10),
+                  formatMoney,
+                )}
+              </td>
+              <td className="py-2.5 pr-2 font-semibold sm:hidden">
+                Wash type: {washName}
+                <span className="block text-xs font-normal text-muted">
+                  {washBillLine(
+                    '',
+                    summary.wash_surcharge_per_kg_cents,
+                    Math.round(summary.per_kg_weight_kg * 10),
+                    formatMoney,
+                  ).replace(/^ — /, '')}
+                </span>
+              </td>
+              <td className="py-2.5 pl-2 text-right">
+                <Money cents={summary.wash_surcharge_cents} />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -162,7 +190,7 @@ export function OrderSummary({
                   {payment.reference_number && (
                     <>
                       {' '}
-                      · GCash <Mono>{payment.reference_number}</Mono>
+                      · {payment.method_label} <Mono>{payment.reference_number}</Mono>
                     </>
                   )}
                 </p>

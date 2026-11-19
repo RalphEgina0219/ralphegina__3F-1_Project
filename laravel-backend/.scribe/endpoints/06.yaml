@@ -1,70 +1,23 @@
-name: Baskets
+name: Services
 description: |-
 
-  The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+  The price list. Changing a rate never changes old orders: their prices were frozen.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/baskets/available
+    uri: api/v1/services
     metadata:
       custom: []
-      groupName: Baskets
+      groupName: Services
       groupDescription: |-
 
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'List the baskets free for a new order'
+      title: 'List services'
       description: ''
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":[{"type":"basket","id":3,"attributes":{"basketNumber":"BSK-0003","qrToken":"3t5LslevO5v4sX4q8Z1VGEsj2olOH5fK","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":34,"lastUsedAt":"2026-11-09T09:39:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/3"}},{"type":"basket","id":6,"attributes":{"basketNumber":"BSK-0006","qrToken":"F5kPnAw7iL4vrHdbT-aKtkSgw99jFas4","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":31,"lastUsedAt":"2026-11-08T04:07:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/6"}},{"type":"basket","id":9,"attributes":{"basketNumber":"BSK-0009","qrToken":"LxpTBVMHh-92wi__tYB1a5vfMx5UdQTb","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":33,"lastUsedAt":"2026-11-08T04:07:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/9"}},{"type":"basket","id":14,"attributes":{"basketNumber":"BSK-0014","qrToken":"vHYXeqvYPr79K4ZzGcWuU3e-jla7E_1w","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-08T07:10:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/14"}},{"type":"basket","id":17,"attributes":{"basketNumber":"BSK-0017","qrToken":"ajnGhf-hRi1f3ZhEd7WlK2ibpY0uAiNR","label":"Blue, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":36,"lastUsedAt":"2026-11-08T07:18:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/17"}},{"type":"basket","id":18,"attributes":{"basketNumber":"BSK-0018","qrToken":"v9z_BjI_8X26ncs8-YcY5CSnfKV4ejgp","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":30,"lastUsedAt":"2026-11-08T07:18:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/18"}},{"type":"basket","id":36,"attributes":{"basketNumber":"BSK-0036","qrToken":"VvujhhamJc7JlbCH5KbmGf1GuSHTsoPD","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-06T23:31:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/36"}},{"type":"basket","id":37,"attributes":{"basketNumber":"BSK-0037","qrToken":"dAGh8g6altpAsydEPl-lJT7yN09D5A5H","label":"Blue, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":35,"lastUsedAt":"2026-11-06T23:43:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/37"}},{"type":"basket","id":39,"attributes":{"basketNumber":"BSK-0039","qrToken":"ubttv-Hbnwcu-QQXSOrolTn2cWqy29aA","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":29,"lastUsedAt":"2026-11-06T23:49:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/39"}},{"type":"basket","id":40,"attributes":{"basketNumber":"BSK-0040","qrToken":"E_PXtiwVN7h_nXI-WYh8eRZ0bS2EHLbg","label":"Red, small","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":30,"lastUsedAt":"2026-11-08T10:44:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/40"}},{"type":"basket","id":41,"attributes":{"basketNumber":"BSK-0041","qrToken":"t3PQcRWcrt7DtjC3MrOSup3vzpP-ve2_","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":22,"lastUsedAt":"2026-11-08T23:21:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/41"}},{"type":"basket","id":42,"attributes":{"basketNumber":"BSK-0042","qrToken":"XSWBZiFUrh3Ci_-ve7kGMHZMT9_vXfIc","label":"Blue, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":28,"lastUsedAt":"2026-11-08T23:21:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/42"}},{"type":"basket","id":43,"attributes":{"basketNumber":"BSK-0043","qrToken":"nSnhpfcSzj69TpQnSIl4gtK4nLOPaFRO","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":27,"lastUsedAt":"2026-10-31T05:01:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/43"}},{"type":"basket","id":45,"attributes":{"basketNumber":"BSK-0045","qrToken":"XCrJxrvqV8OempMPtjXtkb_RjtTi-7ty","label":"Red, small","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":34,"lastUsedAt":"2026-11-09T00:55:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/45"}},{"type":"basket","id":46,"attributes":{"basketNumber":"BSK-0046","qrToken":"FBXV1cz0uR8yY0t-ElCrB_eA_YoSvCre","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":33,"lastUsedAt":"2026-11-09T00:55:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/46"}},{"type":"basket","id":47,"attributes":{"basketNumber":"BSK-0047","qrToken":"wbCiUX9jFlrJq0FvAb9XN0M9OXPE_xW2","label":"Blue, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":35,"lastUsedAt":"2026-11-09T00:59:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/47"}},{"type":"basket","id":48,"attributes":{"basketNumber":"BSK-0048","qrToken":"kbPiZjkzcwAHi5P8Wm36w23iBYvv1Rke","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":35,"lastUsedAt":"2026-11-09T02:46:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/48"}},{"type":"basket","id":49,"attributes":{"basketNumber":"BSK-0049","qrToken":"8qYFq-GgmNTkYBYacmiLixtC4r-a8wFe","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-09T03:20:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/49"}},{"type":"basket","id":50,"attributes":{"basketNumber":"BSK-0050","qrToken":"FOB7eqI5KRYh35vWFIl8DOr9kaxBNqRG","label":"Red, small","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":30,"lastUsedAt":"2026-11-09T03:20:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/50"}},{"type":"basket","id":51,"attributes":{"basketNumber":"BSK-0051","qrToken":"ZJnNgsUi7SxVl1x6w0zzwmtnqNx1bELD","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":30,"lastUsedAt":"2026-11-07T01:34:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/51"}},{"type":"basket","id":52,"attributes":{"basketNumber":"BSK-0052","qrToken":"QeTM9ax_JuHyBxkOgOtCBl1HkBklwTa7","label":"Blue, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-07T01:34:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/52"}},{"type":"basket","id":54,"attributes":{"basketNumber":"BSK-0054","qrToken":"SeZZ2mBTg-74mTThUrZdcPOTBC28Q5hO","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":33,"lastUsedAt":"2026-11-09T04:47:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/54"}},{"type":"basket","id":56,"attributes":{"basketNumber":"BSK-0056","qrToken":"QGsTvT-9SYl6IIecbn9Iu3E9bXw88_kH","label":"Blue, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-09T04:47:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/56"}},{"type":"basket","id":58,"attributes":{"basketNumber":"BSK-0058","qrToken":"fSsUS0uzA1vrZkigmCAX9N-DsptGMPdz","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":31,"lastUsedAt":"2026-11-09T05:05:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/58"}},{"type":"basket","id":59,"attributes":{"basketNumber":"BSK-0059","qrToken":"DTw3TgiVDHcLrgftF4DHswq3Klpml2WO","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":35,"lastUsedAt":"2026-11-09T05:21:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/59"}},{"type":"basket","id":63,"attributes":{"basketNumber":"BSK-0063","qrToken":"k-nNdNpkruiJyoIIWIXFPyuVyn6753s-","label":"Green, large","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":30,"lastUsedAt":"2026-11-09T08:07:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/63"}},{"type":"basket","id":64,"attributes":{"basketNumber":"BSK-0064","qrToken":"XjyMgsMzVKsXw0xiCUuaF0DuSFW68anx","label":"Yellow, medium","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-09T08:12:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/64"}},{"type":"basket","id":65,"attributes":{"basketNumber":"BSK-0065","qrToken":"mRQJiakggPcQmj9mW-JG13od7BCv77GF","label":"Red, small","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":37,"lastUsedAt":"2026-11-09T08:12:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/65"}},{"type":"basket","id":70,"attributes":{"basketNumber":"BSK-0070","qrToken":"8AgwSQMoI6qrXCKOQtDn1nBIbQ_prUl-","label":"Red, small","status":"available","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":null,"timesUsed":32,"lastUsedAt":"2026-11-08T01:07:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/70"}}]}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: api/v1/baskets
-    metadata:
-      custom: []
-      groupName: Baskets
-      groupDescription: |-
-
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'List baskets'
-      description: 'By number. `meta.counts` has the number of baskets in each status.'
       authenticated: true
       deprecated: false
     headers:
@@ -74,63 +27,27 @@ endpoints:
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
-      status:
+      active:
         custom: []
-        name: status
-        description: 'available, in_use or retired.'
+        name: active
+        description: 'Only active (1) or inactive (0) services.'
         required: false
-        example: available
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      search:
-        custom: []
-        name: search
-        description: 'Basket number, label or the order it holds.'
-        required: false
-        example: '0007'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      sort:
-        custom: []
-        name: sort
-        description: 'basketNumber, status or createdAt.'
-        required: false
-        example: basketNumber
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      page:
-        custom: []
-        name: page
-        description: 'The page number.'
-        required: false
-        example: 1
-        type: integer
+        example: true
+        type: boolean
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
     cleanQueryParameters:
-      status: available
-      search: '0007'
-      sort: basketNumber
-      page: 1
+      active: true
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":[],"links":{"first":"http:\/\/laundryflow.test\/api\/v1\/baskets?page=1","last":"http:\/\/laundryflow.test\/api\/v1\/baskets?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":null,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"http:\/\/laundryflow.test\/api\/v1\/baskets","per_page":20,"to":null,"total":0,"counts":{"available":29,"in_use":39,"retired":2}}}'
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -141,7 +58,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -149,19 +66,17 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/baskets
+    uri: api/v1/services
     metadata:
       custom: []
-      groupName: Baskets
+      groupName: Services
       groupDescription: |-
 
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Add baskets'
-      description: |-
-        1 to 100 at a time. Numbers continue after the highest ever issued; each basket gets its own
-        permanent 32-character QR token.
+      title: 'Add a service'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -177,8 +92,8 @@ endpoints:
         custom: []
         name: data
         description: ''
-        required: false
-        example: null
+        required: true
+        example: []
         type: object
         enumValues: []
         exampleWasSpecified: false
@@ -188,47 +103,98 @@ endpoints:
         custom: []
         name: data.attributes
         description: ''
-        required: false
-        example: null
+        required: true
+        example: []
         type: object
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.count:
+      data.attributes.name:
         custom: []
-        name: data.attributes.count
-        description: 'How many baskets to add (1–100). Must be at least 1. Must not be greater than 100.'
-        required: false
-        example: 10
-        type: integer
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
+        required: true
+        example: Wash-Dry-Fold
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.label:
+      data.attributes.description:
         custom: []
-        name: data.attributes.label
-        description: 'A label for all of them. Must not be greater than 100 characters.'
+        name: data.attributes.description
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 'Blue, large'
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
+      data.attributes.pricingType:
+        custom: []
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
+        required: true
+        example: per_kg
+        type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: true
+        example: 3500
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.minimumQty:
+        custom: []
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
+        required: false
+        example: 3.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          count: 10
-          label: 'Blue, large'
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
+          isActive: true
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -236,16 +202,16 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/v1/baskets/{id}'
+    uri: 'api/v1/services/{id}'
     metadata:
       custom: []
-      groupName: Baskets
+      groupName: Services
       groupDescription: |-
 
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Show a basket'
+      title: 'Show a service'
       description: ''
       authenticated: true
       deprecated: false
@@ -257,7 +223,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the basket.'
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -275,8 +241,8 @@ endpoints:
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":{"type":"basket","id":1,"attributes":{"basketNumber":"BSK-0001","qrToken":"EUB90MOU1lMdVeWqd6vKaX1CPg-5EaJu","label":"Blue, large","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":{"id":1605,"orderNumber":"LF-261108-0003"},"timesUsed":33,"lastUsedAt":"2026-11-08T01:35:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}}'
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -287,7 +253,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -295,16 +261,16 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/v1/baskets/{basket_id}'
+    uri: 'api/v1/services/{service_id}'
     metadata:
       custom: []
-      groupName: Baskets
+      groupName: Services
       groupDescription: |-
 
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: "Replace a basket's label and notes"
+      title: 'Replace a service (every field)'
       description: ''
       authenticated: true
       deprecated: false
@@ -313,10 +279,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      basket_id:
+      service_id:
         custom: []
-        name: basket_id
-        description: 'The ID of the basket.'
+        name: service_id
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -325,7 +291,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      basket_id: 1
+      service_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -351,40 +317,91 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.label:
+      data.attributes.name:
         custom: []
-        name: data.attributes.label
-        description: 'Must not be greater than 100 characters.'
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
+        required: true
+        example: Wash-Dry-Fold
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.description:
+        custom: []
+        name: data.attributes.description
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 'Green, large'
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.notes:
+      data.attributes.pricingType:
         custom: []
-        name: data.attributes.notes
-        description: 'Must not be greater than 255 characters.'
-        required: false
-        example: 'Handle taped'
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
+        required: true
+        example: per_kg
         type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: true
+        example: 3500
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.minimumQty:
+        custom: []
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
+        required: false
+        example: 3.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: true
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
         deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          label: 'Green, large'
-          notes: 'Handle taped'
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
+          isActive: true
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -392,16 +409,16 @@ endpoints:
     custom: []
     httpMethods:
       - PATCH
-    uri: 'api/v1/baskets/{id}'
+    uri: 'api/v1/services/{id}'
     metadata:
       custom: []
-      groupName: Baskets
+      groupName: Services
       groupDescription: |-
 
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: "Update a basket's label or notes"
+      title: 'Update a service (fields sent)'
       description: ''
       authenticated: true
       deprecated: false
@@ -413,7 +430,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the basket.'
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -448,223 +465,91 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.label:
+      data.attributes.name:
         custom: []
-        name: data.attributes.label
-        description: 'Must not be greater than 100 characters.'
+        name: data.attributes.name
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: false
-        example: 'Green, large'
+        example: Wash-Dry-Fold
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.description:
+        custom: []
+        name: data.attributes.description
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.notes:
+      data.attributes.pricingType:
         custom: []
-        name: data.attributes.notes
-        description: 'Must not be greater than 255 characters.'
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
         required: false
-        example: 'Handle taped'
+        example: per_kg
         type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: false
+        example: 3500
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.minimumQty:
+        custom: []
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
+        required: false
+        example: 3.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: true
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
         deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          label: 'Green, large'
-          notes: 'Handle taped'
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
+          isActive: true
     fileParameters: []
     responses: []
     responseFields: []
     auth:
       - headers
       - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/baskets/{basket_id}/retire'
-    metadata:
-      custom: []
-      groupName: Baskets
-      groupDescription: |-
-
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Retire a basket'
-      description: |-
-        For a lost or broken basket: kept with its history, its number never reused.
-        409 while it holds an order or when already retired.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      basket_id:
-        custom: []
-        name: basket_id
-        description: 'The ID of the basket.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      basket_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      data.attributes.reason:
-        custom: []
-        name: data.attributes.reason
-        description: 'Why it is retired.'
-        required: false
-        example: 'Cracked handle, replaced'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/v1/baskets/{basket_id}/history'
-    metadata:
-      custom: []
-      groupName: Baskets
-      groupDescription: |-
-
-        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
-      subgroup: ''
-      subgroupDescription: ''
-      title: "A basket's history"
-      description: 'Every order it held, newest first, 10 per page.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      basket_id:
-        custom: []
-        name: basket_id
-        description: 'The ID of the basket.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      basket_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":[{"type":"basketAssignment","id":2102,"attributes":{"orderNumber":"LF-261108-0003","customerName":"Erlinda Medina","assignedAt":"2026-11-08T01:35:00.000Z","releasedAt":null},"relationships":{"order":{"data":{"type":"order","id":1605},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1605"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"basketAssignment","id":2047,"attributes":{"orderNumber":"LF-261105-0015","customerName":"Gerald Yap","assignedAt":"2026-11-05T09:27:00.000Z","releasedAt":"2026-11-06T23:11:00.000Z"},"relationships":{"order":{"data":{"type":"order","id":1563},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1563"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"basketAssignment","id":1992,"attributes":{"orderNumber":"LF-261102-0013","customerName":"Pia Francisco","assignedAt":"2026-11-02T09:44:00.000Z","releasedAt":"2026-11-03T23:46:00.000Z"},"relationships":{"order":{"data":{"type":"order","id":1516},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1516"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":1,"attributes":{"name":"Liza Ramos","username":"liza.ramos","role":"admin"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/1"}}}},{"type":"basketAssignment","id":1956,"attributes":{"orderNumber":"LF-261101-0010","customerName":"Pia Francisco","assignedAt":"2026-11-01T01:50:00.000Z","releasedAt":"2026-11-02T04:51:18.000Z"},"relationships":{"order":{"data":{"type":"order","id":1489},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1489"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"basketAssignment","id":1847,"attributes":{"orderNumber":"LF-261027-0012","customerName":"Carmela Aquino","assignedAt":"2026-10-27T09:12:00.000Z","releasedAt":"2026-10-31T04:15:31.000Z"},"relationships":{"order":{"data":{"type":"order","id":1408},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1408"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"basketAssignment","id":1749,"attributes":{"orderNumber":"LF-261023-0009","customerName":"Alvin Manalo","assignedAt":"2026-10-23T05:20:00.000Z","releasedAt":"2026-10-25T07:04:34.000Z"},"relationships":{"order":{"data":{"type":"order","id":1336},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1336"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},{"type":"basketAssignment","id":1645,"attributes":{"orderNumber":"LF-261018-0008","customerName":"Norma Belmonte","assignedAt":"2026-10-18T01:23:00.000Z","releasedAt":"2026-10-20T23:30:00.000Z"},"relationships":{"order":{"data":{"type":"order","id":1256},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1256"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},{"type":"basketAssignment","id":1585,"attributes":{"orderNumber":"LF-261015-0005","customerName":"Kristine Mercado","assignedAt":"2026-10-15T00:36:00.000Z","releasedAt":"2026-10-17T01:54:08.000Z"},"relationships":{"order":{"data":{"type":"order","id":1207},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1207"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}},{"type":"basketAssignment","id":1540,"attributes":{"orderNumber":"LF-261012-0014","customerName":"Pia Francisco","assignedAt":"2026-10-12T07:39:00.000Z","releasedAt":"2026-10-14T02:54:10.000Z"},"relationships":{"order":{"data":{"type":"order","id":1170},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1170"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"basketAssignment","id":1456,"attributes":{"orderNumber":"LF-261009-0002","customerName":"Nestor Lagman","assignedAt":"2026-10-08T23:24:00.000Z","releasedAt":"2026-10-11T07:47:54.000Z"},"relationships":{"order":{"data":{"type":"order","id":1109},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1109"}},"basket":{"data":{"type":"basket","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1"}}},"includes":{"assignedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}}],"links":{"first":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=1","last":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=4","prev":null,"next":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=2"},"meta":{"current_page":1,"from":1,"last_page":4,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=1","label":"1","page":1,"active":true},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=2","label":"2","page":2,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=3","label":"3","page":3,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=4","label":"4","page":4,"active":false},{"url":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history?page=2","label":"Next &raquo;","page":2,"active":false}],"path":"http:\/\/laundryflow.test\/api\/v1\/baskets\/1\/history","per_page":10,"to":10,"total":33}}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - GET
-    uri: 'api/v1/scan/{code}'
-    metadata:
-      custom: []
-      groupName: Baskets
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Look up a scanned or typed code'
-      description: |-
-        `code` is a basket label URL (…/b/{token}), a bare token, a basket number (BSK-0007) or an
-        order number (LF-261108-0001). A basket answers with its active order (or null when it is
-        available, retired, or its last order is completed); an order number answers with the order.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      code:
-        custom: []
-        name: code
-        description: 'The scanned text.'
-        required: true
-        example: BSK-0007
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      code: BSK-0007
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        custom: []
-        status: 200
-        content: '{"data":{"type":"basket","basket":{"type":"basket","id":7,"attributes":{"basketNumber":"BSK-0007","qrToken":"C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT","label":"Blue, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z","currentOrder":{"id":1644,"orderNumber":"LF-261110-0001"},"timesUsed":31,"lastUsedAt":"2026-11-09T22:40:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/7"}},"activeOrder":{"type":"order","id":1644,"attributes":{"orderNumber":"LF-261110-0001","status":"washing","statusLabel":"Washing","statusSince":"2026-11-09T23:44:00.000Z","receivedAt":"2026-11-09T22:40:00.000Z","promisedAt":"2026-11-11T02:00:00.000Z","releasedAt":null,"notes":null,"totalCents":15500,"paidCents":15500,"balanceCents":0,"paymentStatus":"paid","isOverdue":false,"createdAt":"2026-11-09T22:40:00.000Z","updatedAt":"2026-11-09T23:44:00.000Z"},"relationships":{"customer":{"data":{"type":"customer","id":13},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/13"}},"receivedBy":{"data":{"type":"user","id":2},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1644"},"includes":{"customer":{"type":"customer","id":13,"attributes":{"fullName":"Nina Ramirez","contactNumber":"09198845120","barangayName":"Batangan","streetAddress":null,"ordersCount":5,"createdAt":"2026-07-17T00:30:00.000Z","updatedAt":"2026-07-17T00:30:00.000Z"},"relationships":{"barangay":{"data":{"type":"barangay","id":5}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/customers\/13"}},"baskets":[{"type":"basket","id":7,"attributes":{"basketNumber":"BSK-0007","qrToken":"C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT","label":"Blue, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/7"}}],"items":[{"type":"orderItem","id":2160,"attributes":{"weightKg":3,"quantity":null,"unitPriceCents":3500,"subtotalCents":10500,"serviceName":"Wash-Dry-Fold","pricingType":"per_kg"},"relationships":{"order":{"data":{"type":"order","id":1644}},"service":{"data":{"type":"service","id":1},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/1"}}}},{"type":"orderItem","id":2161,"attributes":{"weightKg":null,"quantity":1,"unitPriceCents":5000,"subtotalCents":5000,"serviceName":"Express (same day)","pricingType":"flat"},"relationships":{"order":{"data":{"type":"order","id":1644}},"service":{"data":{"type":"service","id":5},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/services\/5"}}}}],"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}},"payments":[{"type":"payment","id":2004,"attributes":{"method":"cash","methodLabel":"Cash","amountCents":15500,"referenceNumber":null,"receiptNumber":"OR-002204","paidAt":"2026-11-09T22:42:00.000Z","voidedAt":null,"voidReason":null},"relationships":{"order":{"data":{"type":"order","id":1644},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1644"}}},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/payments\/2004"},"includes":{"receivedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}},"voidedBy":null}}],"statusHistory":[{"type":"statusChange","id":9830,"attributes":{"fromStatus":"received","toStatus":"washing","note":null,"changedAt":"2026-11-09T23:44:00.000Z"},"includes":{"changedBy":{"type":"user","id":3,"attributes":{"name":"Aira Dimaculangan","username":"aira.d","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/3"}}}},{"type":"statusChange","id":9829,"attributes":{"fromStatus":null,"toStatus":"received","note":null,"changedAt":"2026-11-09T22:40:00.000Z"},"includes":{"changedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}}],"basketHistory":[{"type":"basketAssignment","id":2154,"attributes":{"assignedAt":"2026-11-09T22:40:00.000Z","releasedAt":null},"relationships":{"order":{"data":{"type":"order","id":1644},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/orders\/1644"}},"basket":{"data":{"type":"basket","id":7},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/7"}}},"includes":{"basket":{"type":"basket","id":7,"attributes":{"basketNumber":"BSK-0007","qrToken":"C_COcm7UUJ6ZchURwS7X5MAQW5qtfepT","label":"Blue, medium","status":"in_use","notes":null,"createdBy":1,"createdAt":"2026-07-13T01:00:00.000Z","updatedAt":"2026-07-13T01:00:00.000Z"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/baskets\/7"}},"assignedBy":{"type":"user","id":2,"attributes":{"name":"Kevin Manalo","username":"kevin.m","role":"staff"},"links":{"self":"http:\/\/laundryflow.test\/api\/v1\/users\/2"}}}}],"shop":{"type":"shopSettings","id":1,"attributes":{"name":"LaundryFlow","address":"Brgy. Poblacion, Bongabong, Oriental Mindoro","contactNumber":"[SHOP CONTACT NO.]","receiptFooter":"Salamat po! Unclaimed items after 30 days are the customer''s responsibility."}}}}},"message":"Basket found","status":200}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          x-ratelimit-limit: '120'
-          x-ratelimit-remaining: '119'
-          access-control-allow-origin: 'http://localhost:5173'
-          access-control-expose-headers: Retry-After
-        description: null
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer {YOUR_AUTH_KEY}'
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null

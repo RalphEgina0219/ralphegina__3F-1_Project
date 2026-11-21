@@ -20,7 +20,7 @@ final class PaymentRules
      * @param  array<string, mixed>  $payment  amountCents, paymentMethod, referenceNumber
      * @return array{errors: array<string, string>, values: array{amount_cents: int, method: string, reference_number: ?string}}
      */
-    public static function check(array $payment, int $balanceCents): array
+    public static function check(array $payment, int $balanceCents, ?array $allowed = null): array
     {
         $errors = [];
         $amount = $payment['amountCents'] ?? null;
@@ -39,6 +39,9 @@ final class PaymentRules
 
         if (! in_array($method, self::METHODS, true)) {
             $errors['paymentMethod'] = 'Choose Cash, GCash or Maya.';
+        } elseif ($allowed !== null && ! in_array($method, $allowed, true)) {
+            // The shop turned this method off in Settings > Branding & Appearance.
+            $errors['paymentMethod'] = self::LABELS[$method].' is turned off. Choose another way to pay.';
         }
 
         if (in_array($method, self::NEEDS_REFERENCE, true) && $reference === '') {

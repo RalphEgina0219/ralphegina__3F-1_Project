@@ -78,7 +78,7 @@ class PortalOrderResource extends ApiResource
                     'id' => $payment->id,
                     'attributes' => [
                         'paidAt' => $this->iso($payment->paid_at),
-                        'methodLabel' => $payment->method?->label ?? '',
+                        'methodLabel' => $payment->method?->shownLabel() ?? '',
                         'amountCents' => (int) $payment->amount_cents,
                         'referenceNumber' => $payment->reference_number,
                         'receiptNumber' => $payment->receipt_number,

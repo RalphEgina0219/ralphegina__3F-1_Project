@@ -13,19 +13,20 @@ final class BasketCodes
 
     private const ORDER_NUMBER = '/^LF-\d{6}-\d{4}$/i';
 
-    private const BASKET_NUMBER = '/^BSK-?(\d{1,6})$/i';
+    /** PREFIX-0007: any letters, because the shop chooses its own prefix (BSK by default). */
+    private const BASKET_NUMBER = '/^([A-Za-z]{2,8})-?(\d{1,6})$/';
 
     private const TOKEN_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
-    /** BSK-0001, BSK-0002, … */
-    public static function formatBasketNumber(int $sequence): string
+    /** BSK-0001, BSK-0002, … with the shop's prefix. */
+    public static function formatBasketNumber(int $sequence, string $prefix = 'BSK'): string
     {
-        return 'BSK-'.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
+        return strtoupper($prefix).'-'.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
 
     public static function basketSequence(string $basketNumber): int
     {
-        return (int) preg_replace('/^BSK-/i', '', $basketNumber);
+        return (int) preg_replace('/^\D+/', '', $basketNumber);
     }
 
     /** 32 URL-safe characters from a cryptographic source (64 symbols: no modulo bias). */
@@ -58,7 +59,7 @@ final class BasketCodes
         }
 
         if (preg_match(self::BASKET_NUMBER, $text, $basket)) {
-            return ['kind' => 'basket_number', 'value' => self::formatBasketNumber((int) $basket[1])];
+            return ['kind' => 'basket_number', 'value' => self::formatBasketNumber((int) $basket[2], $basket[1])];
         }
 
         if (preg_match('~/b/([A-Za-z0-9_-]{32})(?:[/?#]|$)~', $text, $url)) {

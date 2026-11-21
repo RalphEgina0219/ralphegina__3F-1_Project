@@ -42,7 +42,8 @@ final class StatusRules
 
     public static function label(string $status): string
     {
-        return self::LABELS[$status] ?? $status;
+        // The shop may have renamed a status (Settings > Branding); the codes never change.
+        return Branding::statusLabel($status);
     }
 
     public static function next(string $status): ?string

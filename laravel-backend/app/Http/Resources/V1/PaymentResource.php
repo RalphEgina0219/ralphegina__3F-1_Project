@@ -23,7 +23,7 @@ class PaymentResource extends ApiResource
                 'orderNumber' => $this->when($order !== null, fn () => $order->order_number),
                 'customerName' => $this->when($order?->relationLoaded('customer') ?? false, fn () => $order->customer?->full_name ?? ''),
                 'method' => $this->whenLoaded('method', fn () => $this->method->code),
-                'methodLabel' => $this->whenLoaded('method', fn () => $this->method->label),
+                'methodLabel' => $this->whenLoaded('method', fn () => $this->method->shownLabel()),
                 'amountCents' => (int) $this->amount_cents,
                 'referenceNumber' => $this->reference_number,
                 'receiptNumber' => $this->receipt_number,

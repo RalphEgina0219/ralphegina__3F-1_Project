@@ -144,7 +144,8 @@ export default defineConfig(async ({ mode, command }) => {
         // Mock builds emit a sw.js that only unregisters itself and clears its caches. It is never
         // registered by the app; it cleans up a Workbox worker left by an earlier real-API build.
         selfDestroying: useMocks,
-        includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
+        // Not the apple-touch icon: it follows the shop's branding (fetched when needed).
+        includeAssets: ['favicon.svg', 'favicon.ico', 'logo.svg'],
         // A real build has no static manifest: Laravel serves /manifest.webmanifest from the shop's
         // branding (name, colors, icons). Only the mock/demo build, which has no Laravel, ships one.
         manifest: !useMocks

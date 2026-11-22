@@ -41,7 +41,9 @@ test('only the Workbox worker registers, and it precaches the app shell', async 
   // The manifest and the icons follow the shop's branding (Laravel builds them), so the worker
   // never stores them: a changed logo or name must reach the next install.
   expect(precached).not.toContain('/manifest.webmanifest');
-  expect(precached.some((file) => /pwa-|maskable-icon|apple-touch-icon/.test(file))).toBe(false);
+  expect(precached.some((file) => /^\/(pwa-|maskable-icon|apple-touch-icon)/.test(file))).toBe(
+    false,
+  );
   expect(precached.some((file) => file.startsWith('/storage/'))).toBe(false);
   expect(precached.some((file) => /^\/assets\/index-.*\.js$/.test(file))).toBe(true);
   expect(precached.some((file) => /^\/assets\/.*\.css$/.test(file))).toBe(true);

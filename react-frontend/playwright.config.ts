@@ -40,7 +40,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `${VITE} build --mode demo --outDir dist-e2e/demo && ${VITE} preview --outDir dist-e2e/demo --port ${DEMO_PORT} --strictPort`,
+      command: `${VITE} build --mode demo --outDir dist-e2e/demo && ${VITE} preview --mode demo --outDir dist-e2e/demo --port ${DEMO_PORT} --strictPort`,
       url: `http://localhost:${DEMO_PORT}`,
       reuseExistingServer: false,
       timeout: 240_000,

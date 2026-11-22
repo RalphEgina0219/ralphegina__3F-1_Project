@@ -101,7 +101,8 @@ export function releaseBaskets(order: Order, at: string) {
   }
 }
 
-const NOT_RECOGNIZED = 'QR not recognized. Scan a LaundryFlow basket label.';
+const NOT_RECOGNIZED = () =>
+  `QR not recognized. Scan a ${db().branding.system_name} basket label.`;
 
 export const basketHandlers = [
   route('get', '/baskets', 'baskets.scan', ({ query }) => {
@@ -238,7 +239,7 @@ export const basketHandlers = [
   /** Resolves a basket label (token), a typed basket number or a typed order number. */
   route('get', '/scan/:code', 'baskets.scan', ({ params }) => {
     const input = parseScanInput(decodeURIComponent(params.code ?? ''));
-    if (!input) return fail(404, NOT_RECOGNIZED);
+    if (!input) return fail(404, NOT_RECOGNIZED());
 
     if (input.kind === 'order_number') {
       const order = db().orders.find((o) => o.order_number === input.value);
@@ -253,7 +254,7 @@ export const basketHandlers = [
     if (!basket) {
       return fail(
         404,
-        input.kind === 'token' ? NOT_RECOGNIZED : `No basket matches ${input.value}.`,
+        input.kind === 'token' ? NOT_RECOGNIZED() : `No basket matches ${input.value}.`,
       );
     }
     const active = activeAssignment(basket.id);

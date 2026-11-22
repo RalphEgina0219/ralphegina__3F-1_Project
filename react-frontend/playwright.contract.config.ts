@@ -26,7 +26,7 @@ export default defineConfig({
   projects: [
     { name: 'contract', testMatch: /(analytics\.demo|contract)\.spec\.ts$/ },
     // `npm run screenshots:branding`: not part of the contract run.
-    { name: 'shots', testMatch: /branding\.screenshots\.spec\.ts$/ },
+    { name: 'shots', testMatch: /branding-shots\.spec\.ts$/ },
   ],
   webServer: [
     {

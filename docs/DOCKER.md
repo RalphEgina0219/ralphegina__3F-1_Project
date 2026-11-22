@@ -242,6 +242,10 @@ start Docker Desktop. If Docker Desktop asks for a WSL update, run `wsl --update
 `composer install`, which can take several minutes. Watch it with `docker compose logs -f app`.
 Later starts reuse everything and take seconds.
 
+**A logo upload says the "gd" extension is not turned on (Settings > Branding & Appearance).** The PHP image
+needs the GD extension, which was added to `docker/php/Dockerfile` with the branding release. An older
+image does not have it: run `npm run backend:up` (it rebuilds with `--build`) once.
+
 **"Permission denied" on `storage/` or `bootstrap/cache`.** The container runs as a non-root user
 (UID 1000). On a Windows folder, Docker Desktop maps permissions and this doesn't happen. Inside
 WSL2, set `LAUNDRYFLOW_UID` and `LAUNDRYFLOW_GID` in the root `.env` to the output of `id -u` and

@@ -35,6 +35,9 @@ final class ImageTools
      */
     public static function read(UploadedFile $file, int $minShortSide, bool $square = false): array
     {
+        if (! function_exists('imagecreatefromstring')) {
+            return ['image' => null, 'error' => 'This server cannot process images: the PHP "gd" extension is not turned on. Ask the host to enable it.'];
+        }
         $bytes = @file_get_contents($file->getRealPath());
         $info = $bytes === false ? false : @getimagesizefromstring($bytes);
         if ($info === false || ! isset(self::ALLOWED[$info['mime']])) {

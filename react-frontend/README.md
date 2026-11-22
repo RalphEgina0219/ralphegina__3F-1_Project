@@ -93,6 +93,7 @@ printed before it stop matching.
 | `npm run test:e2e`      | Playwright on both builds: manifest, service workers, offline, updates, install UI           |
 | `npm run test:contract` | Playwright against Laravel: reseeds it, then the contract, error, walkthrough and flow specs |
 | `npm run screenshots`   | Recapture `public/screenshots/` (the install-dialog images) from the demo build              |
+| `npm run screenshots:branding` | Recapture `docs/screenshots/branding/` (default and sample brand, light and dark, 1440 and 390) against Laravel; needs the API (PHP with GD) running on port 8000 |
 | `npm run icons`         | Regenerate every app icon from `public/logo.svg` (see `pwa-assets.config.ts`)                |
 | `npm run format`        | Prettier                                                                                     |
 

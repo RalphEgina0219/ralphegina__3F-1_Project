@@ -233,6 +233,11 @@ export default defineConfig(async ({ mode, command }) => {
             'screenshots/**',
             'manifest.webmanifest',
             'storage/**',
+            // The installed-app icons follow the branding; the browser fetches them at install
+            // time, so the worker has no reason to keep a copy.
+            'pwa-*.png',
+            'maskable-icon-*.png',
+            'apple-touch-icon-*.png',
           ],
           navigateFallback: 'index.html',
           navigateFallbackDenylist: [

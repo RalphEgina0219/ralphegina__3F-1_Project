@@ -130,13 +130,21 @@ export function applyBranding(branding: BrandingDto, mode: Mode) {
     for (const [name, value] of Object.entries(tokens)) root.style.setProperty(name, value);
   }
 
+  // The tab title is "<page> · <system name>": swap the old name (and the first paint's default)
+  // for the new one without touching the page part.
+  const previousName = currentName;
   currentName = branding.system_name;
   currentFooter = branding.report_footer;
   const title = document.title;
-  if (!title || title === DEFAULT_BRANDING.system_name || title.endsWith(' · LaundryFlow')) {
-    document.title = title.endsWith(' · LaundryFlow')
-      ? `${title.slice(0, -' · LaundryFlow'.length)} · ${branding.system_name}`
-      : branding.system_name;
+  for (const old of new Set([previousName, DEFAULT_BRANDING.system_name])) {
+    if (!title || title === old) {
+      document.title = branding.system_name;
+      break;
+    }
+    if (title.endsWith(` · ${old}`)) {
+      document.title = `${title.slice(0, -(old.length + 3))} · ${branding.system_name}`;
+      break;
+    }
   }
   setMeta('apple-mobile-web-app-title', branding.short_name);
   setMeta(

@@ -24,14 +24,17 @@ class BrandingController extends APIController
      * Public branding
      *
      * No sign-in needed (the login page and the customer portal read it first). Nothing private is in
-     * it; the contact email only when the owner chose to show it. Sends an ETag and a short cache.
+     * it; the contact email only when the owner chose to show it. Sends an ETag; browsers revalidate it
+     * every time (an unchanged answer is a tiny 304), so a saved change shows at once.
+     *
+     * @unauthenticated
      */
     public function show(Request $request): Response|JsonResponse
     {
         $payload = Branding::publicPayload();
         $response = response()->json(['data' => ['type' => 'branding', 'id' => 1, 'attributes' => $payload]]);
         $response->setEtag($payload['version']);
-        $response->headers->set('Cache-Control', 'public, max-age=60');
+        $response->headers->set('Cache-Control', 'public, max-age=0, must-revalidate');
         $response->isNotModified($request);
 
         return $response;

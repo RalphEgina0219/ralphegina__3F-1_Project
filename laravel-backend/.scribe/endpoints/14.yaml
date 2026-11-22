@@ -1,23 +1,23 @@
-name: Notifications
+name: Settings
 description: |-
 
-  The staff bell: orders ready for pickup and low stock.
+  The shop profile: a single record, replaced as a whole (PUT).
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/notifications
+    uri: api/v1/settings/shop
     metadata:
       custom: []
-      groupName: Notifications
+      groupName: Settings
       groupDescription: |-
 
-        The staff bell: orders ready for pickup and low stock.
+        The shop profile: a single record, replaced as a whole (PUT).
       subgroup: ''
       subgroupDescription: ''
-      title: 'List staff notifications'
-      description: 'Newest first. `meta.unread` counts the unread ones.'
+      title: 'Shop profile'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -53,17 +53,17 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: 'api/v1/notifications/{notification_id}/read'
+      - PUT
+    uri: api/v1/settings/shop
     metadata:
       custom: []
-      groupName: Notifications
+      groupName: Settings
       groupDescription: |-
 
-        The staff bell: orders ready for pickup and low stock.
+        The shop profile: a single record, replaced as a whole (PUT).
       subgroup: ''
       subgroupDescription: ''
-      title: 'Mark a notification as read'
+      title: 'Replace the shop profile'
       description: ''
       authenticated: true
       deprecated: false
@@ -71,26 +71,222 @@ endpoints:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters:
-      notification_id:
-        custom: []
-        name: notification_id
-        description: 'The ID of the notification.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      notification_id: 1
+    urlParameters: []
+    cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
+    bodyParameters:
+      data.attributes.name:
+        custom: []
+        name: data.attributes.name
+        description: ''
+        required: true
+        example: LaundryFlow
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.address:
+        custom: []
+        name: data.attributes.address
+        description: ''
+        required: true
+        example: 'Brgy. Poblacion, Bongabong, Oriental Mindoro'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.contactNumber:
+        custom: []
+        name: data.attributes.contactNumber
+        description: ''
+        required: false
+        example: '0917 555 0101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.openingHours:
+        custom: []
+        name: data.attributes.openingHours
+        description: ''
+        required: false
+        example: 'Open daily 7:00 AM – 7:00 PM'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.receiptFooter:
+        custom: []
+        name: data.attributes.receiptFooter
+        description: 'The closing note of every order summary.'
+        required: false
+        example: 'Salamat po!'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.claimPolicyDays:
+        custom: []
+        name: data.attributes.claimPolicyDays
+        description: ''
+        required: true
+        example: 30
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
     cleanBodyParameters: []
     fileParameters: []
     responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/settings/stock-rule
+    metadata:
+      custom: []
+      groupName: Settings
+      groupDescription: |-
+
+        The soap stock rule: whether an order is refused (409) when its wash type needs more soap than
+        the stock records show. Off by default: the order is saved and the stock is clamped at zero.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Set the soap stock rule'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes.blockOrdersOnLowSoap:
+        custom: []
+        name: data.attributes.blockOrdersOnLowSoap
+        description: ''
+        required: true
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/activity-logs
+    metadata:
+      custom: []
+      groupName: Settings
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Activity log'
+      description: 'Who did what, newest first, with a readable summary and the values before and after.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      user:
+        custom: []
+        name: user
+        description: 'One staff member.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      entity:
+        custom: []
+        name: entity
+        description: 'order, payment, customer, basket, service, inventory_item, user, role, shop_settings.'
+        required: false
+        example: order
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      action:
+        custom: []
+        name: action
+        description: 'Text in the action or its values.'
+        required: false
+        example: LF-26
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      createdAt:
+        custom: []
+        name: createdAt
+        description: 'A Manila day, or from,to.'
+        required: false
+        example: '2026-11-01,2026-11-08'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      user: 2
+      entity: order
+      action: LF-26
+      createdAt: '2026-11-01,2026-11-08'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
     auth:
       - headers

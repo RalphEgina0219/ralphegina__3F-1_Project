@@ -68,6 +68,16 @@ describe('applying the branding', () => {
     expect(STATUS_META.released.label).toBe('Completed');
   });
 
+  it('keeps the page part of the tab title when the name changes, and when it is reset', () => {
+    document.title = 'Orders · LaundryFlow';
+    applyBranding(custom, 'light');
+    expect(document.title).toBe('Orders · Suds & Co');
+    applyBranding({ ...custom, system_name: 'Bubbles' }, 'light');
+    expect(document.title).toBe('Orders · Bubbles');
+    applyBranding(DEFAULT_BRANDING, 'light');
+    expect(document.title).toBe('Orders · LaundryFlow');
+  });
+
   it('names the file prefix, the report footer and the app title from the system name', () => {
     applyBranding(custom, 'light');
     expect(brandName()).toBe('Suds & Co');

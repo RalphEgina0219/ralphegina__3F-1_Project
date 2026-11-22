@@ -155,6 +155,41 @@ remover 25 mL/kg):
 The rules live in one place on each side (`laravel-backend/app/Support/WashRules.php` and
 `react-frontend/src/lib/wash.ts`) and both are tested with the same cases in `shared/wash-cases.json`.
 
+## Branding and dark mode
+
+One shop is one deployment (its own domain, database and owner): the system is **white-label, not
+multi-tenant**. Nothing about the shop is hard-coded; it lives in `shop_settings` and is edited by the
+owner in **Settings > Branding & Appearance** (admin only; staff and customers get 403).
+
+- **Name and logo**: system name, short name (≤ 12), tagline, logo, dark-mode logo and a square app
+  icon. Uploads are PNG, JPG or WebP only (no SVG), ≤ 2 MB, at least 128 px, type-checked, re-encoded
+  and stripped of metadata; the PWA icons (192, 512, maskable, apple-touch 180, favicons) are generated
+  with PHP GD. Files are content-hashed in `storage/app/public/branding/` and replaced files are deleted.
+- **Colors**: primary, accent and sidebar/header. The app generates a full token scale for light and
+  dark from them (`react-frontend/src/lib/color.ts`), chooses white or dark text, checks WCAG contrast in
+  both modes, warns about weak pairs and **refuses to save a primary color whose button text would be
+  unreadable**. The same check runs in PHP (`App\Support\Branding`) and both are tested with the same
+  cases in `shared/color-cases.json`. Charts keep their fixed color-blind-safe palette; status and warning
+  colors keep their meaning.
+- **Labels and options**: the six status words are editable (display only; codes, order and rules never
+  change; non-empty, unique, ≤ 24); the basket prefix (new baskets only), label footer and "show shop
+  name"; Cash, GCash, Maya and Pay at pickup on or off (at least one stays on, with an optional display
+  name). Old payments always keep showing.
+- **Delivery**: the public `GET /api/v1/branding` (ETag, `version` hash) feeds the `BrandingProvider`,
+  which caches the last answer in `localStorage` (so there is no flash of the default look), sets the CSS
+  variables, the tab title, the favicon and the theme color, and refreshes after a save. Laravel builds
+  `/manifest.webmanifest` from the same settings. The service worker never caches the manifest, the icons
+  or the branding images (network first for `/storage/branding/*`). Phones that already installed the app
+  may keep the old icon until it is installed again.
+- **Printing**: basket labels, receipts and reports use the shop's name and footer and always print on
+  white, whatever the screen shows.
+- **Light and dark mode**: every screen has both. A single sun/moon button per interface (staff top bar,
+  portal header, top-right corner of the sign-in pages) switches instantly; the default follows the device
+  (`prefers-color-scheme`), the choice is stored under one key, and a tiny inline script in `index.html`
+  applies it before the first paint. Motion is reduced for people who ask for it.
+- **New shop**: `php artisan laundryflow:install` names it; the owner then follows the dashboard
+  checklist (logo and colors, shop details, rates, soaps, staff, basket labels). See `docs/NEW_SHOP_SETUP.md`.
+
 ## Business rules
 
 **Orders and money**

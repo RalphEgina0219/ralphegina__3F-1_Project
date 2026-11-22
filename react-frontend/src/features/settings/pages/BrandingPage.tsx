@@ -198,9 +198,18 @@ export default function BrandingPage() {
   const [resetting, setResetting] = useState(false);
   const loaded = query.data;
 
+  // The form follows the server, but never over a person's unsaved edits: an image upload (which
+  // saves at once and refreshes the settings) must not wipe the name typed a moment before.
+  // Saving and resetting set the form themselves.
+  const serverDraft = useRef<string | null>(null);
   useEffect(() => {
-    if (loaded) setDraft(toDraft(loaded));
-    // Re-read after every save, upload and reset.
+    if (!loaded) return;
+    const next = toDraft(loaded);
+    const nextJson = JSON.stringify(next);
+    setDraft((current) =>
+      current === null || JSON.stringify(current) === serverDraft.current ? next : current,
+    );
+    serverDraft.current = nextJson;
   }, [loaded]);
 
   const saved = useMemo(() => (loaded ? toDraft(loaded) : null), [loaded]);
@@ -308,9 +317,11 @@ export default function BrandingPage() {
       })),
     };
     save.mutate(input, {
-      onSuccess: () => {
+      onSuccess: (result) => {
         toast.success('Branding saved');
         setErrors({});
+        setDraft(toDraft(result));
+        serverDraft.current = JSON.stringify(toDraft(result));
       },
       onError: (error) => {
         const collected: Record<string, string> = {};
@@ -699,9 +710,12 @@ export default function BrandingPage() {
           loading={reset.isPending}
           onConfirm={() =>
             reset.mutate(undefined, {
-              onSuccess: () => {
+              onSuccess: (result) => {
                 toast.success('Branding reset');
                 setResetting(false);
+                setErrors({});
+                setDraft(toDraft(result));
+                serverDraft.current = JSON.stringify(toDraft(result));
               },
               onError: (error) => toast.error(errorMessage(error)),
             })

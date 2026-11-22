@@ -6,7 +6,9 @@
 #    (next to "public_html" and "laundryflow", NOT inside public_html).
 # 3. On the server, from the laravel-backend folder:
 #
-#        bash scripts/install-frontend.sh laundryflow-frontend-<...>.zip
+#        bash scripts/install-frontend.sh ~/domains/<your-domain>/laundryflow-frontend-<...>.zip
+#
+#    (the full path to the uploaded zip; the bare file name also works from that folder)
 #
 # What it does:
 #   - checks the zip really is a LaundryFlow release (index.html, .htaccess, laravel.php inside)
@@ -27,7 +29,7 @@ for argument in "$@"; do
     --dry-run) DRY_RUN=1 ;;
     --delete-zip) DELETE_ZIP=1 ;;
     -h | --help)
-      sed -n '2,20p' "$0"
+      sed -n '2,21p' "$0"
       exit 0
       ;;
     -*)
@@ -89,6 +91,9 @@ run tar -czf "$BACKUP" -C "$PUBLIC_HTML" .
 
 say "Removing the old assets/ and unpacking the release"
 run rm -rf "$PUBLIC_HTML/assets"
+# Older releases shipped a static manifest. The installed-app manifest now comes from Laravel
+# (the shop's branding), so a stale file must not be left behind.
+run rm -f "$PUBLIC_HTML/manifest.webmanifest"
 run unzip -o -q "$ZIP" -d "$PUBLIC_HTML"
 
 if [ "$DRY_RUN" != 1 ]; then

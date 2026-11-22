@@ -16,6 +16,30 @@ export function useActivePaymentMethods() {
 }
 
 /**
+ * What makes the app remount: only what screens read once per render (module-level words and
+ * colors: the system name, the status words, the three colors, the footer and the basket prefix).
+ * Everything else (logos, messages, shop details, payment methods) is read from the context and
+ * updates in place. This matters: a person who starts typing on the sign-in page while the branding
+ * is still arriving must not lose what they typed, and a shop on the LaundryFlow defaults never
+ * remounts at all; nor does a new logo throw away what the owner typed on the Branding page.
+ */
+function remountKey(branding: BrandingDto) {
+  const text = JSON.stringify([
+    branding.system_name,
+    branding.short_name,
+    branding.primary_color,
+    branding.accent_color,
+    branding.sidebar_color,
+    branding.status_labels,
+    branding.report_footer,
+    branding.basket_prefix,
+  ]);
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) hash = (Math.imul(hash, 31) + text.charCodeAt(i)) | 0;
+  return String(hash);
+}
+
+/**
  * Fetches the shop's public branding and applies it. The last answer is cached on the device and
  * applied before the first render (see bootBranding), so there is no flash of the default look;
  * the background refresh then corrects anything that changed.
@@ -50,7 +74,7 @@ export function BrandingProvider({ children }: { children: (key: string) => Reac
   return (
     <BrandingContext.Provider value={branding}>
       {/* The app remounts when the look changes, so every label, colour and chart is read fresh. */}
-      {children(`${branding.version}-${theme}`)}
+      {children(`${remountKey(branding)}-${theme}`)}
     </BrandingContext.Provider>
   );
 }

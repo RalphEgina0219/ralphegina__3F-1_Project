@@ -101,8 +101,7 @@ export function releaseBaskets(order: Order, at: string) {
   }
 }
 
-const NOT_RECOGNIZED = () =>
-  `QR not recognized. Scan a ${db().branding.system_name} basket label.`;
+const NOT_RECOGNIZED = () => `QR not recognized. Scan a ${db().branding.system_name} basket label.`;
 
 export const basketHandlers = [
   route('get', '/baskets', 'baskets.scan', ({ query }) => {

@@ -27,14 +27,14 @@ class PostmanCollection extends Command
     private const PATH_VARIABLES = [
         'baskets' => 'basket', 'customers' => 'customer', 'items' => 'item', 'notifications' => 'notification',
         'orders' => 'order', 'payments' => 'payment', 'services' => 'service', 'users' => 'user',
-        'reports' => 'kind', 'scan' => 'code', 'wash-types' => 'washType',
+        'reports' => 'kind', 'scan' => 'code', 'wash-types' => 'washType', 'branding' => 'brandingFile',
     ];
 
     /** Records of the fresh seed. user 3 is aira.d, so disabling or resetting never locks the owner out. */
     private const ID_DEFAULTS = [
         'basket' => '1', 'customer' => '1', 'item' => '1', 'notification' => '1', 'order' => '1',
         'payment' => '1', 'service' => '1', 'user' => '3', 'kind' => 'sales', 'code' => 'BSK-0001',
-        'availableBasket' => '1', 'orderNumber' => '', 'customerNotification' => '1', 'washType' => '1',
+        'availableBasket' => '1', 'orderNumber' => '', 'customerNotification' => '1', 'washType' => '1', 'brandingFile' => 'logo',
     ];
 
     /** List requests that remember a real id for the requests after them: path => [variable, JS expression]. */

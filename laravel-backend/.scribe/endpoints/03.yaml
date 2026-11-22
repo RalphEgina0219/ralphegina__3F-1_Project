@@ -1,25 +1,21 @@
-name: 'Customer portal: authentication'
+name: Customers
 description: |-
 
-  The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-  every staff route, and a staff token by every customer route.
+  Customer profiles and counter registration.
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/customer/auth/register
+      - GET
+    uri: api/v1/customer/barangays
     metadata:
       custom: []
-      groupName: 'Customer portal: authentication'
-      groupDescription: |-
-
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
+      groupName: Customers
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: Register
-      description: 'Creates the customer profile and its account in one transaction and signs the customer in.'
+      title: 'List barangays'
+      description: 'The 36 barangays of Bongabong. Also public at /customer/barangays, for registration (names only).'
       authenticated: false
       deprecated: false
     headers:
@@ -29,96 +25,194 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters:
-      full_name:
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
         custom: []
-        name: full_name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
-        required: true
-        example: 'Juan Dela Cruz'
+        status: 200
+        content: '{"data":[{"type":"barangay","id":1,"attributes":{"name":"Anilao"}},{"type":"barangay","id":2,"attributes":{"name":"Aplaya"}},{"type":"barangay","id":3,"attributes":{"name":"Bagong Bayan I"}},{"type":"barangay","id":4,"attributes":{"name":"Bagong Bayan II"}},{"type":"barangay","id":5,"attributes":{"name":"Batangan"}},{"type":"barangay","id":6,"attributes":{"name":"Bukal"}},{"type":"barangay","id":7,"attributes":{"name":"Camantigue"}},{"type":"barangay","id":8,"attributes":{"name":"Carmundo"}},{"type":"barangay","id":9,"attributes":{"name":"Cawayan"}},{"type":"barangay","id":10,"attributes":{"name":"Dayhagan"}},{"type":"barangay","id":11,"attributes":{"name":"Formon"}},{"type":"barangay","id":12,"attributes":{"name":"Hagan"}},{"type":"barangay","id":13,"attributes":{"name":"Hagupit"}},{"type":"barangay","id":14,"attributes":{"name":"Ipil"}},{"type":"barangay","id":15,"attributes":{"name":"Kaligtasan"}},{"type":"barangay","id":16,"attributes":{"name":"Labasan"}},{"type":"barangay","id":17,"attributes":{"name":"Labonan"}},{"type":"barangay","id":18,"attributes":{"name":"Libertad"}},{"type":"barangay","id":19,"attributes":{"name":"Lisap"}},{"type":"barangay","id":20,"attributes":{"name":"Luna"}},{"type":"barangay","id":21,"attributes":{"name":"Malitbog"}},{"type":"barangay","id":22,"attributes":{"name":"Mapang"}},{"type":"barangay","id":23,"attributes":{"name":"Masaguisi"}},{"type":"barangay","id":24,"attributes":{"name":"Mina de Oro"}},{"type":"barangay","id":25,"attributes":{"name":"Morente"}},{"type":"barangay","id":26,"attributes":{"name":"Ogbot"}},{"type":"barangay","id":27,"attributes":{"name":"Orconuma"}},{"type":"barangay","id":28,"attributes":{"name":"Poblacion"}},{"type":"barangay","id":29,"attributes":{"name":"Pulosahi"}},{"type":"barangay","id":30,"attributes":{"name":"Sagana"}},{"type":"barangay","id":31,"attributes":{"name":"San Isidro"}},{"type":"barangay","id":32,"attributes":{"name":"San Jose"}},{"type":"barangay","id":33,"attributes":{"name":"San Juan"}},{"type":"barangay","id":34,"attributes":{"name":"Sigange"}},{"type":"barangay","id":35,"attributes":{"name":"Sta. Cruz"}},{"type":"barangay","id":36,"attributes":{"name":"Tawas"}}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/barangays
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List barangays'
+      description: 'The 36 barangays of Bongabong. Also public at /customer/barangays, for registration (names only).'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/customers
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: |-
+
+        Customer profiles and counter registration.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List customers'
+      description: 'Most recent visit first, 15 per page. `meta.withBalance` counts customers who still owe.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      search:
+        custom: []
+        name: search
+        description: 'Name, email or phone digits.'
+        required: false
+        example: santos
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      contact_number:
+      fullName:
         custom: []
-        name: contact_number
-        description: 'A PH mobile number. Must match the regex /^09\d{9}$/.'
-        required: true
-        example: '0917 555 0101'
+        name: fullName
+        description: 'Name, * as a wildcard.'
+        required: false
+        example: '*santos*'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      email:
+      barangay:
         custom: []
-        name: email
-        description: 'Must be a valid email address. Must not be greater than 255 characters.'
-        required: true
-        example: juan.delacruz@example.com
+        name: barangay
+        description: 'Barangay ids, comma separated.'
+        required: false
+        example: '28'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      password:
+      hasAccount:
         custom: []
-        name: password
-        description: 'At least 8 characters, with a letter and a number.'
-        required: true
-        example: laundry123
+        name: hasAccount
+        description: 'Only with (true) or without (false) an account.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'fullName, createdAt or lastVisitAt; prefix - for descending.'
+        required: false
+        example: '-lastVisitAt'
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      password_confirmation:
+      page:
         custom: []
-        name: password_confirmation
-        description: 'The value and <code>password</code> must match.'
-        required: true
-        example: laundry123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      barangay_id:
-        custom: []
-        name: barangay_id
-        description: 'Must match an existing stored value.'
-        required: true
-        example: 28
+        name: page
+        description: 'The page number.'
+        required: false
+        example: 1
         type: integer
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      street_address:
+      perPage:
         custom: []
-        name: street_address
-        description: 'Must not be greater than 255 characters.'
+        name: perPage
+        description: 'Rows per page (1–500).'
         required: false
-        example: 'Purok 3'
-        type: string
+        example: 15
+        type: integer
         enumValues: []
-        exampleWasSpecified: false
-        nullable: true
+        exampleWasSpecified: true
+        nullable: false
         deprecated: false
-    cleanBodyParameters:
-      full_name: 'Juan Dela Cruz'
-      contact_number: '0917 555 0101'
-      email: juan.delacruz@example.com
-      password: laundry123
-      password_confirmation: laundry123
-      barangay_id: 28
-      street_address: 'Purok 3'
+    cleanQueryParameters:
+      search: santos
+      fullName: '*santos*'
+      barangay: '28'
+      hasAccount: true
+      sort: '-lastVisitAt'
+      page: 1
+      perPage: 15
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
-    auth: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
     controller: null
     method: null
     route: null
@@ -126,76 +220,19 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/customer/auth/login
+    uri: api/v1/customers
     metadata:
       custom: []
-      groupName: 'Customer portal: authentication'
+      groupName: Customers
       groupDescription: |-
 
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
+        Customer profiles and counter registration.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Log in'
-      description: 'Five failed attempts a minute for the same email and IP answer 429.'
-      authenticated: false
-      deprecated: false
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        custom: []
-        name: email
-        description: 'Must not be greater than 255 characters.'
-        required: true
-        example: maria.santos@example.com
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: ''
-        required: true
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      email: maria.santos@example.com
-      password: password123
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/customer/auth/refresh
-    metadata:
-      custom: []
-      groupName: 'Customer portal: authentication'
-      groupDescription: |-
-
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Refresh the token'
-      description: 'An expired token is accepted within JWT_REFRESH_TTL.'
+      title: 'Register a customer at the counter'
+      description: |-
+        Creates the profile and its account in one step. The temporary password is in the response
+        once: read it out to the customer. They must change it at the first sign-in.
       authenticated: true
       deprecated: false
     headers:
@@ -206,8 +243,140 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.fullName:
+        custom: []
+        name: data.attributes.fullName
+        description: 'Full name. Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Juan Dela Cruz'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.contactNumber:
+        custom: []
+        name: data.attributes.contactNumber
+        description: 'PH mobile number, stored as 09XXXXXXXXX. Must match the regex /^09\d{9}$/.'
+        required: true
+        example: '0917 555 0101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.streetAddress:
+        custom: []
+        name: data.attributes.streetAddress
+        description: 'Street or purok. Must not be greater than 255 characters.'
+        required: false
+        example: 'Purok 3'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.notes:
+        custom: []
+        name: data.attributes.notes
+        description: 'Notes for the counter. Must not be greater than 2000 characters.'
+        required: false
+        example: 'Prefers unscented conditioner'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.relationships.barangay.data:
+        custom: []
+        name: data.relationships.barangay.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay:
+        custom: []
+        name: data.relationships.barangay
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay.data.id:
+        custom: []
+        name: data.relationships.barangay.data.id
+        description: 'The barangay id. Must match an existing stored value.'
+        required: true
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.email:
+        custom: []
+        name: data.attributes.email
+        description: 'The sign-in email of the new account. Must not be greater than 255 characters.'
+        required: true
+        example: juan.delacruz@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          fullName: 'Juan Dela Cruz'
+          contactNumber: '0917 555 0101'
+          streetAddress: 'Purok 3'
+          notes: 'Prefers unscented conditioner'
+          email: juan.delacruz@example.com
+        relationships:
+          barangay:
+            data:
+              id: 28
     fileParameters: []
     responses: []
     responseFields: []
@@ -222,17 +391,16 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/customer/auth/me
+    uri: 'api/v1/customers/{id}'
     metadata:
       custom: []
-      groupName: 'Customer portal: authentication'
+      groupName: Customers
       groupDescription: |-
 
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
+        Customer profiles and counter registration.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Current customer'
+      title: 'Show a customer'
       description: ''
       authenticated: true
       deprecated: false
@@ -240,8 +408,20 @@ endpoints:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -250,10 +430,14 @@ endpoints:
     responses:
       -
         custom: []
-        status: 200
-        content: '{"data":{"customer":{"type":"customerAccount","id":1,"attributes":{"fullName":"Maria Santos","email":"maria.santos@example.com","contactNumber":"09178452210","barangayId":28,"barangayName":"Poblacion","streetAddress":null,"mustChangePassword":false},"links":{"self":"http://laundryflow.test/api/v1/customer/auth/me"}}},"message":"Customer retrieved","status":200}'
-        headers: []
-        description: ''
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
     auth:
       - headers
@@ -265,18 +449,17 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/customer/auth/logout
+      - PUT
+    uri: 'api/v1/customers/{customer_id}'
     metadata:
       custom: []
-      groupName: 'Customer portal: authentication'
+      groupName: Customers
       groupDescription: |-
 
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
+        Customer profiles and counter registration.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Log out'
+      title: "Replace a customer's profile (every field)"
       description: ''
       authenticated: true
       deprecated: false
@@ -284,12 +467,144 @@ endpoints:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      customer_id:
+        custom: []
+        name: customer_id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      customer_id: 1
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.fullName:
+        custom: []
+        name: data.attributes.fullName
+        description: 'Full name. Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: true
+        example: 'Juan Dela Cruz'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.contactNumber:
+        custom: []
+        name: data.attributes.contactNumber
+        description: 'PH mobile number, stored as 09XXXXXXXXX. Must match the regex /^09\d{9}$/.'
+        required: true
+        example: '0917 555 0101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.streetAddress:
+        custom: []
+        name: data.attributes.streetAddress
+        description: 'Street or purok. Must not be greater than 255 characters.'
+        required: false
+        example: 'Purok 3'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.notes:
+        custom: []
+        name: data.attributes.notes
+        description: 'Notes for the counter. Must not be greater than 2000 characters.'
+        required: false
+        example: 'Prefers unscented conditioner'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.relationships.barangay.data:
+        custom: []
+        name: data.relationships.barangay.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay:
+        custom: []
+        name: data.relationships.barangay
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay.data.id:
+        custom: []
+        name: data.relationships.barangay.data.id
+        description: 'The barangay id. Must match an existing stored value.'
+        required: true
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          fullName: 'Juan Dela Cruz'
+          contactNumber: '0917 555 0101'
+          streetAddress: 'Purok 3'
+          notes: 'Prefers unscented conditioner'
+        relationships:
+          barangay:
+            data:
+              id: 28
     fileParameters: []
     responses: []
     responseFields: []
@@ -303,67 +618,452 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: api/v1/customer/account/password
+      - PATCH
+    uri: 'api/v1/customers/{id}'
     metadata:
       custom: []
-      groupName: 'Customer portal: authentication'
+      groupName: Customers
       groupDescription: |-
 
-        The customer guard (JWT), entirely separate from staff sign-in: a customer token is rejected by
-        every staff route, and a staff token by every customer route.
+        Customer profiles and counter registration.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Change my password'
-      description: 'Allowed while a password change is pending; clears must_change_password.'
+      title: "Update a customer's profile (fields sent)"
+      description: ''
       authenticated: true
       deprecated: false
     headers:
       Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      current_password:
+      data:
         custom: []
-        name: current_password
-        description: 'The current password, or the temporary one the owner or shop gave.'
+        name: data
+        description: ''
         required: true
-        example: k7m2p9qx4t
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.fullName:
+        custom: []
+        name: data.attributes.fullName
+        description: 'Full name. Must be at least 2 characters. Must not be greater than 255 characters.'
+        required: false
+        example: 'Juan Dela Cruz'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password:
+      data.attributes.contactNumber:
         custom: []
-        name: password
-        description: 'At least 8 characters, with a letter and a number, different from the current one.'
-        required: true
-        example: laundry2026
+        name: data.attributes.contactNumber
+        description: 'PH mobile number, stored as 09XXXXXXXXX. Must match the regex /^09\d{9}$/.'
+        required: false
+        example: '0917 555 0101'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password_confirmation:
+      data.attributes.streetAddress:
         custom: []
-        name: password_confirmation
-        description: 'The new password again. The value and <code>password</code> must match.'
+        name: data.attributes.streetAddress
+        description: 'Street or purok. Must not be greater than 255 characters.'
+        required: false
+        example: 'Purok 3'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.notes:
+        custom: []
+        name: data.attributes.notes
+        description: 'Notes for the counter. Must not be greater than 2000 characters.'
+        required: false
+        example: 'Prefers unscented conditioner'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.relationships.barangay.data:
+        custom: []
+        name: data.relationships.barangay.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay:
+        custom: []
+        name: data.relationships.barangay
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.barangay.data.id:
+        custom: []
+        name: data.relationships.barangay.data.id
+        description: 'The barangay id. Must match an existing stored value.'
+        required: false
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          fullName: 'Juan Dela Cruz'
+          contactNumber: '0917 555 0101'
+          streetAddress: 'Purok 3'
+          notes: 'Prefers unscented conditioner'
+        relationships:
+          barangay:
+            data:
+              id: 28
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/customers/{customer_id}/orders'
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: "List a customer's orders"
+      description: |-
+        The orders of one customer (a nested resource, course L13), newest first. Every order filter
+        works here too.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      customer_id:
+        custom: []
+        name: customer_id
+        description: 'The ID of the customer.'
         required: true
-        example: laundry2026
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      customer_id: 1
+    queryParameters:
+      include:
+        custom: []
+        name: include
+        description: 'As on GET /orders.'
+        required: false
+        example: 'customer,baskets,items,receivedBy'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      include: 'customer,baskets,items,receivedBy'
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/customers/{customer_id}/account'
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: |-
+
+        A customer's sign-in: create it for a legacy profile, issue a temporary password, switch it on or off.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create an account for a legacy profile'
+      description: 'Answers 409 when the customer already has one. The temporary password is shown once.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      customer_id:
+        custom: []
+        name: customer_id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      customer_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.email:
+        custom: []
+        name: data.attributes.email
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: janine.alcantara@example.com
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      current_password: k7m2p9qx4t
-      password: laundry2026
-      password_confirmation: laundry2026
+      data:
+        attributes:
+          email: janine.alcantara@example.com
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/v1/customers/{customer_id}/account'
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: |-
+
+        A customer's sign-in: create it for a legacy profile, issue a temporary password, switch it on or off.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Enable or disable sign-in'
+      description: 'Owner only.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      customer_id:
+        custom: []
+        name: customer_id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      customer_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.isActive:
+        custom: []
+        name: data.attributes.isActive
+        description: ''
+        required: true
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        attributes:
+          isActive: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/customers/{customer_id}/reset-password'
+    metadata:
+      custom: []
+      groupName: Customers
+      groupDescription: |-
+
+        A customer's sign-in: create it for a legacy profile, issue a temporary password, switch it on or off.
+      subgroup: ''
+      subgroupDescription: ''
+      title: "Reset the customer's password"
+      description: 'Issues a new temporary password (shown once) and asks the customer to change it.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      customer_id:
+        custom: []
+        name: customer_id
+        description: 'The ID of the customer.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      customer_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
     responses: []
     responseFields: []

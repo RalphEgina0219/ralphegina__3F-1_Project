@@ -148,9 +148,23 @@ Orders carry `wash_type` (id, name), the frozen `wash_surcharge_per_kg_cents`, t
 | PUT | `/roles/staff/permissions` | admin | `settings.manage` | `permissions[]` ⊆ known codes (unknown ignored) | as above | 200, 422 |
 | GET | `/settings/shop` | admin | `settings.manage` | — | `ShopSettings` | 200 |
 | PUT | `/settings/shop` | admin | `settings.manage` | `name`, `address` required; `contact_number`, `opening_hours`, `receipt_footer` strings; `claim_policy_days` integer ≥ 0 | `ShopSettings` | 200, 422 |
+| GET | `/branding` | **public** | — | — | `BrandingDto`: names, three colors, `button_text_color`, logo and icon URLs, status labels, basket prefix and label options, payment methods (`code`, `label`, `is_active`), Pay at pickup, messages, report footer, powered-by flag, shop contact (email only if shown), `version` hash. Nothing private. Sends an `ETag` (304 on a match) and `Cache-Control: public, max-age=0, must-revalidate` | 200, 304 |
+| GET | `/settings/branding` | admin | `settings.manage` | — | the public payload plus `contact_email`, `show_contact_email`, `setup_checklist[]` | 200, 403 |
+| PUT | `/settings/branding` | admin | `settings.manage` | any of: `system_name` 1-60; `short_name` 1-12; `tagline` ≤120; `primary_color`, `accent_color`, `sidebar_color` `#RRGGBB` (a primary or sidebar color that makes button or sidebar text unreadable, below 4.5:1, is refused); `contact_email`; `login_message`, `portal_message`, `report_footer` ≤300; `status_labels` (all six codes, non-empty, unique, ≤24; camelCase or snake_case codes accepted); `basket_prefix` 2-8 letters; `basket_label_footer` ≤80; `basket_label_show_shop_name`; `pay_at_pickup_enabled`; `payment_methods[]` (`code`, `is_active`, `label` ≤50; at least one way to pay, counting Pay at pickup, stays on); `show_powered_by` | the admin payload; audit `branding.updated` with old → new | 200, 403, 422 |
+| POST | `/settings/branding/{kind}` | admin | `settings.manage` | multipart `file`; `kind` ∈ `logo`, `logo-dark`, `icon`; PNG, JPG or WebP (real type checked, no SVG), ≤ 2 MB, short side ≥ 128 px (icon: square, ≥ 512); re-encoded as PNG (metadata stripped) under a content-hashed name, old file deleted; the PWA icons are regenerated with GD | the admin payload; audited | 200, 403, 422 |
+| DELETE | `/settings/branding/{kind}` | admin | `settings.manage` | — | the admin payload; the file is deleted | 200, 403 |
+| POST | `/settings/branding/reset` | admin | `settings.manage` | — (the app asks for confirmation) | the admin payload back at the LaundryFlow defaults; files deleted; audit `branding.reset`; orders, payments and customers untouched | 200, 403 |
+| PUT | `/settings/setup-checklist` | admin | `settings.manage` | `key` ∈ branding, shop, rates, soaps, staff, labels (branding, shop and soaps also complete themselves; the others only the owner ticks); `done` boolean | the admin payload | 200, 403, 422 |
 | GET | `/activity-logs` | admin | `settings.manage` | `user_id`, `entity` (auditable type), `action` (text search), `from`/`to`, `page` (20) | paginated `ActivityLogDto` (+readable `summary`), newest first | 200 |
 | GET | `/notifications` | staff | — | `page` (20) | paginated `Notification`, newest first; `meta.unread` | 200 |
 | POST | `/notifications/{id}/read` | staff | — | — | `Notification` | 200, 404 |
+
+### Outside `/api/v1` (Laravel `routes/web.php`)
+
+| Method | Path | Auth | Notes |
+| --- | --- | --- | --- |
+| GET | `/manifest.webmanifest` | public | `application/manifest+json`, `Cache-Control: no-cache`; name, short name, theme and background colors and the generated icons come from the branding (the default icons when none) |
+| GET | `/storage/branding/{file}` | public | the uploaded logo or icon, `immutable` one-year cache (the name is a content hash). Served by Laravel, so no `storage:link` is needed; a path outside `branding/` answers 403 or 404 |
 
 ## Customer portal (`portal.ts`)
 

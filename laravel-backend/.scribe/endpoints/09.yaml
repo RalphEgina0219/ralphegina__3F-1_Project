@@ -1,26 +1,70 @@
-name: Orders
+name: Baskets
 description: |-
 
-  Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+  The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/orders
+    uri: api/v1/baskets/available
     metadata:
       custom: []
-      groupName: Orders
+      groupName: Baskets
       groupDescription: |-
 
-        Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'List orders'
-      description: |-
-        Newest first. `meta.statusCounts` counts each status over every other filter, so the status
-        chips show what each would return. Use ?include=customer,baskets,items,receivedBy for the
-        list rows.
+      title: 'List the baskets free for a new order'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/baskets
+    metadata:
+      custom: []
+      groupName: Baskets
+      groupDescription: |-
+
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List baskets'
+      description: 'By number. `meta.counts` has the number of baskets in each status.'
       authenticated: true
       deprecated: false
     headers:
@@ -30,89 +74,23 @@ endpoints:
     urlParameters: []
     cleanUrlParameters: []
     queryParameters:
-      search:
-        custom: []
-        name: search
-        description: 'Order number, basket number, customer name or 3+ phone digits.'
-        required: false
-        example: santos
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
       status:
         custom: []
         name: status
-        description: 'Status codes, comma separated.'
+        description: 'available, in_use or retired.'
         required: false
-        example: 'received,washing'
+        example: available
         type: string
         enumValues: []
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      paymentStatus:
+      search:
         custom: []
-        name: paymentStatus
-        description: 'unpaid, partial or paid.'
+        name: search
+        description: 'Basket number, label or the order it holds.'
         required: false
-        example: unpaid
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      receivedAt:
-        custom: []
-        name: receivedAt
-        description: 'A Manila day, or from,to.'
-        required: false
-        example: '2026-11-01,2026-11-08'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      customer:
-        custom: []
-        name: customer
-        description: "One customer's orders."
-        required: false
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      waitingMin:
-        custom: []
-        name: waitingMin
-        description: 'At least this many days in the current status.'
-        required: false
-        example: 3.0
-        type: number
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      waitingMax:
-        custom: []
-        name: waitingMax
-        description: 'Under this many days in the current status.'
-        required: false
-        example: 1.0
-        type: number
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      due:
-        custom: []
-        name: due
-        description: 'Active orders due on a Manila day, or "overdue".'
-        required: false
-        example: overdue
+        example: '0007'
         type: string
         enumValues: []
         exampleWasSpecified: true
@@ -121,20 +99,9 @@ endpoints:
       sort:
         custom: []
         name: sort
-        description: 'orderNumber, receivedAt, promisedAt or updatedAt; - for descending.'
+        description: 'basketNumber, status or createdAt.'
         required: false
-        example: '-receivedAt'
-        type: string
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
-      include:
-        custom: []
-        name: include
-        description: 'customer, baskets, items, receivedBy, payments, statusHistory, basketHistory, shop.'
-        required: false
-        example: 'customer,baskets,items,receivedBy'
+        example: basketNumber
         type: string
         enumValues: []
         exampleWasSpecified: true
@@ -151,30 +118,11 @@ endpoints:
         exampleWasSpecified: true
         nullable: false
         deprecated: false
-      perPage:
-        custom: []
-        name: perPage
-        description: 'Rows per page (1–500, default 8).'
-        required: false
-        example: 8
-        type: integer
-        enumValues: []
-        exampleWasSpecified: true
-        nullable: false
-        deprecated: false
     cleanQueryParameters:
-      search: santos
-      status: 'received,washing'
-      paymentStatus: unpaid
-      receivedAt: '2026-11-01,2026-11-08'
-      customer: 1
-      waitingMin: 3.0
-      waitingMax: 1.0
-      due: overdue
-      sort: '-receivedAt'
-      include: 'customer,baskets,items,receivedBy'
+      status: available
+      search: '0007'
+      sort: basketNumber
       page: 1
-      perPage: 8
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -201,20 +149,19 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/orders
+    uri: api/v1/baskets
     metadata:
       custom: []
-      groupName: Orders
+      groupName: Baskets
       groupDescription: |-
 
-        Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Take in an order'
+      title: 'Add baskets'
       description: |-
-        One transaction: locked baskets, the day's order number, items with frozen prices, the wash
-        type with its frozen surcharge and the soap it deducts from stock (409 when the shop blocks
-        orders on a soap shortage), the first history row, the optional payment, the customer's notice and the audit log.
+        1 to 100 at a time. Numbers continue after the highest ever issued; each basket gets its own
+        permanent 32-character QR token.
       authenticated: true
       deprecated: false
     headers:
@@ -230,8 +177,8 @@ endpoints:
         custom: []
         name: data
         description: ''
-        required: true
-        example: []
+        required: false
+        example: null
         type: object
         enumValues: []
         exampleWasSpecified: false
@@ -241,61 +188,31 @@ endpoints:
         custom: []
         name: data.attributes
         description: ''
-        required: true
-        example: []
+        required: false
+        example: null
         type: object
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.items:
+      data.attributes.count:
         custom: []
-        name: data.attributes.items
-        description: 'The service lines: serviceId plus weightKg (per kg) or quantity (per piece).'
+        name: data.attributes.count
+        description: 'How many baskets to add (1–100). Must be at least 1. Must not be greater than 100.'
         required: false
-        example:
-          -
-            serviceId: 1
-            weightKg: 6.5
-          -
-            serviceId: 4
-            quantity: 6
-        type: string
+        example: 10
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.promisedAt:
+      data.attributes.label:
         custom: []
-        name: data.attributes.promisedAt
-        description: 'Estimated completion, ISO-8601.'
+        name: data.attributes.label
+        description: 'A label for all of them. Must not be greater than 100 characters.'
         required: false
-        example: '2026-11-09T09:00:00.000Z'
+        example: 'Blue, large'
         type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.notes:
-        custom: []
-        name: data.attributes.notes
-        description: 'Notes for the shop. Must not be greater than 2000 characters.'
-        required: false
-        example: 'Separate white uniforms.'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      data.attributes.payment:
-        custom: []
-        name: data.attributes.payment
-        description: 'Optional payment at drop-off (needs payments.record).'
-        required: false
-        example:
-          amountCents: 20000
-          paymentMethod: cash
-        type: object
         enumValues: []
         exampleWasSpecified: false
         nullable: true
@@ -303,18 +220,8 @@ endpoints:
     cleanBodyParameters:
       data:
         attributes:
-          items:
-            -
-              serviceId: 1
-              weightKg: 6.5
-            -
-              serviceId: 4
-              quantity: 6
-          promisedAt: '2026-11-09T09:00:00.000Z'
-          notes: 'Separate white uniforms.'
-          payment:
-            amountCents: 20000
-            paymentMethod: cash
+          count: 10
+          label: 'Blue, large'
     fileParameters: []
     responses: []
     responseFields: []
@@ -329,17 +236,17 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/v1/orders/{id}'
+    uri: 'api/v1/baskets/{id}'
     metadata:
       custom: []
-      groupName: Orders
+      groupName: Baskets
       groupDescription: |-
 
-        Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Show an order'
-      description: 'Everything the order page needs: lines, baskets, payments, status history and basket history.'
+      title: 'Show a basket'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -350,7 +257,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the order.'
+        description: 'The ID of the basket.'
         required: true
         example: 1
         type: integer
@@ -388,16 +295,16 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/v1/orders/{order_id}'
+    uri: 'api/v1/baskets/{basket_id}'
     metadata:
       custom: []
-      groupName: Orders
+      groupName: Baskets
       groupDescription: |-
 
-        Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Replace the notes and promised time (both required)'
+      title: "Replace a basket's label and notes"
       description: ''
       authenticated: true
       deprecated: false
@@ -406,10 +313,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      order_id:
+      basket_id:
         custom: []
-        name: order_id
-        description: 'The ID of the order.'
+        name: basket_id
+        description: 'The ID of the basket.'
         required: true
         example: 1
         type: integer
@@ -418,7 +325,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      order_id: 1
+      basket_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -444,33 +351,33 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.notes:
+      data.attributes.label:
         custom: []
-        name: data.attributes.notes
-        description: 'Must not be greater than 2000 characters.'
+        name: data.attributes.label
+        description: 'Must not be greater than 100 characters.'
         required: false
-        example: 'Call before pickup.'
+        example: 'Green, large'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.promisedAt:
+      data.attributes.notes:
         custom: []
-        name: data.attributes.promisedAt
-        description: 'Must be a valid date.'
-        required: true
-        example: '2026-11-09T09:00:00.000Z'
+        name: data.attributes.notes
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'Handle taped'
         type: string
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          notes: 'Call before pickup.'
-          promisedAt: '2026-11-09T09:00:00.000Z'
+          label: 'Green, large'
+          notes: 'Handle taped'
     fileParameters: []
     responses: []
     responseFields: []
@@ -485,16 +392,16 @@ endpoints:
     custom: []
     httpMethods:
       - PATCH
-    uri: 'api/v1/orders/{id}'
+    uri: 'api/v1/baskets/{id}'
     metadata:
       custom: []
-      groupName: Orders
+      groupName: Baskets
       groupDescription: |-
 
-        Laundry transactions: take them in, list and find them, and edit their notes and promised time.
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update the notes or the promised time'
+      title: "Update a basket's label or notes"
       description: ''
       authenticated: true
       deprecated: false
@@ -506,7 +413,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the order.'
+        description: 'The ID of the basket.'
         required: true
         example: 1
         type: integer
@@ -541,33 +448,33 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.notes:
+      data.attributes.label:
         custom: []
-        name: data.attributes.notes
-        description: 'Must not be greater than 2000 characters.'
+        name: data.attributes.label
+        description: 'Must not be greater than 100 characters.'
         required: false
-        example: 'Call before pickup.'
+        example: 'Green, large'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.promisedAt:
+      data.attributes.notes:
         custom: []
-        name: data.attributes.promisedAt
-        description: 'Must be a valid date.'
+        name: data.attributes.notes
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: '2026-11-09T09:00:00.000Z'
+        example: 'Handle taped'
         type: string
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          notes: 'Call before pickup.'
-          promisedAt: '2026-11-09T09:00:00.000Z'
+          label: 'Green, large'
+          notes: 'Handle taped'
     fileParameters: []
     responses: []
     responseFields: []
@@ -582,18 +489,19 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: 'api/v1/orders/{order_id}/status'
+    uri: 'api/v1/baskets/{basket_id}/retire'
     metadata:
       custom: []
-      groupName: Orders
-      groupDescription: ''
+      groupName: Baskets
+      groupDescription: |-
+
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Move an order to another stage'
+      title: 'Retire a basket'
       description: |-
-        Forward one stage at a time. An admin may go back one stage with a note. Completed needs a
-        zero balance and frees the baskets. 409 for a skip, the same status, a balance due, a completed
-        order or a stale scan; 403 for a move back without orders.revert; 422 for a move back without a note.
+        For a lost or broken basket: kept with its history, its number never reused.
+        409 while it holds an order or when already retired.
       authenticated: true
       deprecated: false
     headers:
@@ -601,10 +509,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      order_id:
+      basket_id:
         custom: []
-        name: order_id
-        description: 'The ID of the order.'
+        name: basket_id
+        description: 'The ID of the basket.'
         required: true
         example: 1
         type: integer
@@ -613,114 +521,143 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      order_id: 1
+      basket_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      data.attributes:
+      data.attributes.reason:
         custom: []
-        name: data.attributes
-        description: ''
+        name: data.attributes.reason
+        description: 'Why it is retired.'
         required: false
-        example: []
-        type: object
+        example: 'Cracked handle, replaced'
+        type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         deprecated: false
-      data:
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/baskets/{basket_id}/history'
+    metadata:
+      custom: []
+      groupName: Baskets
+      groupDescription: |-
+
+        The reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted.
+      subgroup: ''
+      subgroupDescription: ''
+      title: "A basket's history"
+      description: 'Every order it held, newest first, 10 per page.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      basket_id:
         custom: []
-        name: data
-        description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.toStatus:
-        custom: []
-        name: data.attributes.toStatus
-        description: 'received, washing, drying, folding, ready_for_pickup or released (Completed).'
+        name: basket_id
+        description: 'The ID of the basket.'
         required: true
-        example: washing
-        type: string
-        enumValues:
-          - received
-          - washing
-          - drying
-          - folding
-          - ready_for_pickup
-          - released
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.note:
-        custom: []
-        name: data.attributes.note
-        description: 'Required when an admin moves an order back. Must not be greater than 255 characters.'
-        required: false
-        example: null
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
-      data.relationships.basket.data:
-        custom: []
-        name: data.relationships.basket.data
-        description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.relationships.basket:
-        custom: []
-        name: data.relationships.basket
-        description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.relationships:
-        custom: []
-        name: data.relationships
-        description: ''
-        required: false
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.relationships.basket.data.id:
-        custom: []
-        name: data.relationships.basket.data.id
-        description: 'The scanned basket, if any.'
-        required: false
-        example: 7
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
-        nullable: true
+        nullable: false
         deprecated: false
-    cleanBodyParameters:
-      data:
-        attributes:
-          toStatus: washing
-        relationships:
-          basket:
-            data:
-              id: 7
+    cleanUrlParameters:
+      basket_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/scan/{code}'
+    metadata:
+      custom: []
+      groupName: Baskets
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Look up a scanned or typed code'
+      description: |-
+        `code` is a basket label URL (…/b/{token}), a bare token, a basket number (BSK-0007) or an
+        order number (LF-261108-0001). A basket answers with its active order (or null when it is
+        available, retired, or its last order is completed); an order number answers with the order.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      code:
+        custom: []
+        name: code
+        description: 'The scanned text.'
+        required: true
+        example: BSK-0007
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      code: BSK-0007
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
     auth:
       - headers

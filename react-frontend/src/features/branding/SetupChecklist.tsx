@@ -23,7 +23,10 @@ export function SetupChecklist() {
           {done} of {items.length} done
         </p>
       </div>
-      <ul className="mt-3 grid gap-1 sm:grid-cols-2">
+      <p className="mt-0.5 text-[13px] text-muted">
+        Some steps tick themselves. Tick the others when you have done them.
+      </p>
+      <ul className="mt-3 grid gap-x-6 gap-y-1 sm:grid-cols-2">
         {items.map((item) => (
           <li key={item.key} className="flex items-center gap-2">
             {item.auto || item.done ? (
@@ -54,7 +57,6 @@ export function SetupChecklist() {
             >
               {item.label}
             </Link>
-            {!item.auto && !item.done && <span className="text-xs text-muted">tick when done</span>}
           </li>
         ))}
       </ul>

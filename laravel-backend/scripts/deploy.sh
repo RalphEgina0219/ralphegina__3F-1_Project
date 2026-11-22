@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# LaundryFlow: update the API on the Hostinger server (docs/RELEASE_NOTES_wash-types.md).
+# LaundryFlow: update the API on the Hostinger server (docs/RELEASE_NOTES_2026-11_wash-types-and-branding.md).
 #
 # Run it on the server, from the laravel-backend folder:
 #
@@ -29,7 +29,7 @@ for argument in "$@"; do
   case "$argument" in
     --dry-run) DRY_RUN=1 ;;
     -h | --help)
-      sed -n '2,25p' "$0"
+      sed -n '2,24p' "$0"
       exit 0
       ;;
     *)
@@ -81,7 +81,7 @@ echo "Now at commit $BEFORE (write it down: it is the rollback point)."
 on_error() {
   echo >&2
   echo "The update FAILED. The site is still in maintenance mode." >&2
-  echo "Read the message above. To go back, follow 'Rollback' in docs/RELEASE_NOTES_wash-types.md" >&2
+  echo "Read the message above. To go back, follow 'Rollback' in docs/RELEASE_NOTES_2026-11_wash-types-and-branding.md" >&2
   echo "(restore the database backup, git checkout $BEFORE, composer install --no-dev, php artisan up)." >&2
 }
 trap on_error ERR

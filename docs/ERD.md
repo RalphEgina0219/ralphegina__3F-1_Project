@@ -170,6 +170,8 @@ erDiagram
         bigint id PK
         varchar code UK "cash | gcash | maya"
         varchar label
+        boolean is_active "default 1: off hides it from new payments only"
+        varchar display_label "nullable: the shop's own name for it"
     }
     payments {
         bigint id PK
@@ -248,6 +250,28 @@ erDiagram
         varchar receipt_footer
         smallint claim_policy_days
         boolean block_orders_on_low_soap "default 0 = warn and clamp, 1 = refuse with 409"
+        varchar system_name "default LaundryFlow"
+        varchar short_name "default LaundryFlow, at most 12 shown"
+        varchar tagline "nullable"
+        varchar logo_path "nullable, storage/app/public/branding"
+        varchar logo_dark_path "nullable"
+        varchar icon_path "nullable, square app icon"
+        json icons "generated PWA icons: 192, 512, maskable, apple, favicons"
+        char primary_color "default #0e7490"
+        char accent_color "default #3dd6e8"
+        char sidebar_color "default #0b2e3f"
+        varchar contact_email "nullable"
+        boolean show_contact_email "default 0"
+        varchar login_message "nullable"
+        varchar portal_message "nullable"
+        varchar report_footer "nullable"
+        json status_labels "nullable: display words only, codes never change"
+        varchar basket_prefix "default BSK, new baskets only"
+        varchar basket_label_footer "default Staff scan only"
+        boolean basket_label_show_shop_name "default 1"
+        boolean pay_at_pickup_enabled "default 1"
+        boolean show_powered_by "default 0"
+        json setup_checklist "nullable: the ticks of the first-login checklist"
         timestamp created_at
         timestamp updated_at
     }
@@ -279,6 +303,20 @@ erDiagram
 | `orders` (wash type) | `wash_type_id` (FK) |
 | `notifications` | `(recipient_type, sent_at)`; `(customer_id, read_at)` |
 | `audit_logs` | `created_at`; `(auditable_type, auditable_id)`; `(user_id, created_at)` |
+
+## Branding (migration of 2026-11-21)
+
+`2026_11_21_000100_add_branding_to_shop_settings` only adds columns, all nullable or with a default,
+so a live database keeps working untouched:
+
+- `shop_settings`: the branding columns shown in the diagram above. The defaults are today's look
+  (LaundryFlow, `#0e7490`, `#3dd6e8`, `#0b2e3f`, prefix `BSK`, every option on), so nothing changes
+  until the owner edits Settings > Branding & Appearance.
+- `payment_methods`: `is_active` (default on) and `display_label`. Turning a method off never alters
+  an old payment: `payments.payment_method_id` still points at it and old receipts show it.
+- Status labels are stored as display text only: `order_statuses.code` and every status rule are untouched.
+- Image files are not in the database, only their paths; the files live in
+  `storage/app/public/branding/` under content-hashed names.
 
 ## Wash types and soap usage (migrations of 2026-11-20)
 

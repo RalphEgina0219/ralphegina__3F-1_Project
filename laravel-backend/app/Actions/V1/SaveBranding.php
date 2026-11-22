@@ -144,8 +144,12 @@ final class SaveBranding
         return DB::transaction(function () use ($kind, $column, $image, $user) {
             $settings = ShopSetting::query()->lockForUpdate()->findOrFail(1);
             $old = $settings->{$column};
-            $settings->update([$column => ImageTools::store($image, $kind === 'icon' ? 'icon-source' : str_replace('-', '', $kind))]);
-            ImageTools::delete($old);
+            $new = ImageTools::store($image, $kind === 'icon' ? 'icon-source' : str_replace('-', '', $kind));
+            $settings->update([$column => $new]);
+            // File names are content hashes: the same picture again is the same file, so keep it.
+            if ($old !== $new) {
+                ImageTools::delete($old);
+            }
             if ($kind !== 'logo-dark') {
                 $this->regenerateIcons($settings);
             }
@@ -206,19 +210,34 @@ final class SaveBranding
     /** Rebuilds the PWA icons from the app icon (or, without one, the logo) on the primary colour. */
     private function regenerateIcons(ShopSetting $settings): void
     {
-        foreach (array_values((array) $settings->icons) as $path) {
-            ImageTools::delete($path);
-        }
+        $oldPaths = array_values((array) $settings->icons);
         $source = $settings->icon_path ?: $settings->logo_path;
         $image = $source && Storage::disk(ImageTools::DISK)->exists($source) ? @imagecreatefromstring(Storage::disk(ImageTools::DISK)->get($source)) : false;
         if (! $image instanceof GdImage) {
             $settings->update(['icons' => null]);
+            $this->deleteExcept($oldPaths, []);
 
             return;
         }
         imagealphablending($image, false);
         imagesavealpha($image, true);
-        $settings->update(['icons' => ImageTools::icons($image, $settings->primary_color)]);
+        $icons = ImageTools::icons($image, $settings->primary_color);
+        $settings->update(['icons' => $icons]);
+        $this->deleteExcept($oldPaths, array_values($icons));
+    }
+
+    /**
+     * Deletes old files that the new set no longer uses (a file name is a content hash, so an
+     * unchanged icon keeps its name and must stay).
+     *
+     * @param  list<string>  $old
+     * @param  list<string>  $keep
+     */
+    private function deleteExcept(array $old, array $keep): void
+    {
+        foreach (array_diff($old, $keep) as $path) {
+            ImageTools::delete($path);
+        }
     }
 
     /**

@@ -90,10 +90,7 @@ function Mini({
 /** The live preview: light and dark side by side, updated as the owner edits. */
 export function BrandPreview(props: PreviewProps) {
   return (
-    <div
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
-      data-testid="brand-preview"
-    >
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1" data-testid="brand-preview">
       <Mini mode="light" {...props} />
       <Mini mode="dark" {...props} />
     </div>

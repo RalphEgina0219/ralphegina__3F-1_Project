@@ -29,7 +29,7 @@ describe('the public branding endpoint', function () {
             ->assertJsonPath('data.attributes.statusLabels.ready_for_pickup', 'Ready for Pickup');
         expect(collect($response->json('data.attributes.paymentMethods'))->pluck('code')->all())->toBe(['cash', 'gcash', 'maya']);
         expect($response->headers->get('ETag'))->not->toBeNull();
-        expect($response->headers->get('Cache-Control'))->toContain('max-age=60');
+        expect($response->headers->get('Cache-Control'))->toContain('must-revalidate');
     });
 
     it('holds nothing private, and the contact email only when the owner shows it', function () {
@@ -195,6 +195,24 @@ describe('logo and icon uploads', function () {
 
         $this->asStaff()->deleteJson('/api/v1/settings/branding/logo')->assertOk()->assertJsonPath('data.attributes.logoUrl', null);
         expect(Storage::disk('public')->allFiles('branding'))->toBe([]);
+    });
+
+    it('keeps the files when the very same picture is uploaded again', function () {
+        $png = fn () => UploadedFile::fake()->image('logo.png', 300, 300);
+        $first = $this->upload('logo', $png())->assertOk();
+        $again = $this->upload('logo', $png())->assertOk();
+        expect($again->json('data.attributes.logoUrl'))->toBe($first->json('data.attributes.logoUrl'));
+        $urls = [$again->json('data.attributes.logoUrl'), ...array_values($again->json('data.attributes.iconUrls'))];
+        foreach ($urls as $url) {
+            expect(Storage::disk('public')->exists(ltrim(str_replace('/storage/', '', $url), '/')))->toBeTrue($url);
+        }
+        // Changing the primary color rebuilds the maskable icon and keeps the unchanged ones.
+        $this->putBranding(['primaryColor' => '#7c3aed'])->assertOk();
+        $after = $this->asStaff()->getJson('/api/v1/settings/branding')->json('data.attributes.iconUrls');
+        foreach ($after as $url) {
+            expect(Storage::disk('public')->exists(ltrim(str_replace('/storage/', '', $url), '/')))->toBeTrue($url);
+        }
+        expect(Storage::disk('public')->allFiles('branding'))->toHaveCount(count($after) + 1);
     });
 
     it('refuses SVG, other types, oversize files and images that are too small, and staff cannot upload', function () {

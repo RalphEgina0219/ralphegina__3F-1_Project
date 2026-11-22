@@ -14,6 +14,9 @@ tags:
     name: Baskets
     description: "\nThe reusable QR baskets. Each label is permanent; a lost basket is retired, never deleted."
   -
+    name: Branding
+    description: "\nWhite-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds\nevery screen before sign-in; the owner edits them in Settings > Branding & Appearance."
+  -
     name: 'Customer portal'
     description: "\nThe signed-in customer's own orders. Every query is scoped to that customer: another\ncustomer's order answers 404, exactly like one that does not exist, so numbers cannot be probed."
   -
@@ -624,6 +627,454 @@ paths:
         required: true
         schema:
           type: string
+  /api/v1/branding:
+    get:
+      summary: 'Public branding'
+      operationId: publicBranding
+      description: "No sign-in needed (the login page and the customer portal read it first). Nothing private is in\nit; the contact email only when the owner chose to show it. Sends an ETag; browsers revalidate it\nevery time (an unchanged answer is a tiny 304), so a saved change shows at once."
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    type: branding
+                    id: 1
+                    attributes:
+                      systemName: LaundryFlow
+                      shortName: LaundryFlow
+                      tagline: null
+                      logoUrl: null
+                      logoDarkUrl: null
+                      iconUrls: null
+                      primaryColor: '#0e7490'
+                      accentColor: '#3dd6e8'
+                      sidebarColor: '#0b2e3f'
+                      buttonTextColor: '#ffffff'
+                      statusLabels:
+                        received: Received
+                        washing: Washing
+                        drying: Drying
+                        folding: Folding
+                        ready_for_pickup: 'Ready for Pickup'
+                        released: Completed
+                      basketPrefix: BSK
+                      basketLabelFooter: 'Staff scan only'
+                      basketLabelShowShopName: true
+                      payAtPickupEnabled: true
+                      paymentMethods:
+                        -
+                          code: cash
+                          label: Cash
+                          isActive: true
+                        -
+                          code: gcash
+                          label: GCash
+                          isActive: true
+                        -
+                          code: maya
+                          label: Maya
+                          isActive: true
+                      loginMessage: null
+                      portalMessage: null
+                      reportFooter: null
+                      showPoweredBy: false
+                      shop:
+                        name: LaundryFlow
+                        address: 'Brgy. Poblacion, Bongabong, Oriental Mindoro'
+                        contactNumber: '[SHOP CONTACT NO.]'
+                        openingHours: 'Open daily 7:00 AM – 7:00 PM'
+                        contactEmail: null
+                      version: dcf03cddda8b
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: branding
+                      id:
+                        type: integer
+                        example: 1
+                      attributes:
+                        type: object
+                        properties:
+                          systemName:
+                            type: string
+                            example: LaundryFlow
+                          shortName:
+                            type: string
+                            example: LaundryFlow
+                          tagline:
+                            type: string
+                            example: null
+                            nullable: true
+                          logoUrl:
+                            type: string
+                            example: null
+                            nullable: true
+                          logoDarkUrl:
+                            type: string
+                            example: null
+                            nullable: true
+                          iconUrls:
+                            type: string
+                            example: null
+                            nullable: true
+                          primaryColor:
+                            type: string
+                            example: '#0e7490'
+                          accentColor:
+                            type: string
+                            example: '#3dd6e8'
+                          sidebarColor:
+                            type: string
+                            example: '#0b2e3f'
+                          buttonTextColor:
+                            type: string
+                            example: '#ffffff'
+                          statusLabels:
+                            type: object
+                            properties:
+                              received:
+                                type: string
+                                example: Received
+                              washing:
+                                type: string
+                                example: Washing
+                              drying:
+                                type: string
+                                example: Drying
+                              folding:
+                                type: string
+                                example: Folding
+                              ready_for_pickup:
+                                type: string
+                                example: 'Ready for Pickup'
+                              released:
+                                type: string
+                                example: Completed
+                          basketPrefix:
+                            type: string
+                            example: BSK
+                          basketLabelFooter:
+                            type: string
+                            example: 'Staff scan only'
+                          basketLabelShowShopName:
+                            type: boolean
+                            example: true
+                          payAtPickupEnabled:
+                            type: boolean
+                            example: true
+                          paymentMethods:
+                            type: array
+                            example:
+                              -
+                                code: cash
+                                label: Cash
+                                isActive: true
+                              -
+                                code: gcash
+                                label: GCash
+                                isActive: true
+                              -
+                                code: maya
+                                label: Maya
+                                isActive: true
+                            items:
+                              type: object
+                              properties:
+                                code:
+                                  type: string
+                                  example: cash
+                                label:
+                                  type: string
+                                  example: Cash
+                                isActive:
+                                  type: boolean
+                                  example: true
+                          loginMessage:
+                            type: string
+                            example: null
+                            nullable: true
+                          portalMessage:
+                            type: string
+                            example: null
+                            nullable: true
+                          reportFooter:
+                            type: string
+                            example: null
+                            nullable: true
+                          showPoweredBy:
+                            type: boolean
+                            example: false
+                          shop:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: LaundryFlow
+                              address:
+                                type: string
+                                example: 'Brgy. Poblacion, Bongabong, Oriental Mindoro'
+                              contactNumber:
+                                type: string
+                                example: '[SHOP CONTACT NO.]'
+                              openingHours:
+                                type: string
+                                example: 'Open daily 7:00 AM – 7:00 PM'
+                              contactEmail:
+                                type: string
+                                example: null
+                                nullable: true
+                          version:
+                            type: string
+                            example: dcf03cddda8b
+      tags:
+        - Branding
+      security: []
+  /api/v1/settings/branding:
+    get:
+      summary: 'Branding for editing (owner): the public payload plus the private fields and the setup checklist.'
+      operationId: brandingForEditingownerThePublicPayloadPlusThePrivateFieldsAndTheSetupChecklist
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  errors:
+                    -
+                      status: 401
+                      message: Unauthenticated
+                      source: ''
+                properties:
+                  errors:
+                    type: array
+                    example:
+                      -
+                        status: 401
+                        message: Unauthenticated
+                        source: ''
+                    items:
+                      type: object
+                      properties:
+                        status:
+                          type: integer
+                          example: 401
+                        message:
+                          type: string
+                          example: Unauthenticated
+                        source:
+                          type: string
+                          example: ''
+      tags:
+        - Branding
+    put:
+      summary: 'Update the branding'
+      operationId: updateTheBranding
+      description: "Only the fields sent change. Colors are #RRGGBB and must keep button text readable; status\nlabels are display names only (the codes never change); at least one way to pay stays on."
+      parameters: []
+      responses: {  }
+      tags:
+        - Branding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: ''
+                  example: []
+                  properties:
+                    attributes:
+                      type: object
+                      description: ''
+                      example: []
+                      properties:
+                        systemName:
+                          type: string
+                          description: 'Must be at least 1 character. Must not be greater than 60 characters.'
+                          example: b
+                        shortName:
+                          type: string
+                          description: 'Must be at least 1 character. Must not be greater than 12 characters.'
+                          example: ngzm
+                        tagline:
+                          type: string
+                          description: 'Must not be greater than 120 characters.'
+                          example: i
+                          nullable: true
+                        primaryColor:
+                          type: string
+                          description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+                          example: '#FeeEdB'
+                        accentColor:
+                          type: string
+                          description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+                          example: '#FeeEdB'
+                        sidebarColor:
+                          type: string
+                          description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+                          example: '#FeeEdB'
+                        contactEmail:
+                          type: string
+                          description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                          example: jermaine.tillman@example.org
+                          nullable: true
+                        showContactEmail:
+                          type: boolean
+                          description: ''
+                          example: true
+                        loginMessage:
+                          type: string
+                          description: 'Must not be greater than 300 characters.'
+                          example: h
+                          nullable: true
+                        portalMessage:
+                          type: string
+                          description: 'Must not be greater than 300 characters.'
+                          example: w
+                          nullable: true
+                        reportFooter:
+                          type: string
+                          description: 'Must not be greater than 300 characters.'
+                          example: a
+                          nullable: true
+                        statusLabels:
+                          type: object
+                          description: ''
+                          example: null
+                          properties: {  }
+                        basketPrefix:
+                          type: string
+                          description: 'Must match the regex /^[A-Za-z]{2,8}$/.'
+                          example: ZM
+                        basketLabelFooter:
+                          type: string
+                          description: 'Must not be greater than 80 characters.'
+                          example: i
+                          nullable: true
+                        basketLabelShowShopName:
+                          type: boolean
+                          description: ''
+                          example: true
+                        payAtPickupEnabled:
+                          type: boolean
+                          description: ''
+                          example: true
+                        showPoweredBy:
+                          type: boolean
+                          description: ''
+                          example: true
+                        paymentMethods:
+                          type: object
+                          description: ''
+                          example: null
+                          properties: {  }
+                  required:
+                    - attributes
+              required:
+                - data
+  /api/v1/settings/branding/reset:
+    post:
+      summary: 'Reset to the LaundryFlow defaults (name, logo, colors, labels, basket and payment options)'
+      operationId: resetToTheLaundryFlowDefaultsnameLogoColorsLabelsBasketAndPaymentOptions
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Branding
+  '/api/v1/settings/branding/{kind}':
+    post:
+      summary: 'Upload the logo, the dark-mode logo or the app icon'
+      operationId: uploadTheLogoTheDarkModeLogoOrTheAppIcon
+      description: "Multipart field `file`: PNG, JPG or WebP (no SVG), up to 2 MB, at least 128 px on the short side\n(the icon: square, at least 512 px). The server re-encodes it, so no metadata survives."
+      parameters: []
+      responses: {  }
+      tags:
+        - Branding
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. Must not be greater than 2048 kilobytes.'
+              required:
+                - file
+    delete:
+      summary: 'Remove the logo, the dark-mode logo or the app icon'
+      operationId: removeTheLogoTheDarkModeLogoOrTheAppIcon
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Branding
+    parameters:
+      -
+        in: path
+        name: kind
+        description: 'logo, logo-dark or icon.'
+        example: logo
+        required: true
+        schema:
+          type: string
+  /api/v1/settings/setup-checklist:
+    put:
+      summary: 'Tick a first-login checklist item'
+      operationId: tickAFirstLoginChecklistItem
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Branding
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  description: ''
+                  example:
+                    attributes:
+                      key: rates
+                  properties:
+                    attributes:
+                      type: object
+                      description: ''
+                      example:
+                        key: rates
+                      properties:
+                        key:
+                          type: string
+                          description: 'branding, shop, rates, soaps, staff or labels.'
+                          example: rates
+                        done:
+                          type: boolean
+                          description: ''
+                          example: true
+                      required:
+                        - key
+                        - done
   /api/v1/customer/account:
     patch:
       summary: 'Update my details'

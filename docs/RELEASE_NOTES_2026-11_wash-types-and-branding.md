@@ -4,9 +4,14 @@ One update, two releases in one go. It takes the live server from commit **`5551
 to the latest `main`. It changes a **live** shop with real orders, payments and stock, so read the
 whole page once before you start. Every step is written to be copied and pasted by one person.
 
-Placeholders you replace: `<user>` (Hostinger SSH username, like `u123456789`), `<domain>` (your
-domain), `<ip>` (the server IP shown in hPanel > Advanced > SSH Access), `<zip>` (the full path of the
-uploaded frontend zip, see step 4). The SSH port is usually `65002`.
+It matches how the live site was set up (`docs/HOSTINGER.md`): the repository is cloned at
+`~/domains/laundryflow-shop.online/laundryflow`, Laravel is `laundryflow/laravel-backend`, and
+`public_html` holds the React build plus `laravel.php` and `.htaccess`, made with
+`npm run build:hostinger` and extracted with File Manager. Over SSH, `php` is already PHP 8.3, and
+Composer must run with `--no-scripts` (Hostinger blocks `proc_open`).
+
+Placeholders you replace: `<user>` (Hostinger SSH username, like `u123456789`) and `<ip>` (the server
+IP shown in hPanel > Advanced > SSH Access). The SSH port is `65002`.
 
 ## What is new
 
@@ -52,17 +57,27 @@ total, paid amount, balance and payment status, payments by method, the stock of
 rows in every table that existed, and the Sales, Payments, Orders and Services report figures. The
 branding defaults equal today's look.
 
+The live layout (`public_html/laravel.php` booting Laravel from `laundryflow/laravel-backend`, the
+`.htaccess` rules) was also tried end to end on a copy: the manifest, a logo upload and the generated
+icons are all served through `laravel.php` with **no storage symlink anywhere**.
+
+## 0. Before you start: turn on PHP's gd extension
+
+Logos and app icons are processed with PHP's **gd** extension. The first-time setup did not list it.
+
+hPanel > **Advanced** > **PHP Configuration** > tab **PHP extensions** > make sure **gd** is ticked >
+**Save**. (If it was already ticked, change nothing.) The update itself works without it, but logo
+uploads are refused with a clear message until it is on.
+
 ## 1. Back up (do not skip this)
 
 **The database.** hPanel > **Databases** > **phpMyAdmin** (Enter) > choose `<user>_laundryflow` >
 **Export** > Quick, format SQL > **Export**. Save the file on your laptop as
 `laundryflow-before-branding.sql`. It is your way back (step 7).
 
-**Uploaded files, if any.** hPanel > **Files** > **File Manager** > `domains/<domain>/laundryflow/laravel-backend/storage/app/public`.
-If that folder exists and has files, select it > **Download** (or **Compress** then download). On a
-shop that never had uploads it does not exist or is empty: nothing to save.
+The current `public_html` and any uploaded files are backed up over SSH in step 2.
 
-## 2. Connect and check where you are
+## 2. Connect, check where you are, and back up the files
 
 On your PC (PowerShell):
 
@@ -73,95 +88,118 @@ ssh -p 65002 <user>@<ip>
 On the server:
 
 ```bash
-cd ~/domains/<domain>/laundryflow/laravel-backend
-/opt/alt/php83/usr/bin/php -v
-/opt/alt/php83/usr/bin/php -m | grep -i gd
+cd ~/domains/laundryflow-shop.online/laundryflow/laravel-backend
+php -v
+php -m | grep -i gd
 git log -1 --oneline
 ```
 
 - `php -v` must say **PHP 8.3** or newer.
-- `php -m | grep -i gd` must print `gd` (logos and app icons need it).
+- `php -m | grep -i gd` should print `gd` (if not, do step 0 again, then `exit` and reconnect).
 - `git log -1` must start with **`5551f58`**. If it shows something else, stop and ask before going on.
+
+Back up the current site and any uploads (each line is safe; an empty folder is fine):
+
+```bash
+cd ~/domains/laundryflow-shop.online
+tar -czf public_html-before-branding.tar.gz -C public_html .
+[ -d laundryflow/laravel-backend/storage/app/public ] && tar -czf storage-public-before-branding.tar.gz -C laundryflow/laravel-backend/storage/app/public .
+ls -la *-before-branding.tar.gz
+cd laundryflow/laravel-backend
+```
 
 ## 3. Maintenance mode, new code, deploy script
 
 ```bash
-/opt/alt/php83/usr/bin/php artisan down --retry=60
+php artisan down --retry=60
 git pull --ff-only
 bash scripts/deploy.sh
 ```
 
 Visitors see "Service Unavailable" until the script finishes. The script is part of this update (it is
-not on the server before the `git pull`). It uses PHP 8.3 by itself (if it cannot find it:
-`PHP_BIN=/opt/alt/php83/usr/bin/php bash scripts/deploy.sh`). In order, it:
+not on the server before the `git pull`). In order, it:
 
-1. finds PHP 8.3+ and prints the commit it started from;
+1. finds PHP 8.3+ (`php` on this server; `PHP_BIN=/path/to/php bash scripts/deploy.sh` to choose another) and prints the commit it started from;
 2. turns maintenance mode on (already on: harmless);
 3. `git pull --ff-only` (nothing new: it never merges on the server);
-4. `composer install --no-dev --optimize-autoloader` (production packages only);
+4. `composer install --no-dev --optimize-autoloader --no-interaction --no-scripts`, then `php artisan package:discover --ansi`;
 5. `php artisan migrate --force`: **all four pending migrations**, never fresh;
 6. the reference-data seeder: `php artisan db:seed --class=WashTypeReferenceSeeder --force` (adds only what is missing);
-7. **`php artisan storage:link`**, safe to repeat; if the host forbids symlinks it only warns (logos are served by Laravel itself, see `docs/NEW_SHOP_SETUP.md`);
-8. rebuilds the caches (`optimize:clear`, `config:cache`, `route:cache`, `view:cache`);
+7. `php artisan storage:link`, **optional**: if a link exists it is left alone; if the host refuses it, the script warns and continues (logos are served by Laravel through `laravel.php`);
+8. rebuilds the caches: `php artisan optimize:clear`, then `php artisan optimize`;
 9. maintenance mode off (`php artisan up`);
-10. health check: `<domain>/api/v1/health` must answer `ok`.
+10. health check: `https://laundryflow-shop.online/api/v1/health` must answer `ok`.
 
 It stops at the first error and leaves the site in maintenance mode: read the message, then follow
 step 7 if you cannot fix it. `bash scripts/deploy.sh --dry-run` shows the commands without running them.
 
-**The same by hand**, if the script cannot be used (replace `php` with `/opt/alt/php83/usr/bin/php`
-if `php -v` shows an older version):
+**The same by hand**, if the script cannot be used:
 
 ```bash
-cd ~/domains/<domain>/laundryflow/laravel-backend
+cd ~/domains/laundryflow-shop.online/laundryflow/laravel-backend
 php artisan down --retry=60
 git pull --ff-only
-composer install --no-dev --optimize-autoloader --no-interaction
+composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+php artisan package:discover --ansi
 php artisan migrate --force
 php artisan db:seed --class=WashTypeReferenceSeeder --force
-php artisan storage:link        # an "already exists" message is fine
+php artisan storage:link        # optional: "already exists" or a refusal are both fine
 php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan optimize
 php artisan up
 ```
 
-## 4. The frontend
+## 4. The frontend (`npm run build:hostinger`, then File Manager)
 
-**On your PC**, make the release zip and note its name and folder:
+**On your PC** (a new PowerShell window), from the **project root**:
 
 ```powershell
-cd "C:\laragon\www\Final_Project_WST&AppDev\react-frontend"
-npm run release
+cd "C:\laragon\www\Final_Project_WST&AppDev"
+git pull
+npm run build:hostinger
 ```
 
-It prints the zip's name and path. For this update (built from `main` at `0c94065`) it is
-**`laundryflow-frontend-v0.1.0-20261122-1337-0c94065.zip`**, in `react-frontend\release\`. If you build it
-again, the date and time in the name change: always use the name the command just printed. **Do not
-upload an older zip** (the one from the wash-types release is replaced by this one).
+It type-checks, builds the app for the real API (the same Vite production build as `npm run release`),
+checks the result and ends with:
 
-hPanel > **Websites** > your domain > **Files** > **File Manager**. Open `domains/<domain>/` (the folder
-that holds `public_html` and `laundryflow`, **not** `public_html` itself) and **Upload** the zip.
+```text
+[laundryflow] Ready: build\hostinger\public_html\  (16 entries)
+[laundryflow]        build\hostinger\public_html.zip  -> upload into public_html, then Extract.
+```
 
-**On the server**, install it with the **full path** of the uploaded zip:
+The file to upload is `C:\laragon\www\Final_Project_WST&AppDev\build\hostinger\public_html.zip`. It
+contains `index.html`, `assets/`, `sw.js`, `workbox-*.js`, the icons, `laravel.php` and the new hidden
+`.htaccess`, and **no** `manifest.webmanifest` (Laravel makes that one now). The build stops with a
+message if any of that is wrong.
+
+**In hPanel > Files > File Manager**, open `public_html` (double-click):
+
+1. **Delete only these two**, if they are there: the folder `assets` and the file
+   `manifest.webmanifest`. Leave everything else. **Never delete a `storage` folder or link** if one
+   exists in `public_html`.
+2. **Upload** (arrow up) > **File** > choose `build\hostinger\public_html.zip`.
+3. Right-click `public_html.zip` > **Extract**. The destination must be **`public_html` itself** (not a
+   new subfolder). When it asks about files that already exist, choose **overwrite / replace all**:
+   `index.html`, `sw.js`, the icons, `laravel.php` and `.htaccess` must be the new ones.
+4. Delete `public_html.zip`.
+
+Check from the SSH window that the new `.htaccess` and no static manifest are there:
 
 ```bash
-cd ~/domains/<domain>/laundryflow/laravel-backend
-bash scripts/install-frontend.sh ~/domains/<domain>/laundryflow-frontend-v0.1.0-20261122-1337-0c94065.zip
+grep -c "storage/branding" ~/domains/laundryflow-shop.online/public_html/.htaccess
+ls ~/domains/laundryflow-shop.online/public_html/manifest.webmanifest
 ```
 
-The script checks it is a LaundryFlow release, saves the current site as
-`frontend-backup-<date>.tar.gz` next to `public_html` (for step 7), removes the old `assets/` and the
-old static `manifest.webmanifest`, unpacks the release over `public_html` and keeps `.htaccess` (the new
-one sends `/manifest.webmanifest` and `/storage/branding/*` to Laravel). Then delete the uploaded zip in
-File Manager.
+The first prints `1` or more. The second must say **No such file or directory**. (If it lists the
+file, delete it in File Manager.)
+
+(`npm run release` and `scripts/install-frontend.sh` are not needed on this setup.)
 
 ## 5. Check it
 
 Open the site in a normal window, signed in as the owner.
 
-1. `https://<domain>/api/v1/health` shows `"status":"ok","database":"ok"`.
+1. `https://laundryflow-shop.online/api/v1/health` shows `"status":"ok","database":"ok"`.
 2. **Same default look**: the name is **LaundryFlow**, the colors and the sidebar are as they were, the
    status words (Received, Washing, Drying, Folding, Ready for Pickup, Completed) are unchanged.
 3. **Old orders are unchanged**: open an old order: **Regular washing, no extra charge**, same total,
@@ -171,12 +209,14 @@ Open the site in a normal window, signed in as the owner.
    Pay at pickup.
 6. **Dark mode**: press the moon button in the top bar: the whole app turns dark; reload: it stays dark.
    Press the sun: light again. The sign-in page (signed out) has the same button in its top-right corner.
-7. **The manifest**: `https://<domain>/manifest.webmanifest` loads (JSON with `"name":"LaundryFlow"`).
+7. **The manifest**: `https://laundryflow-shop.online/manifest.webmanifest` loads (JSON with
+   `"name":"LaundryFlow"`).
 8. **Storage works**: Settings > Branding & Appearance > upload a small logo (PNG, at least 128 px): it
-   appears in the sidebar and still shows after a reload; `https://<domain>/storage/branding/` plus the
-   file name opens the image. If you do not want to keep it, press **Remove** (or **Reset to LaundryFlow
-   defaults**).
-9. Open the app once on a phone or a second tab: **"A new version is available. Reload"**. Tap it.
+   appears in the sidebar and still shows after a reload. If you do not want to keep it, press
+   **Remove** (or **Reset to LaundryFlow defaults**).
+9. Refresh a page like `/orders` with **F5**: it stays on Orders (the `.htaccess` still sends every
+   screen to the app).
+10. Open the app once on a phone or a second tab: **"A new version is available. Reload"**. Tap it.
 
 Phones that **already installed** the app may keep the old name and icon until the app is installed
 again: that is how phones work.
@@ -201,21 +241,32 @@ Changes apply to new orders only. Existing orders keep their prices.
 
 Use this if something is wrong and cannot be fixed quickly. The order matters.
 
-1. **Maintenance mode**: `cd ~/domains/<domain>/laundryflow/laravel-backend` then
-   `/opt/alt/php83/usr/bin/php artisan down`.
+1. **Maintenance mode**: `cd ~/domains/laundryflow-shop.online/laundryflow/laravel-backend` then
+   `php artisan down`.
 2. **Restore the database** from step 1: phpMyAdmin > your database > **Import** >
    `laundryflow-before-branding.sql`. (The backup recreates each table, so the new tables and columns
    disappear with it.) Orders or payments taken after the update are lost with it: write them down first.
-3. **Old code**: `git checkout 5551f58c0db09609f0cb9f398a01181621a5fbd3` then
-   `composer install --no-dev --optimize-autoloader --no-interaction` (if `php -v` is older than 8.3, run
-   it as `/opt/alt/php83/usr/bin/php $(which composer) install --no-dev --optimize-autoloader --no-interaction`).
-4. **Caches**: `php artisan optimize:clear`, then `config:cache`, `route:cache`, `view:cache`.
-5. **Remove the uploaded branding files**: `rm -rf storage/app/public/branding` (and, if it exists,
-   the link `rm -f public/storage`). Restore the `storage/app/public` you downloaded in step 1, if you had one.
-6. **Old frontend**: in the folder that holds `public_html`:
-   `rm -rf public_html/assets && tar -xzf frontend-backup-<date>.tar.gz -C public_html`. (This also puts
-   back the old static manifest and `.htaccess`.)
-7. **Back online**: `php artisan up`, then check `https://<domain>/api/v1/health`.
+3. **Old code**:
+   ```bash
+   git checkout 5551f58c0db09609f0cb9f398a01181621a5fbd3
+   composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+   php artisan package:discover --ansi
+   php artisan optimize:clear
+   php artisan optimize
+   ```
+4. **Uploaded branding files**: `rm -rf storage/app/public/branding`. If you saved
+   `storage-public-before-branding.tar.gz` in step 2, put it back:
+   `tar -xzf ../../storage-public-before-branding.tar.gz -C storage/app/public`. Leave an existing
+   `public/storage` link alone (the old code ignores it).
+5. **Old frontend** (the backup from step 2):
+   ```bash
+   cd ~/domains/laundryflow-shop.online
+   rm -rf public_html/assets
+   tar -xzf public_html-before-branding.tar.gz -C public_html
+   ```
+   This puts back the old `index.html`, `sw.js`, static manifest and `.htaccess`.
+6. **Back online**: `cd laundryflow/laravel-backend && php artisan up`, then check
+   `https://laundryflow-shop.online/api/v1/health`.
 
 Only if **no order has used soap yet**, the migrations can be undone without the backup:
 `php artisan migrate:rollback --step=4 --force`. It refuses, changing nothing, once soap was used.
@@ -227,11 +278,12 @@ To come forward again later: `git checkout main && git pull --ff-only`, then ste
   without `--class=`** (it duplicates the demo data). Only `migrate --force` and
   `db:seed --class=WashTypeReferenceSeeder --force`.
 - Never run the demo seeder, and never copy a `.env` file anywhere public.
+- Never delete a storage link or folder; never `composer install` without `--no-scripts` here.
 
 ## Files in this release
 
-- `laravel-backend/scripts/deploy.sh`: the API update. `laravel-backend/scripts/install-frontend.sh`: installs a frontend zip.
-- `npm run release` (in `react-frontend` or at the project root): builds the zip.
-- `docs/hostinger/public_html/.htaccess`: part of the zip (routes the manifest and uploaded logos to Laravel).
+- `laravel-backend/scripts/deploy.sh`: the API update (above).
+- `npm run build:hostinger` (project root, `scripts/build-hostinger.mjs`): builds and checks `build/hostinger/public_html.zip`.
+- `docs/hostinger/public_html/.htaccess` and `laravel.php`: part of that zip (route the API, the manifest and uploaded logos to Laravel).
 - `php artisan laundryflow:install`: names a **new** shop (`docs/NEW_SHOP_SETUP.md`).
 - More: `docs/HOSTINGER.md` (first-time setup), `docs/SYSTEM_OVERVIEW.md`, `docs/ERD.md`, `docs/API_INVENTORY.md`.

@@ -56,6 +56,30 @@ if (fs.existsSync(path.join(publicHtml, 'mockServiceWorker.js'))) {
 // Netlify's redirect file (the demo deploy) means nothing to Hostinger: .htaccess does that job.
 fs.rmSync(path.join(publicHtml, '_redirects'), { force: true });
 
+// What the server needs, checked before anything is zipped (a wrong public_html must not ship).
+const problems = [];
+for (const file of ['index.html', '.htaccess', 'laravel.php', 'sw.js']) {
+  if (!fs.existsSync(path.join(publicHtml, file))) problems.push(`${file} is missing`);
+}
+// The installed-app manifest comes from Laravel (the shop's branding): no static copy may exist,
+// or nothing may precache one.
+if (fs.existsSync(path.join(publicHtml, 'manifest.webmanifest'))) {
+  problems.push('a static manifest.webmanifest is in the build (it must come from Laravel)');
+}
+const htaccess = fs.readFileSync(path.join(publicHtml, '.htaccess'), 'utf8');
+for (const rule of ['api/', 'up$', 'manifest\\.webmanifest$', 'storage/branding/']) {
+  if (!new RegExp(`RewriteRule \\^\\([^)]*${rule.replace(/[$.\\/]/g, (c) => `\\${c}`)}`).test(htaccess)) {
+    problems.push(`.htaccess does not send ${rule.replace(/\\/g, '')} to laravel.php`);
+  }
+}
+const sw = fs.readFileSync(path.join(publicHtml, 'sw.js'), 'utf8');
+if (/url:"manifest\.webmanifest"/.test(sw)) problems.push('sw.js precaches the manifest');
+if (problems.length > 0) {
+  for (const problem of problems) console.error(`[laundryflow] ${problem}.`);
+  console.error('[laundryflow] Stopping: this public_html is not right for the live site.');
+  process.exit(1);
+}
+
 // Windows 10+ and macOS ship bsdtar, which writes .zip files; without it, upload the folder.
 // On Windows call it by path: in Git Bash, "tar" is GNU tar, which cannot write a zip.
 const bsdtar =
@@ -74,6 +98,8 @@ if (zipped) {
   console.log('[laundryflow] No zip (tar could not write one): upload the folder contents instead.');
 }
 console.log('[laundryflow] Includes the hidden .htaccess: keep it when uploading.');
+console.log('[laundryflow] Updating a live site: in public_html delete assets/ and manifest.webmanifest');
+console.log('[laundryflow] first (never a storage link), then upload the zip and Extract over the rest.');
 
 if (process.argv.includes('--release')) {
   if (!zipped) {

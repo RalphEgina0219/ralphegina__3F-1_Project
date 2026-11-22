@@ -46,7 +46,8 @@ DirectoryIndex index.html
 
     # The app shell, the service worker and the manifest must never be served stale, or
     # updates stop arriving. The hashed files in assets/ never change, so they cache for a year.
-    <FilesMatch "^(index\.html|sw\.js|registerSW\.js)$">
+    # (Laravel also sends no-cache on /manifest.webmanifest; this line covers a stray static copy.)
+    <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
         Header set Cache-Control "no-cache"
     </FilesMatch>
     <If "%{REQUEST_URI} =~ m#^/assets/#">

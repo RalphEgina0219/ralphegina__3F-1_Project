@@ -2,8 +2,10 @@
 
 /*
  * Hostinger front controller (docs/HOSTINGER.md). public_html holds the React build; .htaccess
- * sends /api/* and /up here, and this file boots Laravel from outside the web root, so .env,
- * vendor/ and storage/ can never be downloaded.
+ * sends /api/*, /up, /manifest.webmanifest and /storage/branding/* here, and this file boots
+ * Laravel from outside the web root, so .env, vendor/ and storage/ can never be downloaded.
+ * The branded manifest and the uploaded logos and icons are Laravel routes (routes/web.php) that
+ * read storage/app/public/branding directly, so no storage symlink is needed in public_html.
  *
  * It is laravel-backend/public/index.php with one change: the backend's folder. The default
  * matches the guide's layout:

@@ -23,11 +23,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     baseURL: `http://localhost:${CONTRACT_PORT}`,
   },
-  projects: [
-    { name: 'contract', testMatch: /(analytics\.demo|contract)\.spec\.ts$/ },
-    // `npm run screenshots:branding`: not part of the contract run.
-    { name: 'shots', testMatch: /branding-shots\.spec\.ts$/ },
-  ],
+  // The branding screenshots have their own config (playwright.shots.config.ts).
+  projects: [{ name: 'contract', testMatch: /(analytics\.demo|contract)\.spec\.ts$/ }],
   webServer: [
     {
       command:

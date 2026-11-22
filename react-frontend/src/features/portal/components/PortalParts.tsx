@@ -32,7 +32,7 @@ export function LastUpdated({
       <Button
         variant="ghost"
         size="compact"
-        className="text-flow"
+        className="text-flow-text"
         loading={fetching}
         icon={<RotateCw className="size-4" aria-hidden="true" />}
         onClick={onRefresh}
@@ -63,7 +63,7 @@ export function ActiveOrderCard({ order }: { order: PortalOrderDto }) {
   return (
     <Card className={cn('flex flex-col p-4 md:p-5', ready && 'border-ok-bar')}>
       <div className="flex items-start justify-between gap-3">
-        <Link to={link} className="min-h-11 min-w-0 hover:text-flow">
+        <Link to={link} className="min-h-11 min-w-0 hover:text-flow-text">
           <Mono className="block text-[15px] font-semibold">{order.order_number}</Mono>
           <span className="flex items-center gap-1.5 text-[13px] text-muted">
             <ShoppingBasket className="size-4 shrink-0" aria-hidden="true" />

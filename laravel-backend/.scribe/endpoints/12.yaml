@@ -1,24 +1,20 @@
-name: Users
+name: Inventory
 description: |-
 
-  Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-  their name on the history they made.
+  Supply items. Stock on hand is computed from the movements, never typed in.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/users
+    uri: api/v1/inventory/units
     metadata:
       custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+      groupName: Inventory
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'List staff users'
+      title: 'List units'
       description: ''
       authenticated: true
       deprecated: false
@@ -55,18 +51,64 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/users
+      - GET
+    uri: api/v1/inventory/items
     metadata:
       custom: []
-      groupName: Users
+      groupName: Inventory
       groupDescription: |-
 
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+        Supply items. Stock on hand is computed from the movements, never typed in.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Add a staff user'
+      title: 'List supply items'
+      description: 'Active items, Critical first, then Low, then OK.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"errors":[{"status":401,"message":"Unauthenticated","source":""}]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/inventory/items
+    metadata:
+      custom: []
+      groupName: Inventory
+      groupDescription: |-
+
+        Supply items. Stock on hand is computed from the movements, never typed in.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Add a supply item'
       description: ''
       authenticated: true
       deprecated: false
@@ -104,45 +146,21 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: true
-        example: 'Rico Santos'
+        example: 'Detergent powder'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.username:
+      data.attributes.reorderLevel:
         custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        name: data.attributes.reorderLevel
+        description: 'Low at or below this; Critical at or below half. Must be at least 0.'
         required: true
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: true
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: true
-        example: password123
-        type: string
+        example: 5.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -150,7 +168,7 @@ endpoints:
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -158,14 +176,60 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      data.relationships.unit.data:
+        custom: []
+        name: data.relationships.unit.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit:
+        custom: []
+        name: data.relationships.unit
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit.data.id:
+        custom: []
+        name: data.relationships.unit.data.id
+        description: 'kg 1, L 2, pcs 3, rolls 4. Must match an existing stored value.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
+          name: 'Detergent powder'
+          reorderLevel: 5.0
           isActive: true
+        relationships:
+          unit:
+            data:
+              id: 1
     fileParameters: []
     responses: []
     responseFields: []
@@ -180,17 +244,16 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/v1/users/{id}'
+    uri: 'api/v1/inventory/items/{id}'
     metadata:
       custom: []
-      groupName: Users
+      groupName: Inventory
       groupDescription: |-
 
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+        Supply items. Stock on hand is computed from the movements, never typed in.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Show a staff user'
+      title: 'Show a supply item'
       description: ''
       authenticated: true
       deprecated: false
@@ -202,7 +265,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the user.'
+        description: 'The ID of the item.'
         required: true
         example: 1
         type: integer
@@ -240,17 +303,16 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/v1/users/{user_id}'
+    uri: 'api/v1/inventory/items/{item_id}'
     metadata:
       custom: []
-      groupName: Users
+      groupName: Inventory
       groupDescription: |-
 
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+        Supply items. Stock on hand is computed from the movements, never typed in.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Replace a staff user (name, username and role)'
+      title: 'Replace a supply item (every field)'
       description: ''
       authenticated: true
       deprecated: false
@@ -259,10 +321,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      user_id:
+      item_id:
         custom: []
-        name: user_id
-        description: 'The ID of the user.'
+        name: item_id
+        description: 'The ID of the item.'
         required: true
         example: 1
         type: integer
@@ -271,7 +333,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      user_id: 1
+      item_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -300,45 +362,21 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: true
-        example: 'Rico Santos'
+        example: 'Detergent powder'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.username:
+      data.attributes.reorderLevel:
         custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        name: data.attributes.reorderLevel
+        description: 'Low at or below this; Critical at or below half. Must be at least 0.'
         required: true
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: true
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: false
-        example: password123
-        type: string
+        example: 5.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -346,7 +384,7 @@ endpoints:
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -354,14 +392,60 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      data.relationships.unit.data:
+        custom: []
+        name: data.relationships.unit.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit:
+        custom: []
+        name: data.relationships.unit
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit.data.id:
+        custom: []
+        name: data.relationships.unit.data.id
+        description: 'kg 1, L 2, pcs 3, rolls 4. Must match an existing stored value.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
+          name: 'Detergent powder'
+          reorderLevel: 5.0
           isActive: true
+        relationships:
+          unit:
+            data:
+              id: 1
     fileParameters: []
     responses: []
     responseFields: []
@@ -376,17 +460,16 @@ endpoints:
     custom: []
     httpMethods:
       - PATCH
-    uri: 'api/v1/users/{id}'
+    uri: 'api/v1/inventory/items/{id}'
     metadata:
       custom: []
-      groupName: Users
+      groupName: Inventory
       groupDescription: |-
 
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
+        Supply items. Stock on hand is computed from the movements, never typed in.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update a staff user (fields sent; isActive true re-enables)'
+      title: 'Update a supply item (fields sent)'
       description: ''
       authenticated: true
       deprecated: false
@@ -398,7 +481,7 @@ endpoints:
       id:
         custom: []
         name: id
-        description: 'The ID of the user.'
+        description: 'The ID of the item.'
         required: true
         example: 1
         type: integer
@@ -426,8 +509,8 @@ endpoints:
         custom: []
         name: data.attributes
         description: ''
-        required: true
-        example: []
+        required: false
+        example: null
         type: object
         enumValues: []
         exampleWasSpecified: false
@@ -436,45 +519,21 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Must be at least 2 characters. Must not be greater than 255 characters.'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: false
-        example: 'Rico Santos'
+        example: 'Detergent powder'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.username:
+      data.attributes.reorderLevel:
         custom: []
-        name: data.attributes.username
-        description: 'Lower-case letters, digits, dots, dashes. Must match the regex /^[a-z0-9._-]{3,}$/. Must not be greater than 50 characters.'
+        name: data.attributes.reorderLevel
+        description: 'Low at or below this; Critical at or below half. Must be at least 0.'
         required: false
-        example: rico.s
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.role:
-        custom: []
-        name: data.attributes.role
-        description: 'admin or staff.'
-        required: false
-        example: staff
-        type: string
-        enumValues:
-          - admin
-          - staff
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      data.attributes.password:
-        custom: []
-        name: data.attributes.password
-        description: 'At least 8 characters. Must be at least 8 characters.'
-        required: false
-        example: password123
-        type: string
+        example: 5.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -482,7 +541,7 @@ endpoints:
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'true re-enables a disabled account.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -490,117 +549,60 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
+      data.relationships.unit.data:
+        custom: []
+        name: data.relationships.unit.data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit:
+        custom: []
+        name: data.relationships.unit
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.unit.data.id:
+        custom: []
+        name: data.relationships.unit.data.id
+        description: 'kg 1, L 2, pcs 3, rolls 4. Must match an existing stored value.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Rico Santos'
-          username: rico.s
-          role: staff
-          password: password123
+          name: 'Detergent powder'
+          reorderLevel: 5.0
           isActive: true
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/users/{user_id}/disable'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Disable a staff user'
-      description: 'The account can no longer sign in, and its tokens stop working at once. Not your own account.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: 'api/v1/users/{user_id}/reset-password'
-    metadata:
-      custom: []
-      groupName: Users
-      groupDescription: |-
-
-        Staff accounts, managed by the owner (course L23). Users are never deleted: disabling keeps
-        their name on the history they made.
-      subgroup: ''
-      subgroupDescription: ''
-      title: "Reset a staff user's password"
-      description: |-
-        Returns a temporary password, once. Only its hash is stored. The user must choose a new
-        password at their next sign-in: until then every route but `me`, `logout`, `refresh` and
-        `PUT /auth/password` answers 403.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      user_id:
-        custom: []
-        name: user_id
-        description: 'The ID of the user.'
-        required: true
-        example: 1
-        type: integer
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanUrlParameters:
-      user_id: 1
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+        relationships:
+          unit:
+            data:
+              id: 1
     fileParameters: []
     responses: []
     responseFields: []
@@ -615,17 +617,15 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/roles/permissions
+    uri: api/v1/inventory/movements
     metadata:
       custom: []
-      groupName: Users
-      groupDescription: |-
-
-        The permissions the owner can switch on for all staff.
+      groupName: Inventory
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Staff permissions'
-      description: ''
+      title: 'List stock movements'
+      description: 'Newest first.'
       authenticated: true
       deprecated: false
     headers:
@@ -634,8 +634,44 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
+    queryParameters:
+      item:
+        custom: []
+        name: item
+        description: "One item's movements."
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: 'in, out, adjust or usage (soap used by orders).'
+        required: false
+        example: usage
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'The page number.'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      item: 1
+      type: usage
+      page: 1
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
@@ -661,20 +697,18 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - PUT
-    uri: api/v1/roles/staff/permissions
+      - POST
+    uri: api/v1/inventory/movements
     metadata:
       custom: []
-      groupName: Users
-      groupDescription: |-
-
-        The permissions the owner can switch on for all staff.
+      groupName: Inventory
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Replace the staff permissions'
+      title: 'Record a stock movement'
       description: |-
-        The whole set at once (PUT). Unknown codes are ignored. Turning one off takes effect
-        immediately; a newly granted one arrives with each staff member's next sign-in or refresh.
+        Stock-in and adjustments need inventory.manage (the owner); stock-out also works with
+        inventory.stock_out. A stock-out cannot exceed what is on hand.
       authenticated: true
       deprecated: false
     headers:
@@ -686,20 +720,118 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      data.attributes.permissions:
+      data.relationships.item.data:
         custom: []
-        name: data.attributes.permissions
-        description: 'The codes to switch on.'
-        required: true
-        example:
-          - payments.record
-          - inventory.stock_out
-        type: 'string[]'
+        name: data.relationships.item.data
+        description: ''
+        required: false
+        example: []
+        type: object
         enumValues: []
-        exampleWasSpecified: true
+        exampleWasSpecified: false
         nullable: false
         deprecated: false
-    cleanBodyParameters: []
+      data.relationships.item:
+        custom: []
+        name: data.relationships.item
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships:
+        custom: []
+        name: data.relationships
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data:
+        custom: []
+        name: data
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.relationships.item.data.id:
+        custom: []
+        name: data.relationships.item.data.id
+        description: 'Must match an existing stored value.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.type:
+        custom: []
+        name: data.attributes.type
+        description: 'in, out or adjust (adjust may be negative).'
+        required: true
+        example: out
+        type: string
+        enumValues:
+          - in
+          - out
+          - adjust
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.quantity:
+        custom: []
+        name: data.attributes.quantity
+        description: ''
+        required: true
+        example: 1.5
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.remarks:
+        custom: []
+        name: data.attributes.remarks
+        description: 'Required for an adjustment. Must not be greater than 255 characters.'
+        required: false
+        example: 'Used today'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      data:
+        relationships:
+          item:
+            data:
+              id: 1
+        attributes:
+          type: out
+          quantity: 1.5
+          remarks: 'Used today'
     fileParameters: []
     responses: []
     responseFields: []

@@ -43,7 +43,7 @@ function renderCell(row: Record<string, Cell>, column: ReportColumn): ReactNode 
     return (
       <Link
         to={`/orders/${row.id}`}
-        className="inline-flex min-h-11 items-center font-mono text-[13px] font-semibold text-flow underline underline-offset-2"
+        className="inline-flex min-h-11 items-center font-mono text-[13px] font-semibold text-flow-text underline underline-offset-2"
       >
         {text}
       </Link>
@@ -278,7 +278,7 @@ export function DataTable({ title, table }: DataTableProps) {
                     >
                       <span className="flex size-4 items-center justify-center rounded border border-line-strong">
                         <RadixDropdown.ItemIndicator>
-                          <Check className="size-3.5 text-flow" aria-hidden="true" />
+                          <Check className="size-3.5 text-flow-text" aria-hidden="true" />
                         </RadixDropdown.ItemIndicator>
                       </span>
                       {c.label}

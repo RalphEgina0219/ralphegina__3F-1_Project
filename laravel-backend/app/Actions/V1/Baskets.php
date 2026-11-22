@@ -4,6 +4,7 @@ namespace App\Actions\V1;
 
 use App\Models\Basket;
 use App\Models\OrderBasket;
+use App\Models\ShopSetting;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\BasketCodes;
@@ -24,9 +25,11 @@ final class Baskets
             // Lock the basket numbers so two admins adding at once cannot get the same one.
             $sequence = (int) DB::table('baskets')
                 ->lockForUpdate()
-                ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(basket_number, 5) AS UNSIGNED)), 0) AS last')
+                ->selectRaw("COALESCE(MAX(CAST(SUBSTRING_INDEX(basket_number, '-', -1) AS UNSIGNED)), 0) AS last")
                 ->value('last');
 
+            // The prefix applies to new baskets only: existing numbers stay as they are.
+            $prefix = ShopSetting::current()->basket_prefix ?: 'BSK';
             $taken = Basket::query()->pluck('qr_token')->flip();
             $created = collect();
 
@@ -38,7 +41,7 @@ final class Baskets
                 $taken[$token] = true;
 
                 $created->push(Basket::query()->create([
-                    'basket_number' => BasketCodes::formatBasketNumber($sequence),
+                    'basket_number' => BasketCodes::formatBasketNumber($sequence, $prefix),
                     'qr_token' => $token,
                     'label' => $label,
                     'status' => 'available',

@@ -194,7 +194,7 @@ function BasketsCard({ order }: { order: OrderDetailDto }) {
               key={row.id}
               className="flex min-h-9 items-center gap-1.5 rounded-control bg-flow-soft px-2.5 font-mono text-sm font-semibold"
             >
-              <ShoppingBasket className="size-4 text-flow" aria-hidden="true" />
+              <ShoppingBasket className="size-4 text-flow-text" aria-hidden="true" />
               {row.basket.basket_number}
             </li>
           ))}

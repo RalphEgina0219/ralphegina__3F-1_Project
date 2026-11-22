@@ -38,7 +38,7 @@ function Alert({
         tone === 'plain' && 'border-line bg-surface',
       )}
     >
-      <span className={cn('shrink-0', tone === 'plain' && 'text-flow')}>{icon}</span>
+      <span className={cn('shrink-0', tone === 'plain' && 'text-flow-text')}>{icon}</span>
       <div className="min-w-0">
         <p className="text-[15px] font-bold">{title}</p>
         {children && (
@@ -69,7 +69,7 @@ function Movement({ movement }: { movement: InventoryMovementDto }) {
             {movement.order_id ? (
               <Link
                 to={`/orders/${movement.order_id}`}
-                className="font-mono font-semibold text-flow underline underline-offset-2"
+                className="font-mono font-semibold text-flow-text underline underline-offset-2"
               >
                 {movement.order_number}
               </Link>

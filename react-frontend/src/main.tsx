@@ -5,6 +5,8 @@ import { bootstrapAuth } from '@/features/auth/store';
 import { listenForInstallPrompt } from '@/features/pwa/install';
 import { recordVisit } from '@/features/pwa/visits';
 import { removeOtherWorkers } from '@/features/pwa/workers';
+import { bootBranding } from '@/features/branding/BrandingProvider';
+import { currentTheme } from '@/lib/theme';
 import './index.css';
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
@@ -41,6 +43,8 @@ async function start() {
     }
   }
   void bootstrapAuth();
+  // The cached branding paints with the first frame: no flash of the default look.
+  bootBranding(currentTheme());
 
   createRoot(root).render(
     <StrictMode>

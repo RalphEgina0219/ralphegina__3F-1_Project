@@ -26,7 +26,7 @@ export function FilterChips({
             type="button"
             onClick={chip.onRemove}
             aria-label={`Remove filter: ${chip.label}`}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-flow-line bg-flow-soft px-3 text-[13px] font-semibold text-flow hover:bg-flow-line/40"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-flow-line bg-flow-soft px-3 text-[13px] font-semibold text-flow-text hover:bg-flow-line/40"
           >
             {chip.label}
             <X className="size-4" aria-hidden="true" />

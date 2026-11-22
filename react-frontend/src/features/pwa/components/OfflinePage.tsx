@@ -1,13 +1,16 @@
 import { RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Logo } from '@/components/ui/Logo';
 import { useDocumentTitle } from '@/components/ui/PageHeader';
+import { BrandLogo } from '@/features/branding/BrandLogo';
+import { useBranding } from '@/features/branding/BrandingProvider';
+import { ThemeToggle } from '@/features/theme/ThemeToggle';
 
 /**
  * Shown at /offline and whenever part of the app (a page's code) can't be downloaded: no
  * connection, or a new version replaced the old files. Part of the main bundle, so it always loads.
  */
 export function OfflinePage() {
+  const branding = useBranding();
   useDocumentTitle("You're offline");
   const retry = () => {
     if (window.location.pathname === '/offline') window.location.assign('/');
@@ -15,14 +18,17 @@ export function OfflinePage() {
   };
   return (
     <main className="pt-safe flex min-h-dvh items-center justify-center bg-foam px-4 py-10">
+      <div className="pt-safe fixed top-2 right-2">
+        <ThemeToggle className="border border-line bg-surface/90" />
+      </div>
       <div className="max-w-sm text-center">
-        <Logo className="mx-auto size-16" />
+        <BrandLogo className="mx-auto size-16" />
         <h1 className="mt-5 text-2xl font-extrabold tracking-[-0.02em]">
           This page needs a connection
         </h1>
         <p className="mt-2 text-[15px] text-muted">
-          LaundryFlow couldn&apos;t load this screen. Check the Wi-Fi or mobile data, then try
-          again. Nothing you saved is lost.
+          {branding.system_name} couldn&apos;t load this screen. Check the Wi-Fi or mobile data,
+          then try again. Nothing you saved is lost.
         </p>
         <Button
           size="lg"

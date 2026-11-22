@@ -66,7 +66,7 @@ final class Payments
                 abort(422, 'This order is already fully paid.');
             }
 
-            $check = PaymentRules::check($input, $balance);
+            $check = PaymentRules::check($input, $balance, PaymentMethod::activeCodes());
             if ($check['errors'] !== []) {
                 throw ValidationException::withMessages(collect($check['errors'])
                     ->mapWithKeys(fn ($message, $field) => ["data.attributes.{$field}" => $message])

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# LaundryFlow: update the API on the Hostinger server (docs/RELEASE_NOTES_wash-types.md).
+# LaundryFlow: update the API on the Hostinger server (docs/RELEASE_NOTES_2026-11_wash-types-and-branding.md).
 #
 # Run it on the server, from the laravel-backend folder:
 #
@@ -13,9 +13,10 @@
 #   4. composer install --no-dev    (production packages only)
 #   5. php artisan migrate --force  (only the migrations that are new; never fresh, never seed)
 #   6. the reference-data seeder    (adds missing wash types, units and payment methods; touches nothing else)
-#   7. rebuilds the caches          (config, routes, views)
-#   8. maintenance mode off         (php artisan up)
-#   9. health check                 (GET /api/v1/health must answer ok)
+#   7. links the public storage     (php artisan storage:link: safe to repeat; for uploaded logos)
+#   8. rebuilds the caches          (config, routes, views)
+#   9. maintenance mode off         (php artisan up)
+#  10. health check                 (GET /api/v1/health must answer ok)
 #
 # Options: --dry-run  prints every command without running it (to see what would happen).
 #          PHP_BIN=/path/to/php  to choose the PHP binary yourself.
@@ -80,7 +81,7 @@ echo "Now at commit $BEFORE (write it down: it is the rollback point)."
 on_error() {
   echo >&2
   echo "The update FAILED. The site is still in maintenance mode." >&2
-  echo "Read the message above. To go back, follow 'Rollback' in docs/RELEASE_NOTES_wash-types.md" >&2
+  echo "Read the message above. To go back, follow 'Rollback' in docs/RELEASE_NOTES_2026-11_wash-types-and-branding.md" >&2
   echo "(restore the database backup, git checkout $BEFORE, composer install --no-dev, php artisan up)." >&2
 }
 trap on_error ERR
@@ -105,19 +106,30 @@ run "$PHP" artisan migrate --force
 say "Reference data (adds only what is missing)"
 run "$PHP" artisan db:seed --class=WashTypeReferenceSeeder --force
 
-# 7. caches ---------------------------------------------------------------------------------------
+# 7. public storage -------------------------------------------------------------------------------
+# Uploaded logos live in storage/app/public/branding. The API serves them itself at
+# /storage/branding/<file>, so the site works even where the symlink cannot be made (some shared
+# hosts forbid it): a failed link is a warning here, never a stop. Running it twice is harmless.
+say "Linking public storage (safe to repeat)"
+if [ -L public/storage ] || [ -e public/storage ]; then
+  echo "public/storage already exists: nothing to do."
+else
+  run "$PHP" artisan storage:link || echo "storage:link failed: the API will serve /storage/branding itself. See docs/NEW_SHOP_SETUP.md."
+fi
+
+# 8. caches ---------------------------------------------------------------------------------------
 say "Rebuilding the caches"
 run "$PHP" artisan optimize:clear
 run "$PHP" artisan config:cache
 run "$PHP" artisan route:cache
 run "$PHP" artisan view:cache
 
-# 8. back online ----------------------------------------------------------------------------------
+# 9. back online ----------------------------------------------------------------------------------
 say "Maintenance mode off"
 run "$PHP" artisan up
 trap - ERR
 
-# 9. health check ---------------------------------------------------------------------------------
+# 10. health check ---------------------------------------------------------------------------------
 APP_URL="$(grep -E '^APP_URL=' .env | head -1 | cut -d= -f2- | tr -d '"' | sed 's#/$##')"
 say "Health check: $APP_URL/api/v1/health"
 if [ "$DRY_RUN" = 1 ]; then

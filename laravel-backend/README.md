@@ -46,7 +46,7 @@ diagram is in [`../docs/ERD.md`](../docs/ERD.md).
 
 ## Requirements
 
-- PHP 8.3+ with `pdo_mysql`, `mbstring`, `openssl` and `intl` (recommended).
+- PHP 8.3+ with `pdo_mysql`, `mbstring`, `openssl` and `intl` (recommended), and **`gd`** (logo and app-icon uploads in Settings > Branding & Appearance; Laragon and Hostinger have it).
 - Composer 2.
 - MySQL 8 or MariaDB 10.6+. Laragon and XAMPP both work. MySQL is required: the reports use
   `CONVERT_TZ`/`DATE()` and the `order_baskets` table has a generated column.

@@ -9,11 +9,11 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'dash
 export type ButtonSize = 'md' | 'lg' | 'icon' | 'compact';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-flow text-white hover:bg-flow-hover',
+  primary: 'bg-flow text-on-flow hover:bg-flow-hover',
   secondary: 'border border-line-strong bg-surface text-text hover:bg-foam',
   ghost: 'text-text hover:bg-foam-2',
   danger: 'bg-danger text-white hover:opacity-90',
-  dashed: 'border border-dashed border-flow-line bg-flow-soft/60 text-flow hover:bg-flow-soft',
+  dashed: 'border border-dashed border-flow-line bg-flow-soft/60 text-flow-text hover:bg-flow-soft',
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -111,4 +111,4 @@ export function ButtonLink({
 
 /** Inline text link in the brand color. */
 export const linkClass =
-  'inline-flex min-h-11 items-center font-semibold text-flow underline underline-offset-2 hover:text-flow-hover';
+  'inline-flex min-h-11 items-center font-semibold text-flow-text underline underline-offset-2 hover:text-flow-hover';

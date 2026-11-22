@@ -21,7 +21,7 @@ export function CustomerNotificationBell() {
             : item.type === 'order_received'
               ? WashingMachine
               : CheckCircle2,
-        tone: item.type === 'ready_for_pickup' ? 'text-ok' : 'text-flow',
+        tone: item.type === 'ready_for_pickup' ? 'text-ok' : 'text-flow-text',
       }))}
       unread={query.data?.meta.unread ?? 0}
       isPending={query.isPending}

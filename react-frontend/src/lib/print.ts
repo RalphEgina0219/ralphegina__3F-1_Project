@@ -1,3 +1,4 @@
+import { reportFooter } from '@/features/branding/branding';
 /** The shop prints basket labels and reports only. There are no printed receipts. */
 export type PrintMode = 'labels' | 'report';
 
@@ -7,7 +8,7 @@ const PAGE_RULES: Record<PrintMode, string> = {
   // No fixed size or orientation: A4 portrait and landscape both work. Page numbers bottom right.
   report: `@page {
     margin: 14mm 12mm 16mm;
-    @bottom-left { content: "LaundryFlow report"; font: 8pt sans-serif; color: #557380; }
+    @bottom-left { content: "${reportFooter()}"; font: 8pt sans-serif; color: #557380; }
     @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt sans-serif; color: #557380; }
   }`,
 };

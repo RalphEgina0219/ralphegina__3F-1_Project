@@ -24,6 +24,7 @@ import { useBalances, usePayments } from '../api';
 import { PaymentForm } from '../components/PaymentForm';
 import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
 import { VoidPaymentDialog } from '../components/VoidPaymentDialog';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 const today = toDateParam(new Date());
 
@@ -32,12 +33,6 @@ const RANGE_OPTIONS = [
   { value: '7d', label: 'Last 7 days' },
   { value: 'month', label: 'This month' },
   { value: 'all', label: 'All dates' },
-];
-const METHOD_OPTIONS = [
-  { value: 'all', label: 'All methods' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'gcash', label: 'GCash' },
-  { value: 'maya', label: 'Maya' },
 ];
 
 function readyLabel(order: OrderDto) {
@@ -272,7 +267,10 @@ function HistoryTab() {
             setMethod(value);
             setPage(1);
           }}
-          options={METHOD_OPTIONS}
+          options={[
+            { value: 'all', label: 'All methods' },
+            ...useBranding().payment_methods.map((m) => ({ value: m.code, label: m.label })),
+          ]}
         />
       </div>
       {query.isPending && <SkeletonRows rows={6} />}

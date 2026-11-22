@@ -104,11 +104,16 @@
             "key": "washType",
             "value": "1",
             "type": "string"
+        },
+        {
+            "key": "brandingFile",
+            "value": "logo",
+            "type": "string"
         }
     ],
     "info": {
         "name": "LaundryFlow API v1",
-        "_postman_id": "b46d755a-49f2-4537-b23f-af77cb396f33",
+        "_postman_id": "b2078fea-00e7-4b39-81b2-c058ffddbb75",
         "description": "The REST API of LaundryFlow, the laundry shop management and QR basket tracking system: staff (JWT, api guard) and the customer portal (JWT, customer guard). Built following the course API Master Class in Laravel: versioned at /api/v1, JSON:API-style resources, course error format.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
@@ -772,6 +777,277 @@
                             "name": ""
                         }
                     ]
+                }
+            ],
+            "auth": {
+                "type": "bearer",
+                "bearer": [
+                    {
+                        "key": "token",
+                        "value": "{{token}}",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Branding",
+            "description": "\nWhite-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds\nevery screen before sign-in; the owner edits them in Settings > Branding & Appearance.",
+            "item": [
+                {
+                    "name": "Public branding",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/branding",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/branding",
+                            "variable": []
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "No sign-in needed (the login page and the customer portal read it first). Nothing private is in\nit; the contact email only when the owner chose to show it. Sends an ETag; browsers revalidate it\nevery time (an unchanged answer is a tiny 304), so a saved change shows at once."
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "max-age=0, must-revalidate, public"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "http://localhost:5173"
+                                },
+                                {
+                                    "key": "access-control-expose-headers",
+                                    "value": "Retry-After"
+                                }
+                            ],
+                            "code": 200,
+                            "body": "{\"data\":{\"type\":\"branding\",\"id\":1,\"attributes\":{\"systemName\":\"LaundryFlow\",\"shortName\":\"LaundryFlow\",\"tagline\":null,\"logoUrl\":null,\"logoDarkUrl\":null,\"iconUrls\":null,\"primaryColor\":\"#0e7490\",\"accentColor\":\"#3dd6e8\",\"sidebarColor\":\"#0b2e3f\",\"buttonTextColor\":\"#ffffff\",\"statusLabels\":{\"received\":\"Received\",\"washing\":\"Washing\",\"drying\":\"Drying\",\"folding\":\"Folding\",\"ready_for_pickup\":\"Ready for Pickup\",\"released\":\"Completed\"},\"basketPrefix\":\"BSK\",\"basketLabelFooter\":\"Staff scan only\",\"basketLabelShowShopName\":true,\"payAtPickupEnabled\":true,\"paymentMethods\":[{\"code\":\"cash\",\"label\":\"Cash\",\"isActive\":true},{\"code\":\"gcash\",\"label\":\"GCash\",\"isActive\":true},{\"code\":\"maya\",\"label\":\"Maya\",\"isActive\":true}],\"loginMessage\":null,\"portalMessage\":null,\"reportFooter\":null,\"showPoweredBy\":false,\"shop\":{\"name\":\"LaundryFlow\",\"address\":\"Brgy. Poblacion, Bongabong, Oriental Mindoro\",\"contactNumber\":\"[SHOP CONTACT NO.]\",\"openingHours\":\"Open daily 7:00 AM \\u2013 7:00 PM\",\"contactEmail\":null},\"version\":\"dcf03cddda8b\"}}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Branding for editing (owner): the public payload plus the private fields and the setup checklist.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/branding",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/branding",
+                            "variable": []
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": [
+                        {
+                            "header": [
+                                {
+                                    "key": "cache-control",
+                                    "value": "no-cache, private"
+                                },
+                                {
+                                    "key": "content-type",
+                                    "value": "application/json"
+                                },
+                                {
+                                    "key": "access-control-allow-origin",
+                                    "value": "http://localhost:5173"
+                                },
+                                {
+                                    "key": "access-control-expose-headers",
+                                    "value": "Retry-After"
+                                }
+                            ],
+                            "code": 401,
+                            "body": "{\"errors\":[{\"status\":401,\"message\":\"Unauthenticated\",\"source\":\"\"}]}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Update the branding",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/branding",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/branding",
+                            "variable": []
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"data\":{\"attributes\":{\"systemName\":\"b\",\"shortName\":\"ngzm\",\"tagline\":\"i\",\"primaryColor\":\"#FeeEdB\",\"accentColor\":\"#FeeEdB\",\"sidebarColor\":\"#FeeEdB\",\"contactEmail\":\"jermaine.tillman@example.org\",\"showContactEmail\":true,\"loginMessage\":\"h\",\"portalMessage\":\"w\",\"reportFooter\":\"a\",\"basketPrefix\":\"ZM\",\"basketLabelFooter\":\"i\",\"basketLabelShowShopName\":true,\"payAtPickupEnabled\":true,\"showPoweredBy\":true}}}"
+                        },
+                        "description": "Only the fields sent change. Colors are #RRGGBB and must keep button text readable; status\nlabels are display names only (the codes never change); at least one way to pay stays on."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset to the LaundryFlow defaults (name, logo, colors, labels, basket and payment options)",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/branding/reset",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/branding/reset",
+                            "variable": []
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload the logo, the dark-mode logo or the app icon",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/branding/:brandingFile",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/branding/:brandingFile",
+                            "variable": [
+                                {
+                                    "key": "brandingFile",
+                                    "value": "{{brandingFile}}"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "Multipart field `file`: PNG, JPG or WebP (no SVG), up to 2 MB, at least 128 px on the short side\n(the icon: square, at least 512 px). The server re-encodes it, so no metadata survives."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove the logo, the dark-mode logo or the app icon",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/branding/:brandingFile",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/branding/:brandingFile",
+                            "variable": [
+                                {
+                                    "key": "brandingFile",
+                                    "value": "{{brandingFile}}"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Tick a first-login checklist item",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api/v1/settings/setup-checklist",
+                            "query": [],
+                            "raw": "{{baseUrl}}/api/v1/settings/setup-checklist",
+                            "variable": []
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[]"
+                        },
+                        "description": ""
+                    },
+                    "response": []
                 }
             ],
             "auth": {

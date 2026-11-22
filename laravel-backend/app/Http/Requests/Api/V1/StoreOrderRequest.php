@@ -4,8 +4,11 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Models\Basket;
 use App\Models\Customer;
+use App\Models\PaymentMethod;
 use App\Models\Service;
+use App\Models\ShopSetting;
 use App\Models\WashType;
+use App\Permissions\V1\Abilities;
 use App\Support\Billing;
 use App\Support\PaymentRules;
 use App\Support\WashRules;
@@ -246,12 +249,19 @@ class StoreOrderRequest extends BaseApiRequest
     {
         $payment = $this->input('data.attributes.payment');
         if (! is_array($payment)) {
+            // Pay at pickup turned off: the order is paid when it is taken in (only someone who can take
+            // payments is held to it).
+            $settings = ShopSetting::current();
+            if (! $settings->pay_at_pickup_enabled && $this->user()?->tokenCan(Abilities::PaymentsRecord)) {
+                return ['data.attributes.payment' => 'Pay at pickup is turned off. Record a payment with the order.'];
+            }
+
             return [];
         }
 
         $total = $this->totalCents();
         $errors = [];
-        foreach (PaymentRules::check($payment, $total)['errors'] as $field => $message) {
+        foreach (PaymentRules::check($payment, $total, PaymentMethod::activeCodes())['errors'] as $field => $message) {
             $errors["data.attributes.payment.{$field}"] = $message;
         }
 

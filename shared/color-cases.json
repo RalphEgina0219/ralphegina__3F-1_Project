@@ -1,0 +1,19 @@
+{
+  "_comment": "One set of cases for the WCAG colour rules. Read by laravel-backend/tests/Unit/BrandingColorTest.php and react-frontend/src/lib/color.test.ts, so the server and the screens agree on what is readable.",
+  "contrast": [
+    { "a": "#ffffff", "b": "#000000", "ratio": 21 },
+    { "a": "#0e7490", "b": "#ffffff", "ratio": 5.358 },
+    { "a": "#0b2e3f", "b": "#ffffff", "ratio": 14.22 },
+    { "a": "#f5c518", "b": "#10242e", "ratio": 9.805 },
+    { "a": "#777777", "b": "#ffffff", "ratio": 4.478 },
+    { "a": "#777777", "b": "#10242e", "ratio": 3.569 },
+    { "a": "#ffffff", "b": "#ffffff", "ratio": 1 }
+  ],
+  "buttonText": [
+    { "color": "#0e7490", "text": "#ffffff", "readable": true },
+    { "color": "#0b2e3f", "text": "#ffffff", "readable": true },
+    { "color": "#f5c518", "text": "#10242e", "readable": true },
+    { "color": "#3dd6e8", "text": "#10242e", "readable": true },
+    { "color": "#777777", "text": "#ffffff", "readable": false }
+  ]
+}

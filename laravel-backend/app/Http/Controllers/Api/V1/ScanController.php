@@ -6,6 +6,7 @@ use App\Http\Resources\V1\BasketResource;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Basket;
 use App\Models\Order;
+use App\Models\ShopSetting;
 use App\Support\BasketCodes;
 
 /**
@@ -13,7 +14,10 @@ use App\Support\BasketCodes;
  */
 class ScanController extends APIController
 {
-    private const NOT_RECOGNIZED = 'QR not recognized. Scan a LaundryFlow basket label.';
+    private function notRecognized(): string
+    {
+        return 'QR not recognized. Scan a '.ShopSetting::current()->system_name.' basket label.';
+    }
 
     /**
      * Look up a scanned or typed code
@@ -33,7 +37,7 @@ class ScanController extends APIController
         // Route parameters arrive already decoded.
         $input = BasketCodes::parseScanInput($code);
         if (! $input) {
-            abort(404, self::NOT_RECOGNIZED);
+            abort(404, $this->notRecognized());
         }
 
         if ($input['kind'] === 'order_number') {
@@ -49,7 +53,7 @@ class ScanController extends APIController
             ->where($input['kind'] === 'token' ? 'qr_token' : 'basket_number', $input['value'])
             ->first();
         if (! $basket) {
-            abort(404, $input['kind'] === 'token' ? self::NOT_RECOGNIZED : "No basket matches {$input['value']}.");
+            abort(404, $input['kind'] === 'token' ? $this->notRecognized() : "No basket matches {$input['value']}.");
         }
 
         $order = $basket->activeAssignment?->order_id

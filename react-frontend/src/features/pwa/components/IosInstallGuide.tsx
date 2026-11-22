@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 /** Safari's Share icon: a box with an arrow leaving it. */
 function ShareIcon() {
@@ -47,17 +48,18 @@ export function IosInstallGuide({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const branding = useBranding();
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Install LaundryFlow"
+      title={`Install ${branding.system_name}`}
       description="Tap Share, then Add to Home Screen."
       footer={<Button onClick={() => onOpenChange(false)}>Got it</Button>}
     >
       <ol className="space-y-3">
         <li className="flex items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-flow-soft text-flow">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-flow-soft text-flow-text">
             <ShareIcon />
           </span>
           <span className="text-[15px]">
@@ -65,7 +67,7 @@ export function IosInstallGuide({
           </span>
         </li>
         <li className="flex items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-flow-soft text-flow">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-flow-soft text-flow-text">
             <AddIcon />
           </span>
           <span className="text-[15px]">
@@ -74,7 +76,7 @@ export function IosInstallGuide({
         </li>
       </ol>
       <p className="mt-4 text-[13px] text-muted">
-        LaundryFlow then opens from its own icon, full screen, like any other app.
+        {branding.system_name} then opens from its own icon, full screen, like any other app.
       </p>
     </Dialog>
   );

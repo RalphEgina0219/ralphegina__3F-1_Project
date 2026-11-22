@@ -7,12 +7,14 @@ import { cn } from '@/lib/cn';
 import { useInstallPrompt } from '../install';
 import { dismissInstallBanner, installBannerDismissed, visitCount } from '../visits';
 import { IosInstallGuide } from './IosInstallGuide';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 /**
  * A one-time suggestion on phones, from the second visit on, just above the bottom tabs.
  * Dismissing it, or tapping Install, hides it for good on this device.
  */
 export function InstallBanner({ className }: { className?: string }) {
+  const branding = useBranding();
   const isPhone = useMediaQuery('(max-width: 767px)');
   const { available, canInstall, promptInstall } = useInstallPrompt();
   const [hidden, setHidden] = useState(() => installBannerDismissed() || visitCount() < 2);
@@ -29,7 +31,7 @@ export function InstallBanner({ className }: { className?: string }) {
   return (
     <>
       <aside
-        aria-label="Install LaundryFlow"
+        aria-label={`Install ${branding.system_name}`}
         className={cn(
           'fixed inset-x-3 z-30 flex items-center gap-2 rounded-card border border-line bg-surface py-1.5 pr-1.5 pl-3 shadow-lg md:hidden print:hidden',
           className,
@@ -37,7 +39,7 @@ export function InstallBanner({ className }: { className?: string }) {
       >
         <Logo className="size-9" />
         <p className="min-w-0 flex-1 text-[13px] leading-snug font-semibold">
-          Install LaundryFlow for quicker access.
+          Install {branding.system_name} for quicker access.
         </p>
         <Button
           size="compact"

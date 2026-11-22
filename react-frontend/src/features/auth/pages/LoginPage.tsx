@@ -118,7 +118,7 @@ export default function LoginPage() {
 
       {import.meta.env.DEV && (
         <div className="mt-4 flex gap-2 rounded-control border border-flow-line bg-flow-soft p-3 text-[13px]">
-          <Info className="mt-0.5 size-4 shrink-0 text-flow" aria-hidden="true" />
+          <Info className="mt-0.5 size-4 shrink-0 text-flow-text" aria-hidden="true" />
           <p>
             <strong>Demo accounts</strong> (development only):{' '}
             <code className="font-mono">liza.ramos</code> (admin),{' '}
@@ -144,14 +144,14 @@ export default function LoginPage() {
         </ButtonLink>
         <p className="mt-3 text-center text-xs text-muted">
           Follow your laundry in your own account. New here?{' '}
-          <Link to="/register" className="font-semibold text-flow underline">
+          <Link to="/register" className="font-semibold text-flow-text underline">
             Create an account
           </Link>
         </p>
       </div>
       <div className="mt-auto pt-6 lg:hidden">
         <div className="flex items-center gap-3 rounded-card border border-line bg-surface p-4">
-          <WashingMachine className="size-7 shrink-0 text-flow" aria-hidden="true" />
+          <WashingMachine className="size-7 shrink-0 text-flow-text" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="font-bold">Customer?</p>
             <p className="text-[13px] text-muted">Follow your laundry in your own account.</p>

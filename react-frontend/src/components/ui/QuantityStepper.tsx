@@ -43,7 +43,7 @@ export function QuantityStepper({
   };
 
   const stepButtonClass =
-    'flex size-11 shrink-0 items-center justify-center bg-foam text-flow hover:bg-flow-soft focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:text-muted';
+    'flex size-11 shrink-0 items-center justify-center bg-foam text-flow-text hover:bg-flow-soft focus-visible:-outline-offset-2 disabled:cursor-not-allowed disabled:text-muted';
 
   return (
     <div

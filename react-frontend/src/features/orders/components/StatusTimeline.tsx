@@ -58,7 +58,7 @@ export function StatusTimeline({
             className="flex items-center gap-3"
           >
             {done ? (
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-flow text-white">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-flow text-on-flow">
                 <Check className="size-4" strokeWidth={3} aria-hidden="true" />
               </span>
             ) : isCurrent ? (

@@ -147,7 +147,10 @@ function RatesCard({
         title={title}
         className="p-4 md:p-5"
         action={
-          <Link to="/settings/services" className="text-[13px] font-semibold text-flow underline">
+          <Link
+            to="/settings/services"
+            className="text-[13px] font-semibold text-flow-text underline"
+          >
             Services & rates
           </Link>
         }

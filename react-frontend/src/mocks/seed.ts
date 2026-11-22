@@ -12,6 +12,7 @@ import {
 import { usageQuantity, washSurchargeCents } from '@/lib/wash';
 import type { Order, Payment, PaymentMethodCode, StatusCode } from '@/types/entities';
 import { generateQrToken, type MockDb } from './db';
+import { brandingDefaults } from './handlers/branding';
 import { customerNotice, demoEmail } from './messages';
 
 /** Small seeded generator so that every reset produces the same shop history. */
@@ -760,9 +761,9 @@ export function createSeed(now: Date): MockDb {
     order_baskets: [],
     order_items: [],
     payment_methods: [
-      { id: 1, code: 'cash', label: 'Cash' },
-      { id: 2, code: 'gcash', label: 'GCash' },
-      { id: 3, code: 'maya', label: 'Maya' },
+      { id: 1, code: 'cash', label: 'Cash', is_active: true, display_label: null },
+      { id: 2, code: 'gcash', label: 'GCash', is_active: true, display_label: null },
+      { id: 3, code: 'maya', label: 'Maya', is_active: true, display_label: null },
     ],
     payments: [],
     order_status_history: [],
@@ -798,6 +799,7 @@ export function createSeed(now: Date): MockDb {
       claim_policy_days: 30,
       block_orders_on_low_soap: false,
     },
+    branding: brandingDefaults(),
     audit_logs: [],
   };
 

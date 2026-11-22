@@ -43,7 +43,7 @@ export function InstallAppButton({ variant, className }: InstallAppButtonProps) 
           type="button"
           onClick={onClick}
           className={cn(
-            'inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-flow underline underline-offset-2 hover:text-flow-hover',
+            'inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-flow-text underline underline-offset-2 hover:text-flow-hover',
             className,
           )}
         >

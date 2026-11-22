@@ -5,15 +5,16 @@
 
 const TOKEN = /^[A-Za-z0-9_-]{32}$/;
 const ORDER_NUMBER = /^LF-\d{6}-\d{4}$/i;
-const BASKET_NUMBER = /^BSK-?(\d{1,6})$/i;
+/** PREFIX-0007: the shop chooses its own letters (BSK by default). */
+const BASKET_NUMBER = /^([A-Za-z]{2,8})-?(\d{1,6})$/;
 
 /** BSK-0001, BSK-0002, ... Numbers are never reused, even after a basket is retired. */
-export function formatBasketNumber(sequence: number): string {
-  return `BSK-${String(sequence).padStart(4, '0')}`;
+export function formatBasketNumber(sequence: number, prefix = 'BSK'): string {
+  return `${prefix.toUpperCase()}-${String(sequence).padStart(4, '0')}`;
 }
 
 export function basketSequence(basketNumber: string): number {
-  return Number(basketNumber.replace(/^BSK-/i, '')) || 0;
+  return Number(basketNumber.replace(/^\D+/, '')) || 0;
 }
 
 /** The URL printed on the label. A phone camera opens it; only signed-in staff see anything. */
@@ -36,7 +37,9 @@ export function parseScanInput(raw: string): ScanInput | null {
   if (!text) return null;
   if (ORDER_NUMBER.test(text)) return { kind: 'order_number', value: text.toUpperCase() };
   const basket = text.match(BASKET_NUMBER);
-  if (basket?.[1]) return { kind: 'basket_number', value: formatBasketNumber(Number(basket[1])) };
+  if (basket?.[1] && basket[2]) {
+    return { kind: 'basket_number', value: formatBasketNumber(Number(basket[2]), basket[1]) };
+  }
   const fromUrl = text.match(/\/b\/([A-Za-z0-9_-]{32})(?:[/?#]|$)/);
   if (fromUrl?.[1]) return { kind: 'token', value: fromUrl[1] };
   if (TOKEN.test(text)) return { kind: 'token', value: text };

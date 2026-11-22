@@ -2,6 +2,8 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { BrandingProvider } from '@/features/branding/BrandingProvider';
+import { ThemeProvider } from '@/features/theme/ThemeProvider';
 import { bootstrapAuth, useAuthStore } from '@/features/auth/store';
 import { useCustomerAuth } from '@/features/portal/store';
 import { OfflineBanner } from '@/features/pwa/components/OfflineBanner';
@@ -67,11 +69,18 @@ setPasswordPendingHandler((kind) => {
 export function Providers() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Tooltip.Provider delayDuration={200}>
-        <OfflineBanner />
-        <RouterProvider router={router} future={{ v7_startTransition: true }} />
-        <Toaster position="top-center" richColors closeButton duration={3500} />
-      </Tooltip.Provider>
+      <ThemeProvider>
+        <BrandingProvider>
+          {(lookKey) => (
+            <Tooltip.Provider delayDuration={200}>
+              <OfflineBanner />
+              {/* A new look (theme, colors, labels) remounts the screens so everything reads it fresh. */}
+              <RouterProvider key={lookKey} router={router} future={{ v7_startTransition: true }} />
+              <Toaster position="top-center" richColors closeButton duration={3500} />
+            </Tooltip.Provider>
+          )}
+        </BrandingProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

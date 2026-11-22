@@ -127,6 +127,10 @@ export default defineConfig(async ({ mode, command }) => {
   const apiProxy = { target: target.url, changeOrigin: true };
   // One service worker per scope: with mocks on, MSW's worker owns "/" and Workbox stays out.
   const useMocks = env.VITE_USE_MOCKS === 'true';
+  const proxies = {
+    '/api': apiProxy,
+    ...(useMocks ? {} : { '/manifest.webmanifest': apiProxy, '/storage/branding': apiProxy }),
+  };
 
   return {
     plugins: [
@@ -140,94 +144,133 @@ export default defineConfig(async ({ mode, command }) => {
         // Mock builds emit a sw.js that only unregisters itself and clears its caches. It is never
         // registered by the app; it cleans up a Workbox worker left by an earlier real-API build.
         selfDestroying: useMocks,
-        includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
-        manifest: {
-          id: '/',
-          name: 'LaundryFlow — Laundry Shop Management',
-          short_name: 'LaundryFlow',
-          description:
-            'A web-based laundry shop management system with basket QR tracking and customer accounts.',
-          start_url: '/',
-          scope: '/',
-          display: 'standalone',
-          display_override: ['standalone', 'minimal-ui'],
-          orientation: 'any',
-          theme_color: INK,
-          background_color: FOAM,
-          lang: 'en',
-          dir: 'ltr',
-          categories: ['business', 'productivity'],
-          icons: [
-            { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png', purpose: 'any' },
-            { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            {
-              src: 'maskable-icon-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable',
+        // Not the apple-touch icon: it follows the shop's branding (fetched when needed).
+        includeAssets: ['favicon.svg', 'favicon.ico', 'logo.svg'],
+        // A real build has no static manifest: Laravel serves /manifest.webmanifest from the shop's
+        // branding (name, colors, icons). Only the mock/demo build, which has no Laravel, ships one.
+        manifest: !useMocks
+          ? false
+          : {
+              id: '/',
+              name: 'LaundryFlow — Laundry Shop Management',
+              short_name: 'LaundryFlow',
+              description:
+                'A web-based laundry shop management system with basket QR tracking and customer accounts.',
+              start_url: '/',
+              scope: '/',
+              display: 'standalone',
+              display_override: ['standalone', 'minimal-ui'],
+              orientation: 'any',
+              theme_color: INK,
+              background_color: FOAM,
+              lang: 'en',
+              dir: 'ltr',
+              categories: ['business', 'productivity'],
+              icons: [
+                { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png', purpose: 'any' },
+                { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+                { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+                {
+                  src: 'maskable-icon-512x512.png',
+                  sizes: '512x512',
+                  type: 'image/png',
+                  purpose: 'maskable',
+                },
+              ],
+              // Every shortcut still goes through sign-in.
+              shortcuts: [
+                {
+                  name: 'Scan QR',
+                  short_name: 'Scan',
+                  description: 'Scan a basket label',
+                  url: '/scan',
+                  icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
+                },
+                {
+                  name: 'New order',
+                  short_name: 'New order',
+                  description: 'Record a new laundry order',
+                  url: '/orders/new',
+                  icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
+                },
+                {
+                  name: 'My laundry',
+                  short_name: 'My laundry',
+                  description: 'Customer account: follow your laundry',
+                  url: '/my',
+                  icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
+                },
+              ],
+              screenshots: [
+                {
+                  src: 'screenshots/home-narrow.png',
+                  sizes: '390x844',
+                  type: 'image/png',
+                  form_factor: 'narrow',
+                  label: "Today's laundry flow on a phone",
+                },
+                {
+                  src: 'screenshots/scan-narrow.png',
+                  sizes: '390x844',
+                  type: 'image/png',
+                  form_factor: 'narrow',
+                  label: 'Scanning a basket label',
+                },
+                {
+                  src: 'screenshots/dashboard-wide.png',
+                  sizes: '1440x900',
+                  type: 'image/png',
+                  form_factor: 'wide',
+                  label: 'Shop dashboard',
+                },
+              ],
             },
-          ],
-          // Every shortcut still goes through sign-in.
-          shortcuts: [
-            {
-              name: 'Scan QR',
-              short_name: 'Scan',
-              description: 'Scan a basket label',
-              url: '/scan',
-              icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
-            },
-            {
-              name: 'New order',
-              short_name: 'New order',
-              description: 'Record a new laundry order',
-              url: '/orders/new',
-              icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
-            },
-            {
-              name: 'My laundry',
-              short_name: 'My laundry',
-              description: 'Customer account: follow your laundry',
-              url: '/my',
-              icons: [{ src: 'pwa-96x96.png', sizes: '96x96', type: 'image/png' }],
-            },
-          ],
-          screenshots: [
-            {
-              src: 'screenshots/home-narrow.png',
-              sizes: '390x844',
-              type: 'image/png',
-              form_factor: 'narrow',
-              label: "Today's laundry flow on a phone",
-            },
-            {
-              src: 'screenshots/scan-narrow.png',
-              sizes: '390x844',
-              type: 'image/png',
-              form_factor: 'narrow',
-              label: 'Scanning a basket label',
-            },
-            {
-              src: 'screenshots/dashboard-wide.png',
-              sizes: '1440x900',
-              type: 'image/png',
-              form_factor: 'wide',
-              label: 'Shop dashboard',
-            },
-          ],
-        },
         workbox: {
           // The app shell only. Never API data: it is private and changes all day.
-          globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,webmanifest}'],
-          globIgnores: ['mockServiceWorker.js', 'screenshots/**'],
+          // Never the manifest (Laravel serves it from the branding) and never uploaded branding.
+          globPatterns: [`**/*.{js,css,html,svg,png,ico,woff2${useMocks ? ',webmanifest' : ''}}`],
+          globIgnores: [
+            'mockServiceWorker.js',
+            'screenshots/**',
+            'manifest.webmanifest',
+            'storage/**',
+            // The installed-app icons follow the branding; the browser fetches them at install
+            // time, so the worker has no reason to keep a copy.
+            'pwa-*.png',
+            'maskable-icon-*.png',
+            'apple-touch-icon-*.png',
+          ],
           navigateFallback: 'index.html',
-          navigateFallbackDenylist: [/^\/api\//, /^\/sanctum\//, /^\/mockServiceWorker\.js$/],
+          navigateFallbackDenylist: [
+            /^\/api\//,
+            /^\/sanctum\//,
+            /^\/mockServiceWorker\.js$/,
+            /^\/manifest\.webmanifest$/,
+            /^\/storage\//,
+          ],
           cleanupOutdatedCaches: true,
           runtimeCaching: [
             {
               // Whatever origin the API lives on: straight to the network, nothing stored.
               urlPattern: ({ url }) =>
                 url.pathname.startsWith('/api/') || url.pathname.startsWith('/sanctum/'),
+              handler: 'NetworkOnly',
+            },
+            {
+              // The shop's logo and icons change when the owner uploads new ones (the file name is
+              // a content hash, so a changed logo is a new URL): ask the network first, fall back to
+              // the last copy offline. Before the generic image rule below, which would pin them.
+              urlPattern: ({ url }) => url.pathname.startsWith('/storage/branding/'),
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'branding-images',
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              // The installed-app manifest follows the branding: never stored by the worker.
+              urlPattern: ({ url }) => url.pathname === '/manifest.webmanifest',
               handler: 'NetworkOnly',
             },
             {
@@ -263,8 +306,9 @@ export default defineConfig(async ({ mode, command }) => {
     resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
     // Lets a phone open the dev server through an HTTPS tunnel, which the camera requires.
     // /api goes to Laravel (Laragon or php artisan serve), so the browser sees one origin: no CORS.
-    server: { allowedHosts: ['.trycloudflare.com'], proxy: { '/api': apiProxy } },
-    preview: { allowedHosts: ['.trycloudflare.com'], proxy: { '/api': apiProxy } },
+    // The manifest and the uploaded logos are served by Laravel too, so they are proxied as well.
+    server: { allowedHosts: ['.trycloudflare.com'], proxy: proxies },
+    preview: { allowedHosts: ['.trycloudflare.com'], proxy: proxies },
     test: {
       environment: 'jsdom',
       globals: false,

@@ -28,6 +28,7 @@ const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'));
 const SettingsLayout = lazy(() => import('@/features/settings/pages/SettingsLayout'));
 const ServicesPage = lazy(() => import('@/features/settings/pages/ServicesPage'));
 const PricingUsagePage = lazy(() => import('@/features/settings/pages/PricingUsagePage'));
+const BrandingPage = lazy(() => import('@/features/settings/pages/BrandingPage'));
 const UsersPage = lazy(() => import('@/features/settings/pages/UsersPage'));
 const ShopPage = lazy(() => import('@/features/settings/pages/ShopPage'));
 const ActivityPage = lazy(() => import('@/features/settings/pages/ActivityPage'));
@@ -148,6 +149,7 @@ export const routes: RouteObject[] = [
                       { index: true, element: <Navigate to="services" replace /> },
                       { path: 'services', element: page(ServicesPage) },
                       { path: 'pricing', element: page(PricingUsagePage) },
+                      { path: 'branding', element: page(BrandingPage) },
                       { path: 'users', element: page(UsersPage) },
                       {
                         element: <RequireRole ability="baskets.manage" />,

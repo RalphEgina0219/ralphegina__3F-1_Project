@@ -1,27 +1,28 @@
-name: Authentication
+name: Branding
 description: |-
 
-  Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-  Staff accounts are created by the owner in Settings, so there is no public registration.
+  White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+  every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
 endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/login
+      - GET
+    uri: api/v1/branding
     metadata:
       custom: []
-      groupName: Authentication
+      groupName: Branding
       groupDescription: |-
 
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Log in'
+      title: 'Public branding'
       description: |-
-        Returns an access token. Send it as a Bearer token on every other request. Five failed
-        attempts a minute for the same username and IP answer 429.
+        No sign-in needed (the login page and the customer portal read it first). Nothing private is in
+        it; the contact email only when the owner chose to show it. Sends an ETag; browsers revalidate it
+        every time (an unchanged answer is a tiny 304), so a saved change shows at once.
       authenticated: false
       deprecated: false
     headers:
@@ -31,46 +32,20 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters:
-      username:
-        custom: []
-        name: username
-        description: 'The staff username. Must not be greater than 50 characters.'
-        required: true
-        example: liza.ramos
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      password:
-        custom: []
-        name: password
-        description: 'The password.'
-        required: true
-        example: password123
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-      remember:
-        custom: []
-        name: remember
-        description: 'Kept for the sign-in form; tokens are refreshed instead.'
-        required: false
-        example: false
-        type: boolean
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        deprecated: false
-    cleanBodyParameters:
-      username: liza.ramos
-      password: password123
-      remember: false
+    bodyParameters: []
+    cleanBodyParameters: []
     fileParameters: []
-    responses: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"type":"branding","id":1,"attributes":{"systemName":"LaundryFlow","shortName":"LaundryFlow","tagline":null,"logoUrl":null,"logoDarkUrl":null,"iconUrls":null,"primaryColor":"#0e7490","accentColor":"#3dd6e8","sidebarColor":"#0b2e3f","buttonTextColor":"#ffffff","statusLabels":{"received":"Received","washing":"Washing","drying":"Drying","folding":"Folding","ready_for_pickup":"Ready for Pickup","released":"Completed"},"basketPrefix":"BSK","basketLabelFooter":"Staff scan only","basketLabelShowShopName":true,"payAtPickupEnabled":true,"paymentMethods":[{"code":"cash","label":"Cash","isActive":true},{"code":"gcash","label":"GCash","isActive":true},{"code":"maya","label":"Maya","isActive":true}],"loginMessage":null,"portalMessage":null,"reportFooter":null,"showPoweredBy":false,"shop":{"name":"LaundryFlow","address":"Brgy. Poblacion, Bongabong, Oriental Mindoro","contactNumber":"[SHOP CONTACT NO.]","openingHours":"Open daily 7:00 AM \u2013 7:00 PM","contactEmail":null},"version":"dcf03cddda8b"}}}'
+        headers:
+          cache-control: 'max-age=0, must-revalidate, public'
+          content-type: application/json
+          access-control-allow-origin: 'http://localhost:5173'
+          access-control-expose-headers: Retry-After
+        description: null
     responseFields: []
     auth: []
     controller: null
@@ -79,97 +54,19 @@ endpoints:
   -
     custom: []
     httpMethods:
-      - POST
-    uri: api/v1/auth/refresh
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Refresh the token'
-      description: |-
-        Blacklists the current token (an expired one is accepted within JWT_REFRESH_TTL) and returns
-        a new one carrying the user's current abilities.
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
-      - POST
-    uri: api/v1/auth/logout
-    metadata:
-      custom: []
-      groupName: Authentication
-      groupDescription: |-
-
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Log out'
-      description: 'Blacklists the current token so it can never be used again.'
-      authenticated: true
-      deprecated: false
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-  -
-    custom: []
-    httpMethods:
       - GET
-    uri: api/v1/auth/me
+    uri: api/v1/settings/branding
     metadata:
       custom: []
-      groupName: Authentication
+      groupName: Branding
       groupDescription: |-
 
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Current user'
-      description: 'Returns the staff member who owns the Bearer token, with their role and permissions.'
+      title: 'Branding for editing (owner): the public payload plus the private fields and the setup checklist.'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -206,18 +103,20 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: api/v1/auth/password
+    uri: api/v1/settings/branding
     metadata:
       custom: []
-      groupName: Authentication
+      groupName: Branding
       groupDescription: |-
 
-        Staff sign-in with JWT (course L8): log in, read the current user, refresh and log out.
-        Staff accounts are created by the owner in Settings, so there is no public registration.
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Change my password'
-      description: 'Also allowed while a password change is pending.'
+      title: 'Update the branding'
+      description: |-
+        Only the fields sent change. Colors are #RRGGBB and must keep button text readable; status
+        labels are display names only (the codes never change); at least one way to pay stays on.
       authenticated: true
       deprecated: false
     headers:
@@ -229,43 +128,457 @@ endpoints:
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
-      current_password:
+      data:
         custom: []
-        name: current_password
-        description: 'The current password, or the temporary one the owner or shop gave.'
+        name: data
+        description: ''
         required: true
-        example: k7m2p9qx4t
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes:
+        custom: []
+        name: data.attributes
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.systemName:
+        custom: []
+        name: data.attributes.systemName
+        description: 'Must be at least 1 character. Must not be greater than 60 characters.'
+        required: false
+        example: b
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password:
+      data.attributes.shortName:
         custom: []
-        name: password
-        description: 'At least 8 characters, with a letter and a number, different from the current one.'
-        required: true
-        example: laundry2026
+        name: data.attributes.shortName
+        description: 'Must be at least 1 character. Must not be greater than 12 characters.'
+        required: false
+        example: ngzm
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      password_confirmation:
+      data.attributes.tagline:
         custom: []
-        name: password_confirmation
-        description: 'The new password again. The value and <code>password</code> must match.'
-        required: true
-        example: laundry2026
+        name: data.attributes.tagline
+        description: 'Must not be greater than 120 characters.'
+        required: false
+        example: i
         type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.primaryColor:
+        custom: []
+        name: data.attributes.primaryColor
+        description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+        required: false
+        example: '#FeeEdB'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.accentColor:
+        custom: []
+        name: data.attributes.accentColor
+        description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+        required: false
+        example: '#FeeEdB'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.sidebarColor:
+        custom: []
+        name: data.attributes.sidebarColor
+        description: 'Must match the regex /^#[0-9a-fA-F]{6}$/.'
+        required: false
+        example: '#FeeEdB'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.contactEmail:
+        custom: []
+        name: data.attributes.contactEmail
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: false
+        example: jermaine.tillman@example.org
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.showContactEmail:
+        custom: []
+        name: data.attributes.showContactEmail
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.loginMessage:
+        custom: []
+        name: data.attributes.loginMessage
+        description: 'Must not be greater than 300 characters.'
+        required: false
+        example: h
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.portalMessage:
+        custom: []
+        name: data.attributes.portalMessage
+        description: 'Must not be greater than 300 characters.'
+        required: false
+        example: w
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.reportFooter:
+        custom: []
+        name: data.attributes.reportFooter
+        description: 'Must not be greater than 300 characters.'
+        required: false
+        example: a
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.statusLabels:
+        custom: []
+        name: data.attributes.statusLabels
+        description: ''
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.basketPrefix:
+        custom: []
+        name: data.attributes.basketPrefix
+        description: 'Must match the regex /^[A-Za-z]{2,8}$/.'
+        required: false
+        example: ZM
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.basketLabelFooter:
+        custom: []
+        name: data.attributes.basketLabelFooter
+        description: 'Must not be greater than 80 characters.'
+        required: false
+        example: i
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      data.attributes.basketLabelShowShopName:
+        custom: []
+        name: data.attributes.basketLabelShowShopName
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.payAtPickupEnabled:
+        custom: []
+        name: data.attributes.payAtPickupEnabled
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.showPoweredBy:
+        custom: []
+        name: data.attributes.showPoweredBy
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.paymentMethods:
+        custom: []
+        name: data.attributes.paymentMethods
+        description: ''
+        required: false
+        example: null
+        type: object
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanBodyParameters:
-      current_password: k7m2p9qx4t
-      password: laundry2026
-      password_confirmation: laundry2026
+      data:
+        attributes:
+          systemName: b
+          shortName: ngzm
+          tagline: i
+          primaryColor: '#FeeEdB'
+          accentColor: '#FeeEdB'
+          sidebarColor: '#FeeEdB'
+          contactEmail: jermaine.tillman@example.org
+          showContactEmail: true
+          loginMessage: h
+          portalMessage: w
+          reportFooter: a
+          basketPrefix: ZM
+          basketLabelFooter: i
+          basketLabelShowShopName: true
+          payAtPickupEnabled: true
+          showPoweredBy: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/settings/branding/reset
+    metadata:
+      custom: []
+      groupName: Branding
+      groupDescription: |-
+
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Reset to the LaundryFlow defaults (name, logo, colors, labels, basket and payment options)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/settings/branding/{kind}'
+    metadata:
+      custom: []
+      groupName: Branding
+      groupDescription: |-
+
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Upload the logo, the dark-mode logo or the app icon'
+      description: |-
+        Multipart field `file`: PNG, JPG or WebP (no SVG), up to 2 MB, at least 128 px on the short side
+        (the icon: square, at least 512 px). The server re-encodes it, so no metadata survives.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      kind:
+        custom: []
+        name: kind
+        description: 'logo, logo-dark or icon.'
+        required: true
+        example: logo
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      kind: logo
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      file:
+        custom: []
+        name: file
+        description: 'Must be a file. Must not be greater than 2048 kilobytes.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      file: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/settings/branding/{kind}'
+    metadata:
+      custom: []
+      groupName: Branding
+      groupDescription: |-
+
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Remove the logo, the dark-mode logo or the app icon'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      kind:
+        custom: []
+        name: kind
+        description: ''
+        required: true
+        example: logo|logo-dark|icon
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      kind: logo|logo-dark|icon
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: api/v1/settings/setup-checklist
+    metadata:
+      custom: []
+      groupName: Branding
+      groupDescription: |-
+
+        White-label branding: the shop's name, logo, colors, labels and options. The public endpoint feeds
+        every screen before sign-in; the owner edits them in Settings > Branding & Appearance.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Tick a first-login checklist item'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      data.attributes.key:
+        custom: []
+        name: data.attributes.key
+        description: 'branding, shop, rates, soaps, staff or labels.'
+        required: true
+        example: rates
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      data.attributes.done:
+        custom: []
+        name: data.attributes.done
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
     fileParameters: []
     responses: []
     responseFields: []

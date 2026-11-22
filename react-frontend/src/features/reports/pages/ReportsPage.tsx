@@ -37,6 +37,8 @@ import {
   type ReportFilterKey,
   type ReportMeta,
 } from '../reportMeta';
+import { brandSlug } from '@/features/branding/branding';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 // Recharts is the heaviest dependency: the KPIs and table show first, the charts right after.
 const Charts = {
@@ -72,13 +74,10 @@ function useFilterOptions(): Record<ReportFilterKey, Option[]> {
   const users = useUsers();
   const barangays = useBarangays();
   const items = useInventoryItems();
+  const branding = useBranding();
   return {
     service: (services.data ?? []).map((s) => ({ value: String(s.id), label: s.name })),
-    method: [
-      { value: 'cash', label: 'Cash' },
-      { value: 'gcash', label: 'GCash' },
-      { value: 'maya', label: 'Maya' },
-    ],
+    method: branding.payment_methods.map((m) => ({ value: m.code, label: m.label })),
     status: STATUS_ORDER.map((code) => ({ value: code, label: STATUS_META[code].label })),
     staff: (users.data ?? []).map((u) => ({ value: String(u.id), label: u.name })),
     barangay: (barangays.data ?? []).map((b) => ({ value: b.name, label: b.name })),
@@ -145,7 +144,7 @@ function ReportPicker({
               <span
                 className={cn(
                   'flex size-8 items-center justify-center rounded-control',
-                  active ? 'bg-flow text-white' : 'bg-foam-2 text-flow',
+                  active ? 'bg-flow text-on-flow' : 'bg-foam-2 text-flow-text',
                 )}
               >
                 <report.icon className="size-4" aria-hidden="true" />
@@ -207,13 +206,14 @@ function PrintHeader({
 }) {
   const user = useCurrentUser();
   const shop = useShopSettings();
+  const branding = useBranding();
   const now = new Date();
   return (
     <div className="mb-5 hidden border-b-2 border-ink pb-3 print:block">
       <div className="flex items-center gap-3">
         <Logo className="size-10" />
         <div>
-          <p className="text-lg font-extrabold">{shop.data?.name ?? 'LaundryFlow'}</p>
+          <p className="text-lg font-extrabold">{shop.data?.name ?? branding.system_name}</p>
           <p className="text-xs text-muted">{shop.data?.address}</p>
         </div>
       </div>
@@ -256,7 +256,7 @@ function exportTable(meta: ReportMeta, table: ReportTable, range: { from: string
         }),
       ]
     : [];
-  downloadCsv(`laundryflow-${meta.kind}-report-${range.from}-to-${range.to}.csv`, [
+  downloadCsv(`${brandSlug()}-${meta.kind}-report-${range.from}-to-${range.to}.csv`, [
     table.columns.map((c) =>
       numeric(c.format) ? csvHeader(c.label, c.format as Parameters<typeof csvHeader>[1]) : c.label,
     ),
@@ -454,10 +454,10 @@ export default function ReportsPage() {
       {data && data.insights.length > 0 && (
         <Card className="report-insights mb-6 border-flow-line bg-flow-soft p-4 md:p-5">
           <h2 className="flex items-center gap-2 text-[17px] font-bold">
-            <Lightbulb className="size-5 text-flow" aria-hidden="true" />
+            <Lightbulb className="size-5 text-flow-text" aria-hidden="true" />
             Key insights
           </h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] marker:text-flow">
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] marker:text-flow-text">
             {data.insights.map((line) => (
               <li key={line}>{line}</li>
             ))}

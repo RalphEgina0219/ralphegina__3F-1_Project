@@ -17,6 +17,7 @@ import { clearPrivateDeviceData } from '@/lib/session';
 import { useUnsavedChanges } from '@/lib/unsaved';
 import { shopSchema, type ShopForm } from '@/schemas/settings';
 import { useShopSettings, useUpdateShopSettings } from '../api';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 const USING_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
@@ -24,7 +25,7 @@ const USING_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 function AboutApp() {
   return (
     <Card className="p-4 md:p-5">
-      <CardHeader title="About LaundryFlow" className="mb-3" />
+      <CardHeader title={`About ${useBranding().system_name}`} className="mb-3" />
       <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
         <dt className="text-muted">Version</dt>
         <dd className="font-mono font-semibold" data-testid="app-version">

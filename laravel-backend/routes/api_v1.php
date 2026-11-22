@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BalanceController;
 use App\Http\Controllers\Api\V1\BarangayController;
 use App\Http\Controllers\Api\V1\BasketController;
+use App\Http\Controllers\Api\V1\BrandingController;
 use App\Http\Controllers\Api\V1\CustomerAccountController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\CustomerOrdersController;
@@ -48,6 +49,9 @@ use Illuminate\Support\Facades\Route;
 
 // For Docker's health check and the dev server's startup check: "OK" plus a database check.
 Route::get('health', [HealthController::class, 'show'])->name('health');
+
+// The shop's name, logo, colors and labels: the login page and the customer portal need them before sign-in.
+Route::get('branding', [BrandingController::class, 'show'])->name('branding.show');
 
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
@@ -140,6 +144,12 @@ Route::middleware(['auth:api', 'account.usable:api'])->group(function () {
     Route::get('settings/shop', [ShopSettingController::class, 'show'])->name('settings.shop.show');
     Route::put('settings/shop', [ShopSettingController::class, 'replace'])->name('settings.shop.replace');
     Route::put('settings/stock-rule', [StockRuleController::class, 'replace'])->name('settings.stock-rule.replace');
+    Route::get('settings/branding', [BrandingController::class, 'edit'])->name('settings.branding.edit');
+    Route::put('settings/branding', [BrandingController::class, 'update'])->name('settings.branding.update');
+    Route::post('settings/branding/reset', [BrandingController::class, 'reset'])->name('settings.branding.reset');
+    Route::post('settings/branding/{kind}', [BrandingController::class, 'upload'])->whereIn('kind', ['logo', 'logo-dark', 'icon'])->name('settings.branding.upload');
+    Route::delete('settings/branding/{kind}', [BrandingController::class, 'remove'])->whereIn('kind', ['logo', 'logo-dark', 'icon'])->name('settings.branding.remove');
+    Route::put('settings/setup-checklist', [BrandingController::class, 'checklist'])->name('settings.setup-checklist');
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     // Staff notifications

@@ -38,13 +38,20 @@ test('only the Workbox worker registers, and it precaches the app shell', async 
     return (await cache.keys()).map((request) => new URL(request.url).pathname);
   });
   expect(precached).toContain('/index.html');
-  expect(precached).toContain('/manifest.webmanifest');
-  expect(precached).toContain('/pwa-192x192.png');
+  // The manifest and the icons follow the shop's branding (Laravel builds them), so the worker
+  // never stores them: a changed logo or name must reach the next install.
+  expect(precached).not.toContain('/manifest.webmanifest');
+  expect(precached.some((file) => /^\/(pwa-|maskable-icon|apple-touch-icon)/.test(file))).toBe(
+    false,
+  );
+  expect(precached.some((file) => file.startsWith('/storage/'))).toBe(false);
   expect(precached.some((file) => /^\/assets\/index-.*\.js$/.test(file))).toBe(true);
   expect(precached.some((file) => /^\/assets\/.*\.css$/.test(file))).toBe(true);
   expect(precached).not.toContain('/mockServiceWorker.js');
   expect(precached.some((file) => file.startsWith('/screenshots/'))).toBe(false);
 
+  // The manifest is Laravel's (/manifest.webmanifest, proxied by `vite preview` to port 8000): this
+  // part needs the API running (Docker or php artisan serve).
   expect(await manifestErrors(page)).toEqual([]);
   expect(await installabilityInProfile(page.url())).toEqual({ installability: [], manifest: [] });
 });

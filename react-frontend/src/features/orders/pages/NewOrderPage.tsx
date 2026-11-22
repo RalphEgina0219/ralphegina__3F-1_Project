@@ -23,6 +23,7 @@ import { useCustomer } from '@/features/customers/api';
 import { CreateAccountDialog } from '@/features/customers/components/CreateAccountDialog';
 import { CustomerFormDialog } from '@/features/customers/components/CustomerFormDialog';
 import { useAvailableBaskets } from '@/features/baskets/api';
+import { useActivePaymentMethods, useBranding } from '@/features/branding/BrandingProvider';
 import { useServices, useWashTypes } from '@/features/settings/api';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { applyFieldErrors, errorMessage, errorStatus } from '@/lib/api';
@@ -171,6 +172,21 @@ export default function NewOrderPage() {
   const method = useWatch({ control, name: 'payment_method' });
   const amount = useWatch({ control, name: 'amount' });
   const washTypeId = useWatch({ control, name: 'wash_type_id' });
+
+  // Settings > Branding & Appearance turns ways to pay on and off. A staff account that cannot take
+  // payments always has Pay at pickup, so it is never left without a choice.
+  const branding = useBranding();
+  const payMethods = useActivePaymentMethods();
+  const pickupShown = branding.pay_at_pickup_enabled || !canTakePayment;
+  useEffect(() => {
+    const allowed: string[] = [
+      ...(canTakePayment ? payMethods.map((m) => m.code) : []),
+      ...(pickupShown ? ['later'] : []),
+    ];
+    if (allowed.length > 0 && !allowed.includes(method)) {
+      setValue('payment_method', allowed[0] as NewOrderForm['payment_method']);
+    }
+  }, [payMethods, pickupShown, canTakePayment, method, setValue]);
 
   const catalog = useMemo(() => services.data ?? [], [services.data]);
   const lineServices = useMemo(() => catalog.filter((s) => s.pricing_type !== 'flat'), [catalog]);
@@ -440,10 +456,9 @@ export default function NewOrderPage() {
         <legend className="mb-1.5 text-[13px] font-semibold">Payment method</legend>
         <div className="flex flex-wrap gap-2">
           {[
-            { value: 'cash', label: 'Cash', show: canTakePayment },
-            { value: 'gcash', label: 'GCash', show: canTakePayment },
-            { value: 'maya', label: 'Maya', show: canTakePayment },
-            { value: 'later', label: 'Pay at pickup', show: true },
+            // The ways to pay the shop has turned on, under the names it gave them.
+            ...payMethods.map((m) => ({ value: m.code, label: m.label, show: canTakePayment })),
+            { value: 'later', label: 'Pay at pickup', show: pickupShown },
           ]
             .filter((option) => option.show)
             .map((option) => (

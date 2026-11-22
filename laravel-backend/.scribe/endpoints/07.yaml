@@ -1,27 +1,23 @@
-name: 'Wash types'
+name: Services
 description: |-
 
-  How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-  Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-  Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+  The price list. Changing a rate never changes old orders: their prices were frozen.
 endpoints:
   -
     custom: []
     httpMethods:
       - GET
-    uri: api/v1/wash-types
+    uri: api/v1/services
     metadata:
       custom: []
-      groupName: 'Wash types'
+      groupName: Services
       groupDescription: |-
 
-        How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-        Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-        Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'List wash types'
-      description: "In the order they are shown (sortOrder). `meta.blockOrdersOnLowSoap` is the shop's stock rule."
+      title: 'List services'
+      description: ''
       authenticated: true
       deprecated: false
     headers:
@@ -34,7 +30,7 @@ endpoints:
       active:
         custom: []
         name: active
-        description: 'Only active (1) or inactive (0) wash types.'
+        description: 'Only active (1) or inactive (0) services.'
         required: false
         example: true
         type: boolean
@@ -70,18 +66,16 @@ endpoints:
     custom: []
     httpMethods:
       - POST
-    uri: api/v1/wash-types
+    uri: api/v1/services
     metadata:
       custom: []
-      groupName: 'Wash types'
+      groupName: Services
       groupDescription: |-
 
-        How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-        Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-        Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Add a wash type'
+      title: 'Add a service'
       description: ''
       authenticated: true
       deprecated: false
@@ -119,9 +113,9 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Unique name. Must not be greater than 100 characters.'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: true
-        example: 'Tough stains'
+        example: Wash-Dry-Fold
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -130,40 +124,54 @@ endpoints:
       data.attributes.description:
         custom: []
         name: data.attributes.description
-        description: 'Short note for staff. Must not be greater than 255 characters.'
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 'Heavy-duty treatment for stubborn stains.'
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.surchargePerKgCents:
+      data.attributes.pricingType:
         custom: []
-        name: data.attributes.surchargePerKgCents
-        description: 'Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000.'
-        required: false
-        example: 500
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
+        required: true
+        example: per_kg
+        type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: true
+        example: 3500
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.sortOrder:
+      data.attributes.minimumQty:
         custom: []
-        name: data.attributes.sortOrder
-        description: 'Position in the list. Must be at least 0. Must not be greater than 65535.'
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
         required: false
-        example: 5
-        type: integer
+        example: 3.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'Inactive wash types stay on old orders but cannot be chosen.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -171,32 +179,15 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.supplies:
-        custom: []
-        name: data.attributes.supplies
-        description: 'Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.'
-        required: false
-        example:
-          -
-            inventoryItemId: 6
-            usagePerKgSmallUnit: 0.25
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Tough stains'
-          description: 'Heavy-duty treatment for stubborn stains.'
-          surchargePerKgCents: 500
-          sortOrder: 5
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
           isActive: true
-          supplies:
-            -
-              inventoryItemId: 6
-              usagePerKgSmallUnit: 0.25
     fileParameters: []
     responses: []
     responseFields: []
@@ -211,18 +202,16 @@ endpoints:
     custom: []
     httpMethods:
       - GET
-    uri: 'api/v1/wash-types/{washType_id}'
+    uri: 'api/v1/services/{id}'
     metadata:
       custom: []
-      groupName: 'Wash types'
+      groupName: Services
       groupDescription: |-
 
-        How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-        Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-        Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Show a wash type'
+      title: 'Show a service'
       description: ''
       authenticated: true
       deprecated: false
@@ -231,10 +220,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      washType_id:
+      id:
         custom: []
-        name: washType_id
-        description: 'The ID of the washType.'
+        name: id
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -243,7 +232,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      washType_id: 1
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -272,18 +261,16 @@ endpoints:
     custom: []
     httpMethods:
       - PUT
-    uri: 'api/v1/wash-types/{washType_id}'
+    uri: 'api/v1/services/{service_id}'
     metadata:
       custom: []
-      groupName: 'Wash types'
+      groupName: Services
       groupDescription: |-
 
-        How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-        Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-        Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Replace a wash type (fields sent; `supplies` replaces the whole list)'
+      title: 'Replace a service (every field)'
       description: ''
       authenticated: true
       deprecated: false
@@ -292,10 +279,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      washType_id:
+      service_id:
         custom: []
-        name: washType_id
-        description: 'The ID of the washType.'
+        name: service_id
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -304,7 +291,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      washType_id: 1
+      service_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -333,9 +320,9 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Unique name. Must not be greater than 100 characters.'
-        required: false
-        example: 'Tough stains'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
+        required: true
+        example: Wash-Dry-Fold
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -344,40 +331,54 @@ endpoints:
       data.attributes.description:
         custom: []
         name: data.attributes.description
-        description: 'Short note for staff. Must not be greater than 255 characters.'
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 'Heavy-duty treatment for stubborn stains.'
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.surchargePerKgCents:
+      data.attributes.pricingType:
         custom: []
-        name: data.attributes.surchargePerKgCents
-        description: 'Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000.'
-        required: false
-        example: 500
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
+        required: true
+        example: per_kg
+        type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: true
+        example: 3500
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.sortOrder:
+      data.attributes.minimumQty:
         custom: []
-        name: data.attributes.sortOrder
-        description: 'Position in the list. Must be at least 0. Must not be greater than 65535.'
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
         required: false
-        example: 5
-        type: integer
+        example: 3.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'Inactive wash types stay on old orders but cannot be chosen.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -385,32 +386,15 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.supplies:
-        custom: []
-        name: data.attributes.supplies
-        description: 'Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.'
-        required: false
-        example:
-          -
-            inventoryItemId: 6
-            usagePerKgSmallUnit: 0.25
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Tough stains'
-          description: 'Heavy-duty treatment for stubborn stains.'
-          surchargePerKgCents: 500
-          sortOrder: 5
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
           isActive: true
-          supplies:
-            -
-              inventoryItemId: 6
-              usagePerKgSmallUnit: 0.25
     fileParameters: []
     responses: []
     responseFields: []
@@ -425,18 +409,16 @@ endpoints:
     custom: []
     httpMethods:
       - PATCH
-    uri: 'api/v1/wash-types/{washType_id}'
+    uri: 'api/v1/services/{id}'
     metadata:
       custom: []
-      groupName: 'Wash types'
+      groupName: Services
       groupDescription: |-
 
-        How the laundry is washed, with the optional surcharge per kilo and the soaps each one uses.
-        Staff read them to take orders; only the owner changes them (Settings > Pricing & Usage).
-        Changes apply to new orders only: an order freezes its wash type surcharge when it is made.
+        The price list. Changing a rate never changes old orders: their prices were frozen.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update a wash type (fields sent)'
+      title: 'Update a service (fields sent)'
       description: ''
       authenticated: true
       deprecated: false
@@ -445,10 +427,10 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      washType_id:
+      id:
         custom: []
-        name: washType_id
-        description: 'The ID of the washType.'
+        name: id
+        description: 'The ID of the service.'
         required: true
         example: 1
         type: integer
@@ -457,7 +439,7 @@ endpoints:
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      washType_id: 1
+      id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -486,9 +468,9 @@ endpoints:
       data.attributes.name:
         custom: []
         name: data.attributes.name
-        description: 'Unique name. Must not be greater than 100 characters.'
+        description: 'Must be at least 2 characters. Must not be greater than 100 characters.'
         required: false
-        example: 'Tough stains'
+        example: Wash-Dry-Fold
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -497,40 +479,54 @@ endpoints:
       data.attributes.description:
         custom: []
         name: data.attributes.description
-        description: 'Short note for staff. Must not be greater than 255 characters.'
+        description: 'Must not be greater than 255 characters.'
         required: false
-        example: 'Heavy-duty treatment for stubborn stains.'
+        example: 'Regular, 24-hour turnaround'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         deprecated: false
-      data.attributes.surchargePerKgCents:
+      data.attributes.pricingType:
         custom: []
-        name: data.attributes.surchargePerKgCents
-        description: 'Extra charge per kilo of per-kg laundry, in centavos (0 = none). Must be at least 0. Must not be greater than 1000000.'
+        name: data.attributes.pricingType
+        description: 'per_kg, per_piece or flat.'
         required: false
-        example: 500
+        example: per_kg
+        type: string
+        enumValues:
+          - per_kg
+          - per_piece
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      data.attributes.rateCents:
+        custom: []
+        name: data.attributes.rateCents
+        description: 'Centavos per kg, per piece or per order. Must be at least 1.'
+        required: false
+        example: 3500
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.sortOrder:
+      data.attributes.minimumQty:
         custom: []
-        name: data.attributes.sortOrder
-        description: 'Position in the list. Must be at least 0. Must not be greater than 65535.'
+        name: data.attributes.minimumQty
+        description: 'Minimum billable kilograms (per_kg only). Must be at least 0.'
         required: false
-        example: 5
-        type: integer
+        example: 3.0
+        type: number
         enumValues: []
         exampleWasSpecified: false
-        nullable: false
+        nullable: true
         deprecated: false
       data.attributes.isActive:
         custom: []
         name: data.attributes.isActive
-        description: 'Inactive wash types stay on old orders but cannot be chosen.'
+        description: ''
         required: false
         example: true
         type: boolean
@@ -538,32 +534,15 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         deprecated: false
-      data.attributes.supplies:
-        custom: []
-        name: data.attributes.supplies
-        description: 'Replaces the soaps used: inventoryItemId and usagePerKgSmallUnit (g, mL or pieces per kilo). Must not have more than 20 items.'
-        required: false
-        example:
-          -
-            inventoryItemId: 6
-            usagePerKgSmallUnit: 0.25
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        deprecated: false
     cleanBodyParameters:
       data:
         attributes:
-          name: 'Tough stains'
-          description: 'Heavy-duty treatment for stubborn stains.'
-          surchargePerKgCents: 500
-          sortOrder: 5
+          name: Wash-Dry-Fold
+          description: 'Regular, 24-hour turnaround'
+          pricingType: per_kg
+          rateCents: 3500
+          minimumQty: 3.0
           isActive: true
-          supplies:
-            -
-              inventoryItemId: 6
-              usagePerKgSmallUnit: 0.25
     fileParameters: []
     responses: []
     responseFields: []

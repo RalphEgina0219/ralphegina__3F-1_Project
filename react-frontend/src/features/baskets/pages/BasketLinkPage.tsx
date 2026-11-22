@@ -6,6 +6,8 @@ import { useDocumentTitle } from '@/components/ui/PageHeader';
 import { useAuthStore } from '@/features/auth/store';
 import { PublicHeader } from '@/layouts/PublicHeader';
 import { can } from '@/lib/permissions';
+import { brandName } from '@/features/branding/branding';
+import { useBranding } from '@/features/branding/BrandingProvider';
 
 /**
  * What a phone camera opens from a basket label. A basket is shared by many customers over time,
@@ -14,9 +16,10 @@ import { can } from '@/lib/permissions';
  */
 export default function BasketLinkPage() {
   const token = useParams().token ?? '';
+  const branding = useBranding();
   const status = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user);
-  useDocumentTitle('LaundryFlow basket');
+  useDocumentTitle(`${brandName()} basket`);
 
   if (status === 'loading') {
     return (
@@ -25,7 +28,7 @@ export default function BasketLinkPage() {
         aria-label="Loading"
         className="flex min-h-dvh items-center justify-center"
       >
-        <Loader2 className="size-8 animate-spin text-flow" aria-hidden="true" />
+        <Loader2 className="size-8 animate-spin text-flow-text" aria-hidden="true" />
       </div>
     );
   }
@@ -40,11 +43,11 @@ export default function BasketLinkPage() {
       <PublicHeader />
       <main className="mx-auto max-w-xl px-4 py-6">
         <Card className="p-6 text-center">
-          <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-flow-soft text-flow">
+          <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-flow-soft text-flow-text">
             <ShoppingBasket className="size-6" aria-hidden="true" />
           </span>
           <h1 className="text-xl font-extrabold tracking-[-0.01em]">
-            This is a LaundryFlow laundry basket.
+            This is a {branding.system_name} laundry basket.
           </h1>
           <p className="mt-1 text-muted">Staff, please sign in.</p>
           <ButtonLink to={`/login?next=${next}`} variant="primary" className="mt-5 w-full">

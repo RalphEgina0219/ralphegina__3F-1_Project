@@ -5,7 +5,7 @@
 //   build/hostinger/public_html.zip    the same, for hPanel's File Manager (upload, then Extract)
 // With --release (npm run release, in react-frontend or at the root) it also writes a zip whose name
 // says what it is, react-frontend/release/laundryflow-frontend-v<version>-<date>-<commit>.zip, for
-// laravel-backend/scripts/install-frontend.sh on the server (docs/RELEASE_NOTES_wash-types.md).
+// laravel-backend/scripts/install-frontend.sh on the server (docs/RELEASE_NOTES_2026-11_wash-types-and-branding.md).
 // Plain Node, no packages. It calls node directly: the "&" in this folder name breaks npm's shims.
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';

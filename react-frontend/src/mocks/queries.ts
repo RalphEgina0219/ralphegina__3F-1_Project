@@ -204,7 +204,7 @@ export function toPaymentDto(payment: Payment): PaymentDto {
     order_number: order.order_number,
     customer_name: customerById.get(order.customer_id)?.full_name ?? '',
     method: method?.code ?? 'cash',
-    method_label: method?.label ?? 'Cash',
+    method_label: method?.display_label ?? method?.label ?? 'Cash',
     amount_cents: payment.amount_cents,
     reference_number: payment.reference_number,
     receipt_number: payment.receipt_number,

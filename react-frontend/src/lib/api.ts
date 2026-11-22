@@ -61,8 +61,12 @@ if (!USING_MOCKS) {
     if (config._adapted) return config;
     config._adapted = true;
     config.method = methodFor((config.method ?? 'get').toLowerCase(), url);
-    if (config.data !== undefined && !isFlatBodyPath(url))
+    if (config.data instanceof FormData) {
+      // A file upload: the browser writes the multipart boundary.
+      config.headers.delete('Content-Type');
+    } else if (config.data !== undefined && !isFlatBodyPath(url)) {
       config.data = toResourceBody(config.data);
+    }
     config.params = adaptParams(url, config.params);
     return config;
   });
@@ -113,8 +117,7 @@ api.interceptors.response.use(undefined, async (error: AxiosError) => {
   const url = config?.url ?? '';
   if (
     error.response?.status === 403 &&
-    (error.response.data as Partial<ApiErrorBody> | undefined)?.message ===
-      PASSWORD_PENDING_MESSAGE
+    (error.response.data as Partial<ApiErrorBody> | undefined)?.message === PASSWORD_PENDING_MESSAGE
   ) {
     onPasswordPending?.(tokenKindOf(url));
     return Promise.reject(error);

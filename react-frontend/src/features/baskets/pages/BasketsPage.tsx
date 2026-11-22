@@ -271,7 +271,7 @@ export default function BasketsPage() {
               {selected.size} selected for printing.{' '}
               <button
                 type="button"
-                className="min-h-11 font-semibold text-flow underline"
+                className="min-h-11 font-semibold text-flow-text underline"
                 onClick={() => setSelected(new Map())}
               >
                 Clear

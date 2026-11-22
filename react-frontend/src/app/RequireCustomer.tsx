@@ -25,7 +25,7 @@ export function RequireCustomer() {
         aria-label="Loading"
         className="flex min-h-dvh items-center justify-center"
       >
-        <Loader2 className="size-8 animate-spin text-flow" aria-hidden="true" />
+        <Loader2 className="size-8 animate-spin text-flow-text" aria-hidden="true" />
       </div>
     );
   }

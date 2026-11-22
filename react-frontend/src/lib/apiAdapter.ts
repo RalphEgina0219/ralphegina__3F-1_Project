@@ -212,6 +212,8 @@ export function adaptParams(url: string, params: unknown): Record<string, unknow
 const FULL_REPLACE = [
   /^\/settings\/shop$/,
   /^\/settings\/stock-rule$/,
+  /^\/settings\/branding$/,
+  /^\/settings\/setup-checklist$/,
   /^\/roles\/staff\/permissions$/,
   /^\/customer\/account\/password$/,
   /^\/auth\/password$/,

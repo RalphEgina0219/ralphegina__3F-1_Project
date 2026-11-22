@@ -10,10 +10,12 @@ use App\Models\InventoryMovement;
 use App\Models\OrderStatus;
 use App\Models\User;
 use App\Models\WashType;
+use App\Support\Branding;
 use Database\Seeders\DemoSeeder;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use PHPOpenSourceSaver\JWTAuth\JWTGuard;
@@ -31,6 +33,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         OrderStatus::flushCache();
+        Branding::flush();
     }
 
     /**
@@ -208,6 +211,18 @@ abstract class TestCase extends BaseTestCase
         }
 
         return $this->asStaff($as)->postJson('/api/v1/orders', $body);
+    }
+
+    /** PUT /settings/branding as the owner unless said otherwise. */
+    protected function putBranding(array $attributes, string $as = 'liza.ramos'): TestResponse
+    {
+        return $this->asStaff($as)->putJson('/api/v1/settings/branding', ['data' => ['attributes' => $attributes]]);
+    }
+
+    /** POST /settings/branding/{logo|logo-dark|icon} with a file. */
+    protected function upload(string $kind, UploadedFile $file, string $as = 'liza.ramos'): TestResponse
+    {
+        return $this->asStaff($as)->post("/api/v1/settings/branding/{$kind}", ['file' => $file], ['Accept' => 'application/json']);
     }
 
     /** POST /orders/{id}/status */

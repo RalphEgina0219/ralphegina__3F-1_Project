@@ -33,9 +33,9 @@ it('upgrades a database that already has orders, payments and stock without chan
         $before = $this->asStaff()->getJson("/api/v1/orders/{$orderId}")->json('data.attributes');
         $customerId = Order::query()->findOrFail($orderId)->customer_id;
 
-        // Back to the schema the live database has (the three new migrations undone), then one more
+        // Back to the schema the live database has (the new migrations undone), then one more
         // order that was taken in before this update: it has no wash type column at all.
-        Artisan::call('migrate:rollback', ['--step' => 3, '--force' => true]);
+        Artisan::call('migrate:rollback', ['--step' => 4, '--force' => true]);
         expect(Schema::hasColumn('orders', 'wash_type_id'))->toBeFalse();
         expect(Schema::hasTable('wash_types'))->toBeFalse();
         expect(Schema::hasColumn('inventory_movements', 'order_id'))->toBeFalse();

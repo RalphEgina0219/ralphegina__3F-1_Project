@@ -6,12 +6,14 @@ import { EmptyState, ErrorState, SkeletonCards } from '@/components/ui/States';
 import { greeting } from '@/lib/dates';
 import { useMyOrders } from '../api';
 import { ActiveOrderCard, LastUpdated } from '../components/PortalParts';
+import { useBranding } from '@/features/branding/BrandingProvider';
 import { useSignedInCustomer } from '../store';
 
 /** /my: the customer's laundry that is still at the shop. */
 export default function PortalHomePage() {
   useDocumentTitle('My laundry');
   const customer = useSignedInCustomer();
+  const branding = useBranding();
   const query = useMyOrders({ status: 'active', per_page: 50 });
   const orders = query.data?.data ?? [];
   const ready = orders.filter((o) => o.status === 'ready_for_pickup').length;
@@ -31,6 +33,15 @@ export default function PortalHomePage() {
               : `${orders.length} ${orders.length === 1 ? 'order' : 'orders'} in progress${ready > 0 ? `, ${ready} ready for pickup` : ''}.`}
         </p>
       </header>
+
+      {branding.portal_message && (
+        <p
+          className="rounded-control border border-flow-line bg-flow-soft px-4 py-3 text-sm font-semibold"
+          data-testid="portal-message"
+        >
+          {branding.portal_message}
+        </p>
+      )}
 
       <LastUpdated
         updatedAt={query.dataUpdatedAt}

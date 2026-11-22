@@ -10,8 +10,9 @@ ARG GID=1000
 # Extensions the project needs. mbstring, pdo, ctype, curl, openssl and fileinfo are built in.
 # git and unzip let Composer install packages; libfcgi-bin gives cgi-fcgi for the health check.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git unzip libicu-dev libzip-dev libfcgi-bin \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath intl zip opcache \
+    && apt-get install -y --no-install-recommends git unzip libicu-dev libzip-dev libfcgi-bin libpng-dev libjpeg-dev libwebp-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql bcmath intl zip opcache gd \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer

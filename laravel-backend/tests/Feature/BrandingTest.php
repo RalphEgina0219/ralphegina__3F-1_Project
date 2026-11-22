@@ -92,6 +92,13 @@ describe('Settings > Branding & Appearance', function () {
         expect($checklist['rates']['done'])->toBeTrue()->and($checklist['staff']['done'])->toBeFalse();
     });
 
+    it('takes camelCased status codes from the web app and stores the snake_case code', function () {
+        $labels = ['received' => 'Dropped off', 'washing' => 'In the wash', 'drying' => 'Drying', 'folding' => 'Folding', 'readyForPickup' => 'Ready!', 'released' => 'Picked up'];
+        $this->putBranding(['statusLabels' => $labels])->assertOk()
+            ->assertJsonPath('data.attributes.statusLabels.ready_for_pickup', 'Ready!');
+        expect(Branding::statusLabel('ready_for_pickup'))->toBe('Ready!');
+    });
+
     it('renames status labels without touching the codes, and refuses empty, duplicate or long ones', function () {
         $labels = ['received' => 'Dropped off', 'washing' => 'In the wash', 'drying' => 'Drying', 'folding' => 'Folding', 'ready_for_pickup' => 'Ready!', 'released' => 'Picked up'];
         $this->putBranding(['statusLabels' => $labels])->assertOk();

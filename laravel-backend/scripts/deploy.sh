@@ -13,9 +13,10 @@
 #   4. composer install --no-dev    (production packages only)
 #   5. php artisan migrate --force  (only the migrations that are new; never fresh, never seed)
 #   6. the reference-data seeder    (adds missing wash types, units and payment methods; touches nothing else)
-#   7. rebuilds the caches          (config, routes, views)
-#   8. maintenance mode off         (php artisan up)
-#   9. health check                 (GET /api/v1/health must answer ok)
+#   7. links the public storage     (php artisan storage:link: safe to repeat; for uploaded logos)
+#   8. rebuilds the caches          (config, routes, views)
+#   9. maintenance mode off         (php artisan up)
+#  10. health check                 (GET /api/v1/health must answer ok)
 #
 # Options: --dry-run  prints every command without running it (to see what would happen).
 #          PHP_BIN=/path/to/php  to choose the PHP binary yourself.
@@ -28,7 +29,7 @@ for argument in "$@"; do
   case "$argument" in
     --dry-run) DRY_RUN=1 ;;
     -h | --help)
-      sed -n '2,24p' "$0"
+      sed -n '2,25p' "$0"
       exit 0
       ;;
     *)
@@ -105,19 +106,30 @@ run "$PHP" artisan migrate --force
 say "Reference data (adds only what is missing)"
 run "$PHP" artisan db:seed --class=WashTypeReferenceSeeder --force
 
-# 7. caches ---------------------------------------------------------------------------------------
+# 7. public storage -------------------------------------------------------------------------------
+# Uploaded logos live in storage/app/public/branding. The API serves them itself at
+# /storage/branding/<file>, so the site works even where the symlink cannot be made (some shared
+# hosts forbid it): a failed link is a warning here, never a stop. Running it twice is harmless.
+say "Linking public storage (safe to repeat)"
+if [ -L public/storage ] || [ -e public/storage ]; then
+  echo "public/storage already exists: nothing to do."
+else
+  run "$PHP" artisan storage:link || echo "storage:link failed: the API will serve /storage/branding itself. See docs/NEW_SHOP_SETUP.md."
+fi
+
+# 8. caches ---------------------------------------------------------------------------------------
 say "Rebuilding the caches"
 run "$PHP" artisan optimize:clear
 run "$PHP" artisan config:cache
 run "$PHP" artisan route:cache
 run "$PHP" artisan view:cache
 
-# 8. back online ----------------------------------------------------------------------------------
+# 9. back online ----------------------------------------------------------------------------------
 say "Maintenance mode off"
 run "$PHP" artisan up
 trap - ERR
 
-# 9. health check ---------------------------------------------------------------------------------
+# 10. health check ---------------------------------------------------------------------------------
 APP_URL="$(grep -E '^APP_URL=' .env | head -1 | cut -d= -f2- | tr -d '"' | sed 's#/$##')"
 say "Health check: $APP_URL/api/v1/health"
 if [ "$DRY_RUN" = 1 ]; then

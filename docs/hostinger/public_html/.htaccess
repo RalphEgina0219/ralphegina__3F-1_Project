@@ -1,5 +1,7 @@
 # LaundryFlow on Hostinger (docs/HOSTINGER.md): one domain, two apps.
 #   /api/*  and /up  -> laravel.php (Laravel, installed outside public_html)
+#   /manifest.webmanifest and /storage/branding/*  -> laravel.php too: the installed-app manifest and
+#                      the shop's uploaded logo and icons come from the branding settings
 #   a real file      -> served as is (index.html, assets/, sw.js, icons)
 #   anything else    -> index.html (React Router: /orders, /scan, /my ...)
 # Browser and API share one origin, so CORS is never involved.
@@ -24,8 +26,9 @@ DirectoryIndex index.html
     RewriteCond %{THE_REQUEST} \s/+laravel\.php[\s?/] [NC]
     RewriteRule ^ - [R=404,L]
 
-    # The API and Laravel's health check.
-    RewriteRule ^(api/|up$) laravel.php [L]
+    # The API, Laravel's health check, the branded manifest and the uploaded logos and icons.
+    # (public_html has no manifest.webmanifest or storage/ folder: Laravel answers these.)
+    RewriteRule ^(api/|up$|manifest\.webmanifest$|storage/branding/) laravel.php [L]
 
     # Files and folders that exist are served directly.
     RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -43,7 +46,7 @@ DirectoryIndex index.html
 
     # The app shell, the service worker and the manifest must never be served stale, or
     # updates stop arriving. The hashed files in assets/ never change, so they cache for a year.
-    <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    <FilesMatch "^(index\.html|sw\.js|registerSW\.js)$">
         Header set Cache-Control "no-cache"
     </FilesMatch>
     <If "%{REQUEST_URI} =~ m#^/assets/#">

@@ -44,7 +44,13 @@ final class Branding
     /** The label shown for a status code. */
     public static function statusLabel(string $code): string
     {
-        self::$cache['labels'] ??= self::labelsOf(self::settings());
+        try {
+            self::$cache['labels'] ??= self::labelsOf(self::settings());
+        } catch (\Throwable) {
+            // No database yet (a unit test, or the moment before the branding migration has run):
+            // the standard words are always right.
+            return self::DEFAULT_STATUS_LABELS[$code] ?? $code;
+        }
 
         return self::$cache['labels'][$code] ?? (self::DEFAULT_STATUS_LABELS[$code] ?? $code);
     }

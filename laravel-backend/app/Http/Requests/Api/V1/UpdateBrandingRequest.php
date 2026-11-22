@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api\V1;
 use App\Models\PaymentMethod;
 use App\Models\ShopSetting;
 use App\Support\Branding;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 
 /**
@@ -17,6 +18,25 @@ class UpdateBrandingRequest extends BaseApiRequest
     protected function attributeMap(): array
     {
         return [];
+    }
+
+    /**
+     * The status codes are snake_case (ready_for_pickup) but a camelCasing client sends
+     * readyForPickup: take either, and keep the codes as the one source of truth.
+     */
+    protected function prepareForValidation(): void
+    {
+        $labels = $this->input('data.attributes.statusLabels');
+        if (! is_array($labels)) {
+            return;
+        }
+        $fixed = [];
+        foreach ($labels as $key => $label) {
+            $fixed[is_string($key) ? Str::snake($key) : $key] = $label;
+        }
+        $data = $this->input('data');
+        $data['attributes']['statusLabels'] = $fixed;
+        $this->merge(['data' => $data]);
     }
 
     public function rules(): array

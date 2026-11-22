@@ -20,7 +20,7 @@ export function OrderLink({
     <Link
       to={`/orders/${id}`}
       className={cn(
-        'inline-flex min-h-11 items-center font-mono font-medium whitespace-nowrap text-flow underline underline-offset-2 hover:text-flow-hover',
+        'inline-flex min-h-11 items-center font-mono font-medium whitespace-nowrap text-flow-text underline underline-offset-2 hover:text-flow-hover',
         className,
       )}
     >

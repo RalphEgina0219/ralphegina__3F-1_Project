@@ -29,7 +29,7 @@ export function Avatar({ name, className, solid }: AvatarProps) {
       aria-hidden="true"
       className={cn(
         'inline-flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-bold',
-        className?.includes('bg-') ? undefined : solid ? 'bg-flow text-white' : tint,
+        className?.includes('bg-') ? undefined : solid ? 'bg-flow text-on-flow' : tint,
         className,
       )}
     >

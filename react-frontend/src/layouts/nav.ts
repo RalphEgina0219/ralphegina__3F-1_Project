@@ -43,5 +43,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export const tabClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold',
-    isActive ? 'text-flow' : 'text-muted',
+    isActive ? 'text-flow-text' : 'text-muted',
   );

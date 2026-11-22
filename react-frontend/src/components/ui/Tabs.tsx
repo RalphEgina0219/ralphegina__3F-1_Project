@@ -7,7 +7,7 @@ export const tabListClass =
   'no-scrollbar inline-flex max-w-full gap-1 overflow-x-auto rounded-card bg-foam-2 p-1';
 const tabClass =
   'min-h-11 shrink-0 rounded-control px-4 text-sm font-semibold whitespace-nowrap text-text transition-colors';
-const activeClass = 'bg-surface text-flow shadow-sm';
+const activeClass = 'bg-surface text-flow-text shadow-sm';
 
 export const Tabs = RadixTabs.Root;
 export const TabsContent = RadixTabs.Content;
@@ -21,7 +21,7 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof Radix
     <RadixTabs.Trigger
       className={cn(
         tabClass,
-        'data-[state=active]:bg-surface data-[state=active]:text-flow data-[state=active]:shadow-sm',
+        'data-[state=active]:bg-surface data-[state=active]:text-flow-text data-[state=active]:shadow-sm',
         className,
       )}
       {...props}

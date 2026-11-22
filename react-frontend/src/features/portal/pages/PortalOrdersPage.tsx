@@ -23,7 +23,7 @@ const COLUMNS: Column<PortalOrderDto>[] = [
     cell: (o) => (
       <Link
         to={`/my/orders/${o.order_number}`}
-        className="inline-flex min-h-11 items-center font-mono font-medium whitespace-nowrap text-flow underline underline-offset-2 hover:text-flow-hover"
+        className="inline-flex min-h-11 items-center font-mono font-medium whitespace-nowrap text-flow-text underline underline-offset-2 hover:text-flow-hover"
       >
         {o.order_number}
       </Link>

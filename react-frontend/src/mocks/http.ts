@@ -41,7 +41,7 @@ export interface Ctx {
   body: Record<string, unknown>;
 }
 
-type Method = 'get' | 'post' | 'put';
+type Method = 'get' | 'post' | 'put' | 'delete';
 
 /** The signed-in customer: an active account and its profile. Staff sessions never count. */
 export function currentCustomer(): { account: CustomerAccount; customer: Customer } | null {
@@ -59,6 +59,13 @@ type Handler = (ctx: Ctx) => Response | Promise<Response>;
 
 async function readBody(request: Request): Promise<Record<string, unknown>> {
   if (request.method === 'GET') return {};
+  if (request.headers.get('content-type')?.includes('multipart/form-data')) {
+    try {
+      return Object.fromEntries((await request.clone().formData()).entries());
+    } catch {
+      return {};
+    }
+  }
   try {
     const parsed: unknown = await request.clone().json();
     return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};

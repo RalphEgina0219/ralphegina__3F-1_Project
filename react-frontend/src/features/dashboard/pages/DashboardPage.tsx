@@ -16,6 +16,7 @@ import { KpiTile } from '@/features/analytics/components/KpiTile';
 import { RangeFilter } from '@/features/analytics/components/RangeFilter';
 import { useRangeParams } from '@/features/analytics/useRangeParams';
 import { useCan, useCurrentUser } from '@/features/auth/store';
+import { SetupChecklist } from '@/features/branding/SetupChecklist';
 import { ScanAndNewButtons } from '@/features/orders/components/GlobalActions';
 import { MoveStatusButton } from '@/features/orders/components/MoveStatusButton';
 import type { AdminDashboardSeries, StaffDashboardSeries } from '@/lib/analytics/build';
@@ -206,7 +207,7 @@ function NeedsAction({ rows }: { rows: readonly NeedsActionDto[] }) {
                 <div className="min-w-44">
                   <Link
                     to={`/orders/${order.id}`}
-                    className="-my-3 inline-flex min-h-11 items-center font-bold hover:text-flow"
+                    className="-my-3 inline-flex min-h-11 items-center font-bold hover:text-flow-text"
                   >
                     {order.customer.full_name}
                   </Link>
@@ -327,6 +328,8 @@ export default function DashboardPage() {
           </Suspense>
         </div>
       )}
+
+      {useCan('settings.manage') && <SetupChecklist />}
 
       <section aria-label="Charts" className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-12">
         <Suspense fallback={<ChartsFallback count={isAdmin ? 7 : 5} />}>

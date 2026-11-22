@@ -18,6 +18,9 @@
   --color-flow-hover: #0b5a70;
   --color-flow-soft: #e8f4f7;
   --color-flow-line: #a9dbe5;
+  /* Brand-aware helpers: links and text on the page, and the text on a primary button. */
+  --color-flow-text: #0e7490;
+  --color-on-flow: #ffffff;
   --color-aqua: #3dd6e8;
   --color-foam: #f3f8fa;
   --color-foam-2: #e6eef2;
@@ -106,6 +109,94 @@
       top: 88%;
     }
   }
+}
+
+/*
+ * The dark theme: the same tokens with dark values, set on <html data-theme="dark"> by the theme
+ * toggle (and before the first paint by the script in index.html). A shop's own brand colors
+ * are generated for dark mode in src/lib/color.ts and set inline, which wins over this block.
+ */
+:root[data-theme='dark'],
+[data-preview-theme='dark'] {
+  color-scheme: dark;
+  --color-ink: #071922;
+  --color-ink-2: #124b63;
+  --color-ink-3: #0d2a37;
+  --color-ink-deep: #04121a;
+  --color-on-ink: #ffffff;
+  --color-on-ink-muted: #9fbac6;
+  --color-flow: #0e7490;
+  --color-flow-hover: #1389aa;
+  --color-flow-soft: #123743;
+  --color-flow-line: #1f6a7e;
+  --color-flow-text: #4cc3dd;
+  --color-on-flow: #ffffff;
+  --color-aqua: #3dd6e8;
+  --color-foam: #0a141a;
+  --color-foam-2: #142630;
+  --color-surface: #102029;
+  --color-line: #213a47;
+  --color-line-strong: #2e4f5f;
+  --color-text: #e8f1f5;
+  --color-muted: #9bb3bf;
+  --color-scrim: rgb(0 0 0 / 0.65);
+  --color-warn-bg: #33250f;
+  --color-warn: #fbbf6a;
+  --color-warn-line: #5c4315;
+  --color-warn-bar: #f59e0b;
+  --color-danger-bg: #3a1714;
+  --color-danger: #ff9b92;
+  --color-danger-bar: #ef4444;
+  --color-ok-bg: #0f3025;
+  --color-ok: #5fe0b0;
+  --color-ok-bar: #10b981;
+  --color-chart-1: #22b8d4;
+  --color-chart-2: #f59e0b;
+  --color-status-received-bg: #1d2a34;
+  --color-status-received-fg: #cbd5e1;
+  --color-status-received-dot: #94a3b8;
+  --color-status-washing-bg: #0f2f45;
+  --color-status-washing-fg: #8fd0f5;
+  --color-status-washing-dot: #38a7e0;
+  --color-status-drying-bg: #3a2a0e;
+  --color-status-drying-fg: #fbbf6a;
+  --color-status-drying-dot: #f59e0b;
+  --color-status-folding-bg: #2a1f4a;
+  --color-status-folding-fg: #c4b5fd;
+  --color-status-folding-dot: #8b5cf6;
+  --color-status-ready-bg: #0f3025;
+  --color-status-ready-fg: #5fe0b0;
+  --color-status-ready-dot: #10b981;
+  --color-status-released-bg: #1d2a34;
+  --color-status-released-fg: #cbd5e1;
+  --color-status-released-dot: #94a3b8;
+}
+
+/* The light tokens again, scoped, so the Branding preview can show light mode inside a dark page. */
+[data-preview-theme='light'] {
+  color-scheme: light;
+  --color-ink: #0b2e3f;
+  --color-ink-2: #14506b;
+  --color-ink-3: #0f3a4f;
+  --color-ink-deep: #07222f;
+  --color-on-ink: #ffffff;
+  --color-on-ink-muted: #b4cdd8;
+  --color-flow: #0e7490;
+  --color-flow-hover: #0b5a70;
+  --color-flow-soft: #e8f4f7;
+  --color-flow-line: #a9dbe5;
+  --color-flow-text: #0e7490;
+  --color-on-flow: #ffffff;
+  --color-aqua: #3dd6e8;
+  --color-foam: #f3f8fa;
+  --color-foam-2: #e6eef2;
+  --color-surface: #ffffff;
+  --color-line: #dce7ec;
+  --color-line-strong: #cfdde4;
+  --color-text: #10242e;
+  --color-muted: #557380;
+  --color-status-washing-bg: #e0f0fb;
+  --color-status-washing-fg: #075985;
 }
 
 @layer base {

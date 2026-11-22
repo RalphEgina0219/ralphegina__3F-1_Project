@@ -7,6 +7,7 @@ import { InstallBanner } from '@/features/pwa/components/InstallBanner';
 import { rememberSide } from '@/features/pwa/side';
 import { cn } from '@/lib/cn';
 import { tabClass } from './nav';
+import { PoweredBy } from '@/features/branding/PoweredBy';
 import { PublicHeader } from './PublicHeader';
 
 const LINKS = [
@@ -80,6 +81,7 @@ export function CustomerLayout() {
         <Suspense fallback={<PageFallback />}>
           <Outlet />
         </Suspense>
+        <PoweredBy className="pb-24 text-muted md:pb-6" />
       </main>
       <nav
         aria-label="My account"

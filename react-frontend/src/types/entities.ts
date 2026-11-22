@@ -188,6 +188,10 @@ export interface PaymentMethod {
   id: number;
   code: PaymentMethodCode;
   label: string;
+  /** Turned off in Settings > Branding: gone from new payment forms, still shown on old payments. */
+  is_active: boolean;
+  /** The name the shop gave it, if any. */
+  display_label: string | null;
 }
 
 export interface Payment {

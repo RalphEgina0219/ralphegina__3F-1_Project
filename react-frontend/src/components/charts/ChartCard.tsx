@@ -189,7 +189,7 @@ export function ChartCard({
             : String(raw ?? '');
         const href = index === 0 ? table.href?.(row) : undefined;
         return href ? (
-          <Link to={href} className="font-semibold text-flow underline underline-offset-2">
+          <Link to={href} className="font-semibold text-flow-text underline underline-offset-2">
             {text}
           </Link>
         ) : (
@@ -333,7 +333,7 @@ export function ChartCard({
               action={
                 <a
                   href={emptyHref}
-                  className="font-semibold text-flow underline underline-offset-2"
+                  className="font-semibold text-flow-text underline underline-offset-2"
                 >
                   Change the date range
                 </a>

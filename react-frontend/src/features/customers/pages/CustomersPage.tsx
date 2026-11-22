@@ -28,7 +28,7 @@ const COLUMNS: Column<CustomerDto>[] = [
     cell: (c) => (
       <Link
         to={`/customers/${c.id}`}
-        className="flex min-h-11 items-center gap-2.5 font-semibold hover:text-flow"
+        className="flex min-h-11 items-center gap-2.5 font-semibold hover:text-flow-text"
       >
         <Avatar name={c.full_name} />
         <span className="min-w-0 truncate">{c.full_name}</span>

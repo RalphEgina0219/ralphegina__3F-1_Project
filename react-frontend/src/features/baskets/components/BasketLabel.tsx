@@ -1,6 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { createPortal } from 'react-dom';
 import { basketUrl } from '@/lib/basket';
+import { useBranding } from '@/features/branding/BrandingProvider';
 import { cn } from '@/lib/cn';
 import type { BasketDto } from '../types';
 
@@ -21,6 +22,7 @@ export function BasketLabel({
   shopName: string;
   className?: string;
 }) {
+  const branding = useBranding();
   return (
     <div
       className={cn(
@@ -38,9 +40,11 @@ export function BasketLabel({
         style={{ width: '27mm', height: '27mm', flexShrink: 0 }}
       />
       <div className="min-w-0 leading-tight">
-        <p className="truncate font-bold" style={{ fontSize: '8pt' }}>
-          {shopName}
-        </p>
+        {branding.basket_label_show_shop_name && (
+          <p className="truncate font-bold" style={{ fontSize: '8pt' }}>
+            {shopName}
+          </p>
+        )}
         <p className="font-mono font-extrabold" style={{ fontSize: '16pt', lineHeight: 1.15 }}>
           {basket.basket_number}
         </p>
@@ -49,12 +53,14 @@ export function BasketLabel({
             {basket.label}
           </p>
         )}
-        <p
-          className="mt-[1mm] font-bold uppercase"
-          style={{ fontSize: '7pt', letterSpacing: '0.04em' }}
-        >
-          Staff scan only
-        </p>
+        {branding.basket_label_footer && (
+          <p
+            className="mt-[1mm] font-bold uppercase"
+            style={{ fontSize: '7pt', letterSpacing: '0.04em' }}
+          >
+            {branding.basket_label_footer}
+          </p>
+        )}
       </div>
     </div>
   );

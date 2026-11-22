@@ -15,8 +15,9 @@ import type { ScanResultDto } from '@/types/api';
 import { useRecentScans, useScan } from '../api';
 import { CameraScanner } from '../components/CameraScanner';
 import { BasketAvailable, BasketRetired, ScanOrderPanel } from '../components/ScanResult';
+import { brandName } from '@/features/branding/branding';
 
-const NOT_RECOGNIZED = 'QR not recognized. Scan a LaundryFlow basket label.';
+const NOT_RECOGNIZED = () => `QR not recognized. Scan a ${brandName()} basket label.`;
 const OFFLINE_LOOKUP = "You're offline. Looking up a basket or order needs a connection.";
 
 function ManualLookup({
@@ -252,10 +253,10 @@ export default function ScanPage() {
                     <button
                       type="button"
                       onClick={() => resolve(recent.code)}
-                      className="flex min-h-11 w-full flex-wrap items-center gap-x-3 py-1.5 text-left hover:text-flow"
+                      className="flex min-h-11 w-full flex-wrap items-center gap-x-3 py-1.5 text-left hover:text-flow-text"
                     >
                       {recent.kind === 'basket' && (
-                        <ShoppingBasket className="size-4 text-flow" aria-hidden="true" />
+                        <ShoppingBasket className="size-4 text-flow-text" aria-hidden="true" />
                       )}
                       <Mono className="text-[13px]">{recent.code}</Mono>
                       <span className="min-w-0 flex-1 truncate">{recent.detail}</span>

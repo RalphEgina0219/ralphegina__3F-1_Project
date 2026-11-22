@@ -136,7 +136,8 @@ export const basketHandlers = [
       sequence += 1;
       const basket = {
         id: nextId(db().baskets),
-        basket_number: formatBasketNumber(sequence),
+        // The prefix applies to new baskets only.
+        basket_number: formatBasketNumber(sequence, db().branding.basket_prefix),
         qr_token: uniqueToken(),
         label,
         status: 'available' as const,

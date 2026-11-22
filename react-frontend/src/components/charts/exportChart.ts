@@ -1,4 +1,5 @@
 import { UI } from './chartTheme';
+import { brandSlug } from '@/features/branding/branding';
 
 const STYLE_PROPS = [
   'font-family',
@@ -107,5 +108,5 @@ export function chartFilename(title: string, range?: { from: string; to: string 
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
-  return `laundryflow-${slug}${range ? `-${range.from}-to-${range.to}` : ''}`;
+  return `${brandSlug()}-${slug}${range ? `-${range.from}-to-${range.to}` : ''}`;
 }

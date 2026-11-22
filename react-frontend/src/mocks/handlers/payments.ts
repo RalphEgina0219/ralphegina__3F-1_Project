@@ -25,8 +25,12 @@ export function validatePayment(body: Record<string, unknown>, balance: number) 
   } else if (amount > balance) {
     errors.amount_cents = 'The amount cannot be more than the balance.';
   }
+  const chosen = db().payment_methods.find((m) => m.code === method);
   if (method !== 'cash' && method !== 'gcash' && method !== 'maya') {
     errors.payment_method = 'Choose Cash, GCash or Maya.';
+  } else if (chosen && !chosen.is_active) {
+    // The shop turned it off in Settings > Branding & Appearance.
+    errors.payment_method = `${chosen.label} is turned off. Choose another way to pay.`;
   }
   // GCash and Maya both need the customer's reference number.
   if ((method === 'gcash' || method === 'maya') && !reference) {

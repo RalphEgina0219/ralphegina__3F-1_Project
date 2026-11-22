@@ -262,7 +262,7 @@ export function BasketAvailable({ basket, className }: { basket: BasketDto; clas
   return (
     <Card className={cn('p-4 md:p-5', className)}>
       <p className="flex items-center gap-2 font-bold" aria-live="polite">
-        <ShoppingBasket className="size-5 text-flow" aria-hidden="true" />
+        <ShoppingBasket className="size-5 text-flow-text" aria-hidden="true" />
         {basket.basket_number} is available. No active laundry.
       </p>
       {basket.label && <p className="mt-0.5 text-[13px] text-muted">{basket.label}</p>}

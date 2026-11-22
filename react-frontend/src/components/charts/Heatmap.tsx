@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { WEEKDAYS, WEEKDAYS_LONG, formatHour } from '@/lib/analytics/time';
 import type { HeatmapData } from '@/lib/analytics/types';
 import { useElementSize } from '@/hooks/useElementSize';
-import { SEQUENTIAL, UI, sequentialColor } from './chartTheme';
+import { UI, sequentialColor, sequentialRamp } from './chartTheme';
 import { TooltipBox } from './ChartTooltip';
 
 interface HeatmapProps {
@@ -135,7 +135,7 @@ export default function Heatmap({ data, unit }: HeatmapProps) {
           <text x={0} y={10} fill={UI.muted} fontSize={12}>
             Fewer
           </text>
-          {SEQUENTIAL.map((color, index) => (
+          {sequentialRamp().map((color, index) => (
             <rect
               key={color}
               x={44 + index * 22}
@@ -146,7 +146,7 @@ export default function Heatmap({ data, unit }: HeatmapProps) {
               fill={color}
             />
           ))}
-          <text x={44 + SEQUENTIAL.length * 22 + 4} y={10} fill={UI.muted} fontSize={12}>
+          <text x={44 + sequentialRamp().length * 22 + 4} y={10} fill={UI.muted} fontSize={12}>
             More ({data.max} max)
           </text>
         </g>

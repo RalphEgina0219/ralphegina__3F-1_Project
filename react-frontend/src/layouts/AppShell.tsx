@@ -4,7 +4,9 @@ import { Link, NavLink, Outlet, useLocation, useMatches } from 'react-router-dom
 import { create } from 'zustand';
 import { PageFallback } from '@/app/PageFallback';
 import { Drawer } from '@/components/ui/Dialog';
-import { Logo } from '@/components/ui/Logo';
+import { BrandLogo } from '@/features/branding/BrandLogo';
+import { useBranding } from '@/features/branding/BrandingProvider';
+import { ThemeToggle } from '@/features/theme/ThemeToggle';
 import { WaveDivider } from '@/components/ui/WaveDivider';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { InstallBanner } from '@/features/pwa/components/InstallBanner';
@@ -35,33 +37,41 @@ function useFullscreenOnPhone() {
 
 function TopBar({ hideOnPhone }: { hideOnPhone: boolean }) {
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen);
+  const branding = useBranding();
   return (
     <header
       className={cn(
-        'on-dark pt-safe sticky top-0 z-20 bg-ink text-on-ink lg:hidden print:hidden',
+        // A navy bar on phones and tablets; on desktop a slim bar whose only control is the theme toggle.
+        'on-dark pt-safe sticky top-0 z-20 bg-ink text-on-ink lg:bg-foam lg:text-text print:hidden',
         hideOnPhone && 'hidden md:block',
       )}
     >
-      <div className="flex h-14 items-center gap-1 px-2">
+      <div className="flex h-14 items-center gap-1 px-2 lg:h-12 lg:justify-end lg:px-8">
         <button
           type="button"
           aria-label="Open menu"
           onClick={() => setDrawerOpen(true)}
-          className="flex size-11 items-center justify-center rounded-control hover:bg-ink-3"
+          className="flex size-11 items-center justify-center rounded-control hover:bg-ink-3 lg:hidden"
         >
           <Menu className="size-6" aria-hidden="true" />
         </button>
         <Link
           to="/"
-          className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-control px-1"
+          className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-control px-1 lg:hidden"
         >
-          <Logo className="size-8" />
-          <span className="truncate text-base font-extrabold tracking-[-0.02em]">LaundryFlow</span>
+          <BrandLogo className="size-8" onInk />
+          <span className="truncate text-base font-extrabold tracking-[-0.02em]">
+            {branding.system_name}
+          </span>
         </Link>
-        <NotificationBell variant="topbar" />
+        <div className="lg:hidden">
+          <NotificationBell variant="topbar" />
+        </div>
+        {/* The one theme toggle of the staff app, on every screen size. */}
+        <ThemeToggle className="hover:bg-ink-3 lg:hover:bg-foam-2" />
       </div>
       <WaveDivider
-        className="absolute inset-x-0 top-full h-2.5 rotate-180 md:h-3"
+        className="absolute inset-x-0 top-full h-2.5 rotate-180 md:h-3 lg:hidden"
         fill="fill-ink"
       />
     </header>
@@ -100,7 +110,7 @@ function BottomTabs() {
         <Link
           to="/scan"
           aria-label="Scan QR"
-          className="absolute -top-5 left-1/2 flex size-15 -translate-x-1/2 items-center justify-center rounded-full border-4 border-surface bg-flow text-white shadow-md"
+          className="absolute -top-5 left-1/2 flex size-15 -translate-x-1/2 items-center justify-center rounded-full border-4 border-surface bg-flow text-on-flow shadow-md"
         >
           <ScanLine className="size-7" aria-hidden="true" />
         </Link>

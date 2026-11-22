@@ -1,7 +1,9 @@
 import { KeyRound, LogOut } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/Avatar';
-import { Logo } from '@/components/ui/Logo';
+import { BrandLogo } from '@/features/branding/BrandLogo';
+import { PoweredBy } from '@/features/branding/PoweredBy';
+import { useBranding } from '@/features/branding/BrandingProvider';
 import { useLogout } from '@/features/auth/api';
 import { roleLabel, useCurrentUser } from '@/features/auth/store';
 import { useInventoryItems } from '@/features/inventory/api';
@@ -15,16 +17,23 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const user = useCurrentUser();
   const navigate = useNavigate();
   const logout = useLogout();
+  const branding = useBranding();
+  // The tagline, else the town (the last two parts of the shop address).
+  const subtitle = branding.tagline ?? branding.shop.address.split(',').slice(-2).join(',').trim();
   const stock = useInventoryItems();
   const lowStock = (stock.data ?? []).filter((item) => item.stock_status !== 'ok').length;
 
   return (
     <div className="on-dark pt-safe pb-safe flex h-full flex-col bg-ink text-on-ink">
       <div className="flex items-center gap-2.5 px-4 pt-6 pb-5">
-        <Logo className="size-9" />
+        <BrandLogo className="size-9" onInk />
         <div className="min-w-0">
-          <p className="text-[17px] leading-tight font-extrabold tracking-[-0.02em]">LaundryFlow</p>
-          <p className="text-[11px] leading-tight text-on-ink-muted">Bongabong, Oriental Mindoro</p>
+          <p className="truncate text-[17px] leading-tight font-extrabold tracking-[-0.02em]">
+            {branding.system_name}
+          </p>
+          {subtitle && (
+            <p className="truncate text-[11px] leading-tight text-on-ink-muted">{subtitle}</p>
+          )}
         </div>
       </div>
 
@@ -95,6 +104,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <LogOut className="size-4.5 shrink-0" aria-hidden="true" />
             {logout.isPending ? 'Signing out…' : 'Sign out'}
           </button>
+          <PoweredBy className="mt-2" />
         </div>
       </div>
     </div>

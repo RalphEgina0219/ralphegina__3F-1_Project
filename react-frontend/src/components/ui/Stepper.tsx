@@ -21,7 +21,9 @@ function StepDot({
   const box = size === 'md' ? 'size-9' : 'size-7';
   if (step.state === 'done') {
     return (
-      <span className={cn(box, 'flex items-center justify-center rounded-full bg-flow text-white')}>
+      <span
+        className={cn(box, 'flex items-center justify-center rounded-full bg-flow text-on-flow')}
+      >
         <Check className="size-4" strokeWidth={3} aria-hidden="true" />
       </span>
     );

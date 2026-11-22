@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { Logo } from '@/components/ui/Logo';
+import { BrandLogo } from '@/features/branding/BrandLogo';
+import { useBranding } from '@/features/branding/BrandingProvider';
+import { ThemeToggle } from '@/features/theme/ThemeToggle';
 import { WaveDivider } from '@/components/ui/WaveDivider';
 import { cn } from '@/lib/cn';
 
@@ -18,10 +20,13 @@ interface PublicHeaderProps {
 
 /** The ink header with the wave, shared by the customer portal, its sign-in pages and /b/:token. */
 export function PublicHeader({ children, overlap, aside, homeTo, wide }: PublicHeaderProps) {
+  const branding = useBranding();
   const brand = (
     <>
-      <Logo className="size-9" />
-      <span className="text-lg font-extrabold tracking-[-0.02em]">LaundryFlow</span>
+      <BrandLogo className="size-9" onInk />
+      <span className="truncate text-lg font-extrabold tracking-[-0.02em]">
+        {branding.system_name}
+      </span>
     </>
   );
   return (
@@ -35,7 +40,11 @@ export function PublicHeader({ children, overlap, aside, homeTo, wide }: PublicH
           ) : (
             <div className="flex items-center gap-2.5">{brand}</div>
           )}
-          {aside}
+          <div className="flex items-center gap-1">
+            {aside}
+            {/* The one theme toggle of the portal and of the public pages. */}
+            <ThemeToggle className="text-on-ink hover:bg-ink-3" />
+          </div>
         </div>
         {children}
       </div>

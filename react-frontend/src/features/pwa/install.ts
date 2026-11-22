@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { isIos } from '@/lib/platform';
+import { brandName } from '@/features/branding/branding';
 
 /** Chrome, Edge and Samsung Internet hand the page this event when the app can be installed. */
 export interface BeforeInstallPromptEvent extends Event {
@@ -32,7 +33,7 @@ export function listenForInstallPrompt() {
   });
   window.addEventListener('appinstalled', () => {
     useInstallStore.setState({ deferred: null, installed: true });
-    toast.success('LaundryFlow is installed', {
+    toast.success(`${brandName()} is installed`, {
       description: 'Open it from your home screen or app list.',
     });
   });

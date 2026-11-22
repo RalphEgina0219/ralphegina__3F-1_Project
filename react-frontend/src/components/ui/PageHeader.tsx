@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { brandName } from '@/features/branding/branding';
 import { cn } from '@/lib/cn';
 
 interface PageHeaderProps {
@@ -37,7 +38,7 @@ export function PageHeader({
           <Link
             to={back.to}
             className={cn(
-              'mb-1 inline-flex min-h-11 items-center gap-1.5 text-[13px] font-semibold text-flow hover:text-flow-hover print:hidden',
+              'mb-1 inline-flex min-h-11 items-center gap-1.5 text-[13px] font-semibold text-flow-text hover:text-flow-hover print:hidden',
               back.phoneOnly && 'lg:hidden',
             )}
           >
@@ -63,6 +64,6 @@ export function PageHeader({
 
 export function useDocumentTitle(title?: string) {
   useEffect(() => {
-    document.title = title ? `${title} · LaundryFlow` : 'LaundryFlow';
+    document.title = title ? `${title} · ${brandName()}` : brandName();
   }, [title]);
 }

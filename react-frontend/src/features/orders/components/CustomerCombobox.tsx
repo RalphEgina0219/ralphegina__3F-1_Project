@@ -122,7 +122,9 @@ export function CustomerCombobox({ id, onSelect, onNeedsAccount, ...aria }: Cust
             ) : (
               <span id={`${listId}-${index}-note`} className="shrink-0 text-right">
                 <Badge tone="warn">No account</Badge>
-                <span className="mt-0.5 block text-xs font-semibold text-flow">Create account</span>
+                <span className="mt-0.5 block text-xs font-semibold text-flow-text">
+                  Create account
+                </span>
               </span>
             )}
           </li>

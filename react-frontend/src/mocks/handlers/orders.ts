@@ -231,6 +231,10 @@ export const orderHandlers = [
       lines.reduce((sum, line) => sum + line.subtotal_cents, 0) +
       washSurchargeCents(weighedTenths, surchargePerKg);
     const rawPayment = body.payment as Record<string, unknown> | undefined | null;
+    // Pay at pickup turned off: whoever can take payments records one with the order.
+    if (!rawPayment && !db().branding.pay_at_pickup_enabled && can(user, 'payments.record')) {
+      errors.payment = 'Pay at pickup is turned off. Record a payment with the order.';
+    }
     let payment: ReturnType<typeof validatePayment>['values'] | null = null;
     if (rawPayment) {
       if (!can(user, 'payments.record'))

@@ -397,6 +397,87 @@ export interface WashTypeInput {
   supplies?: { inventory_item_id: number; usage_per_kg_small_unit: number }[];
 }
 
+/** The shop's public branding (GET /branding): needed before sign-in, nothing private in it. */
+export interface BrandingPaymentMethod {
+  code: PaymentMethodCode;
+  label: string;
+  is_active: boolean;
+}
+
+export interface BrandingDto {
+  system_name: string;
+  short_name: string;
+  tagline: string | null;
+  logo_url: string | null;
+  logo_dark_url: string | null;
+  /** Generated PWA icons: 192, 512, maskable, apple, favicon32, favicon16. Null = the defaults. */
+  icon_urls: Record<string, string> | null;
+  primary_color: string;
+  accent_color: string;
+  sidebar_color: string;
+  button_text_color: string;
+  /** Display labels only: the status codes never change. */
+  status_labels: Record<StatusCode, string>;
+  basket_prefix: string;
+  basket_label_footer: string | null;
+  basket_label_show_shop_name: boolean;
+  pay_at_pickup_enabled: boolean;
+  payment_methods: BrandingPaymentMethod[];
+  login_message: string | null;
+  portal_message: string | null;
+  report_footer: string | null;
+  show_powered_by: boolean;
+  shop: {
+    name: string;
+    address: string;
+    contact_number: string;
+    opening_hours: string;
+    contact_email: string | null;
+  };
+  version: string;
+}
+
+export interface SetupItemDto {
+  key: string;
+  label: string;
+  done: boolean;
+  auto: boolean;
+  link: string;
+}
+
+/** GET /settings/branding (owner): the public branding plus what is private. */
+export interface BrandingAdminDto extends BrandingDto {
+  contact_email: string | null;
+  show_contact_email: boolean;
+  has_logo: boolean;
+  has_logo_dark: boolean;
+  has_icon: boolean;
+  setup_checklist: SetupItemDto[];
+}
+
+export type BrandingInput = Partial<
+  Pick<
+    BrandingAdminDto,
+    | 'system_name'
+    | 'short_name'
+    | 'tagline'
+    | 'primary_color'
+    | 'accent_color'
+    | 'sidebar_color'
+    | 'contact_email'
+    | 'show_contact_email'
+    | 'login_message'
+    | 'portal_message'
+    | 'report_footer'
+    | 'status_labels'
+    | 'basket_prefix'
+    | 'basket_label_footer'
+    | 'basket_label_show_shop_name'
+    | 'pay_at_pickup_enabled'
+    | 'show_powered_by'
+  >
+> & { payment_methods?: { code: PaymentMethodCode; is_active: boolean; label?: string }[] };
+
 export interface UnitDto {
   id: number;
   code: string;

@@ -34,6 +34,19 @@ export const SEQUENTIAL = [
   '#0B4F63',
 ] as const;
 
+/** The heatmap ramp on a dark surface: dark to bright, so a busier hour is still the brightest. */
+export const SEQUENTIAL_DARK = [
+  '#12303b',
+  '#18495a',
+  '#1e6479',
+  '#2a86a1',
+  '#4fb0c9',
+  '#8fd6e8',
+] as const;
+
+/** The ramp for the current mode. */
+export const sequentialRamp = (): readonly string[] => (isDark() ? SEQUENTIAL_DARK : SEQUENTIAL);
+
 /** Laundry stages keep the status colours used everywhere else (index.css *-dot tokens). */
 export const STAGE_COLORS: Record<StatusCode, string> = {
   received: '#64748b',
@@ -47,8 +60,10 @@ export const STAGE_COLORS: Record<StatusCode, string> = {
 /** Alerts and aging only, always with an icon and a label (index.css *-bar tokens). */
 export const ALERT = { ok: '#059669', warn: '#f59e0b', danger: '#dc2626' } as const;
 
-/** Ink, text and surface tokens from index.css. */
-export const UI = {
+const isDark = () =>
+  typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark';
+
+const UI_LIGHT = {
   text: '#10242e',
   muted: '#557380',
   line: '#dce7ec',
@@ -58,6 +73,50 @@ export const UI = {
   flow: '#0e7490',
   ink: '#0b2e3f',
 } as const;
+
+/** The dark theme's chart chrome (index.css `[data-theme="dark"]`): checked against the dark surface. */
+const UI_DARK = {
+  text: '#e8f1f5',
+  muted: '#9bb3bf',
+  line: '#213a47',
+  lineStrong: '#2e4f5f',
+  surface: '#102029',
+  foam: '#0a141a',
+  flow: '#3bb3cf',
+  ink: '#e8f1f5',
+} as const;
+
+/**
+ * Ink, text and surface colours for charts, for the mode the page is in right now. They are fixed
+ * hex values and never follow the shop's brand colours, so data series stay readable and
+ * colour-blind safe (the screens remount when the mode changes).
+ */
+export const UI: Record<keyof typeof UI_LIGHT, string> = {
+  get text() {
+    return isDark() ? UI_DARK.text : UI_LIGHT.text;
+  },
+  get muted() {
+    return isDark() ? UI_DARK.muted : UI_LIGHT.muted;
+  },
+  get line() {
+    return isDark() ? UI_DARK.line : UI_LIGHT.line;
+  },
+  get lineStrong() {
+    return isDark() ? UI_DARK.lineStrong : UI_LIGHT.lineStrong;
+  },
+  get surface() {
+    return isDark() ? UI_DARK.surface : UI_LIGHT.surface;
+  },
+  get foam() {
+    return isDark() ? UI_DARK.foam : UI_LIGHT.foam;
+  },
+  get flow() {
+    return isDark() ? UI_DARK.flow : UI_LIGHT.flow;
+  },
+  get ink() {
+    return isDark() ? UI_DARK.ink : UI_LIGHT.ink;
+  },
+};
 
 /**
  * Colour follows the entity: Wash-Dry-Fold is teal in every chart, on every page, and filtering
@@ -85,12 +144,10 @@ export function categoricalAt(index: number): string {
 
 /** Heatmap shade for a count, from the six sequential steps. Zero stays the lightest. */
 export function sequentialColor(value: number, max: number): string {
-  if (max <= 0 || value <= 0) return SEQUENTIAL[0];
-  const step = Math.min(
-    SEQUENTIAL.length - 1,
-    1 + Math.floor((value / max) * (SEQUENTIAL.length - 1)),
-  );
-  return SEQUENTIAL[step] as string;
+  const ramp = sequentialRamp();
+  if (max <= 0 || value <= 0) return ramp[0] as string;
+  const step = Math.min(ramp.length - 1, 1 + Math.floor((value / max) * (ramp.length - 1)));
+  return ramp[step] as string;
 }
 
 // Marks and anatomy -------------------------------------------------------------------------

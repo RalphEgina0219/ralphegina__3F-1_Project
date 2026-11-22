@@ -8,6 +8,7 @@ import { fetchScan, useAvailableBaskets } from '@/features/baskets/api';
 import { errorMessage } from '@/lib/api';
 import { parseScanInput } from '@/lib/basket';
 import type { BasketRefDto } from '@/types/api';
+import { brandName } from '@/features/branding/branding';
 
 // The scanner library is large: load it only when someone actually scans.
 const CameraScanner = lazy(() =>
@@ -16,7 +17,7 @@ const CameraScanner = lazy(() =>
   })),
 );
 
-const NOT_A_BASKET = 'QR not recognized. Scan a LaundryFlow basket label.';
+const NOT_A_BASKET = () => `QR not recognized. Scan a ${brandName()} basket label.`;
 
 interface BasketPickerProps {
   value: readonly BasketRefDto[];
@@ -102,7 +103,7 @@ export function BasketPicker({ value, onChange, error, id }: BasketPickerProps) 
               key={basket.id}
               className="flex min-h-11 items-center gap-1 rounded-control border border-flow-line bg-flow-soft pl-3 font-mono font-semibold"
             >
-              <ShoppingBasket className="size-4 text-flow" aria-hidden="true" />
+              <ShoppingBasket className="size-4 text-flow-text" aria-hidden="true" />
               {basket.basket_number}
               <button
                 type="button"

@@ -11,6 +11,16 @@ export const STATUS_ORDER: readonly StatusCode[] = [
 
 export const BOARD_STATUSES: readonly StatusCode[] = STATUS_ORDER.filter((s) => s !== 'released');
 
+/** What each status is called when the shop has not renamed it. The codes never change. */
+export const DEFAULT_STATUS_LABELS: Record<StatusCode, string> = {
+  received: 'Received',
+  washing: 'Washing',
+  drying: 'Drying',
+  folding: 'Folding',
+  ready_for_pickup: 'Ready for Pickup',
+  released: 'Completed',
+};
+
 export interface StatusMeta {
   label: string;
   shortLabel: string;
@@ -171,3 +181,13 @@ export function checkTransition({
 
 /** Orders still in the shop: everything before Completed. */
 export const isActiveStatus = (status: StatusCode) => status !== 'released';
+
+/** The shop's own names for the statuses (Settings > Branding): display only, the rules use the codes. */
+export function applyStatusLabels(labels: Partial<Record<StatusCode, string>>) {
+  for (const code of STATUS_ORDER) {
+    const label = labels[code]?.trim() || DEFAULT_STATUS_LABELS[code];
+    STATUS_META[code].label = label;
+    STATUS_META[code].shortLabel =
+      code === 'ready_for_pickup' && label === DEFAULT_STATUS_LABELS[code] ? 'Ready' : label;
+  }
+}

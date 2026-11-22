@@ -26,7 +26,7 @@ function BoardCard({ order }: { order: OrderDto }) {
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <Link
             to={`/orders/${order.id}`}
-            className="-my-3 inline-flex min-h-11 min-w-0 items-center text-xs hover:text-flow hover:underline"
+            className="-my-3 inline-flex min-h-11 min-w-0 items-center text-xs hover:text-flow-text hover:underline"
             aria-label={`Open ${order.order_number}, ${order.customer.full_name}`}
           >
             <Mono>{order.order_number}</Mono>

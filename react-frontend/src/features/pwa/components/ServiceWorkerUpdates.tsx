@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { hasUnsavedChanges } from '@/lib/unsaved';
+import { brandName } from '@/features/branding/branding';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -37,7 +38,7 @@ export default function ServiceWorkerUpdates() {
   const offer = useCallback(() => {
     // A fresh toast each time: reusing the id of one that is still animating out drops the new one.
     if (shown.current !== null) toast.dismiss(shown.current);
-    shown.current = toast('A new version of LaundryFlow is available', {
+    shown.current = toast(`A new version of ${brandName()} is available`, {
       duration: Infinity,
       closeButton: false,
       action: {

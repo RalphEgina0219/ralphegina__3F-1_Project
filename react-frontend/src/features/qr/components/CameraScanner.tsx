@@ -6,6 +6,7 @@ import { getDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/cn';
 import { isAndroid, isIos } from '@/lib/platform';
 import type { CameraState } from '../types';
+import { brandName } from '@/features/branding/branding';
 
 /**
  * The library's defaults demand a height of at least 640 px, which rejects 480p webcams outright.
@@ -61,7 +62,7 @@ function deniedHelp(): string {
   }
   if (isAndroid()) {
     return installed
-      ? 'Long-press the LaundryFlow icon, tap App info › Permissions › Camera › Allow, then reopen the app. (Or Chrome › Settings › Site settings › Camera.)'
+      ? `Long-press the ${brandName()} icon, tap App info › Permissions › Camera › Allow, then reopen the app. (Or Chrome › Settings › Site settings › Camera.)`
       : 'Tap the icon beside the address bar, then Permissions › Camera › Allow, and reload this page.';
   }
   return installed

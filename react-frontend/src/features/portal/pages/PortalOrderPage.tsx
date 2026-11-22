@@ -23,7 +23,7 @@ export default function PortalOrderPage() {
   const back = (
     <Link
       to="/my/orders"
-      className="inline-flex min-h-11 items-center gap-1.5 pt-2 text-[13px] font-semibold text-flow hover:text-flow-hover"
+      className="inline-flex min-h-11 items-center gap-1.5 pt-2 text-[13px] font-semibold text-flow-text hover:text-flow-hover"
     >
       <ArrowLeft className="size-4" aria-hidden="true" />
       My orders

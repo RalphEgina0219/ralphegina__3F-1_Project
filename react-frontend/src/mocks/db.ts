@@ -26,6 +26,7 @@ import type {
   WashTypeSupply,
 } from '@/types/entities';
 import { createSeed } from './seed';
+import type { StoredBranding } from './handlers/branding';
 
 /** One array per table, mirroring the Phase 2 MySQL schema. */
 export interface MockDb {
@@ -57,12 +58,14 @@ export interface MockDb {
   notifications: Notification[];
   customer_notifications: CustomerNotification[];
   shop_settings: ShopSettings;
+  /** Branding (white-label): the mock's stand-in for the new shop_settings columns. */
+  branding: StoredBranding;
   audit_logs: AuditLog[];
 }
 
 // v2 added customer accounts and baskets; v3 holds 120 days of history in a packed format;
 // v4 adds wash types, soap usage and Maya. Older saved demo data is simply reseeded.
-const DB_KEY = 'laundryflow.mock.db.v4';
+const DB_KEY = 'laundryflow.mock.db.v5';
 const SESSION_KEY = 'laundryflow.mock.session';
 /** A separate key, like the separate Sanctum guard in Phase 2: the two sessions never mix. */
 const CUSTOMER_SESSION_KEY = 'laundryflow.mock.customer-session';

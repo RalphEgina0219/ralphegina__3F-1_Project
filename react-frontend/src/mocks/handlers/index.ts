@@ -2,6 +2,7 @@ import { notFoundHandler } from '../http';
 import { adminHandlers } from './admin';
 import { authHandlers } from './auth';
 import { basketHandlers } from './baskets';
+import { brandingHandlers } from './branding';
 import { customerHandlers } from './customers';
 import { dashboardHandlers } from './dashboard';
 import { inventoryHandlers } from './inventory';
@@ -14,6 +15,7 @@ import { washTypeHandlers } from './washTypes';
 
 export const handlers = [
   ...authHandlers,
+  ...brandingHandlers,
   ...portalHandlers,
   ...dashboardHandlers,
   ...customerHandlers,

@@ -68,7 +68,7 @@ export default function CustomerLoginPage() {
             Shop staff?{' '}
             <Link
               to="/login"
-              className="inline-flex min-h-11 items-center font-semibold text-flow underline"
+              className="inline-flex min-h-11 items-center font-semibold text-flow-text underline"
             >
               Staff sign in
             </Link>

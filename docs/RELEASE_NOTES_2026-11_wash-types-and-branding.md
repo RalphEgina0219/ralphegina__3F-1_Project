@@ -136,8 +136,10 @@ cd "C:\laragon\www\Final_Project_WST&AppDev\react-frontend"
 npm run release
 ```
 
-It prints the zip, like `react-frontend\release\laundryflow-frontend-v0.1.0-<date>-<commit>.zip`. **Do
-not upload an older zip** (the one from the previous release is replaced by this one).
+It prints the zip's name and path. For this update (built from `main` at `0c94065`) it is
+**`laundryflow-frontend-v0.1.0-20261122-1337-0c94065.zip`**, in `react-frontend\release\`. If you build it
+again, the date and time in the name change: always use the name the command just printed. **Do not
+upload an older zip** (the one from the wash-types release is replaced by this one).
 
 hPanel > **Websites** > your domain > **Files** > **File Manager**. Open `domains/<domain>/` (the folder
 that holds `public_html` and `laundryflow`, **not** `public_html` itself) and **Upload** the zip.
@@ -146,7 +148,7 @@ that holds `public_html` and `laundryflow`, **not** `public_html` itself) and **
 
 ```bash
 cd ~/domains/<domain>/laundryflow/laravel-backend
-bash scripts/install-frontend.sh ~/domains/<domain>/<zip file name>
+bash scripts/install-frontend.sh ~/domains/<domain>/laundryflow-frontend-v0.1.0-20261122-1337-0c94065.zip
 ```
 
 The script checks it is a LaundryFlow release, saves the current site as

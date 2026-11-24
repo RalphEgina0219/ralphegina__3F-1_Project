@@ -25,6 +25,7 @@ const ScanPage = lazy(() => import('@/features/qr/pages/ScanPage'));
 const PaymentsPage = lazy(() => import('@/features/payments/pages/PaymentsPage'));
 const InventoryPage = lazy(() => import('@/features/inventory/pages/InventoryPage'));
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'));
+const ForecastPage = lazy(() => import('@/features/forecast/pages/ForecastPage'));
 const SettingsLayout = lazy(() => import('@/features/settings/pages/SettingsLayout'));
 const ServicesPage = lazy(() => import('@/features/settings/pages/ServicesPage'));
 const PricingUsagePage = lazy(() => import('@/features/settings/pages/PricingUsagePage'));
@@ -138,6 +139,10 @@ export const routes: RouteObject[] = [
               {
                 element: <RequireRole ability="reports.view" />,
                 children: [{ path: '/reports', element: page(ReportsPage) }],
+              },
+              {
+                element: <RequireRole ability="dashboard.view" />,
+                children: [{ path: '/forecast', element: page(ForecastPage) }],
               },
               {
                 element: <RequireRole ability="settings.manage" />,

@@ -310,7 +310,9 @@ test('dashboard: the demand forecast renders from the Laravel model', async ({ p
   const problems = watch(page);
   await asOwner(page);
   await page.goto('/');
-  const section = page.locator('section[aria-labelledby="forecast-heading"]');
+  await page.getByRole('link', { name: 'ML Forecast' }).click();
+  await expect(page).toHaveURL(/forecast$/);
+  const section = page.locator('section[aria-label="Demand forecast"]');
   for (const title of ['Orders forecast', 'Kilos forecast']) {
     const card = section
       .locator('.chart-card')

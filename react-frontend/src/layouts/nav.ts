@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BrainCircuit,
   Boxes,
   CreditCard,
   LayoutGrid,
@@ -36,6 +37,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
     stockBadge: true,
   },
   { to: '/reports', label: 'Reports', icon: BarChart3, ability: 'reports.view' },
+  // The machine-learning demand forecast: no peso fields, so staff see it too.
+  { to: '/forecast', label: 'ML Forecast', icon: BrainCircuit, ability: 'dashboard.view' },
   { to: '/settings', label: 'Settings & Users', icon: Settings, ability: 'settings.manage' },
 ];
 

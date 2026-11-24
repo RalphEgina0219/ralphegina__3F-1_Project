@@ -212,8 +212,11 @@ test('the demand forecast shows both models, how accurate they are and the soap 
 }) => {
   await asOwner(page);
   await page.goto('/');
-  const section = page.locator('section[aria-labelledby="forecast-heading"]');
-  await expect(section.getByRole('heading', { name: 'Demand forecast' })).toBeVisible();
+  // Its own page, one click from the sidebar.
+  await page.getByRole('link', { name: 'ML Forecast' }).click();
+  await expect(page).toHaveURL(/forecast$/);
+  await expect(page.getByRole('heading', { name: 'Demand forecast', level: 1 })).toBeVisible();
+  const section = page.locator('section[aria-label="Demand forecast"]');
   await expect(card(page, 'Orders forecast')).toContainText('expected');
   await expect(card(page, 'Kilos forecast')).toContainText('expected');
   await expect(section).toContainText('How the forecast works');
@@ -222,5 +225,12 @@ test('the demand forecast shows both models, how accurate they are and the soap 
   await section.getByText('What the model learned').click();
   await expect(section.getByRole('row', { name: /Saturday vs Monday/ })).toBeVisible();
   await settle(page);
-  if (process.env.FORECAST_SHOT) await section.screenshot({ path: process.env.FORECAST_SHOT });
+  if (process.env.FORECAST_SHOT) await page.screenshot({ path: process.env.FORECAST_SHOT });
+});
+
+test('staff find the forecast in the sidebar too', async ({ page }) => {
+  await asStaffMember(page);
+  await page.goto('/');
+  await page.getByRole('link', { name: 'ML Forecast' }).click();
+  await expect(card(page, 'Orders forecast')).toContainText('expected');
 });

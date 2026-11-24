@@ -33,7 +33,6 @@ import { useDashboard } from '../api';
 // Recharts is the heaviest dependency: the KPI row shows first, the charts load right after.
 const AdminCharts = lazy(() => import('../components/AdminCharts'));
 const StaffCharts = lazy(() => import('../components/StaffCharts'));
-const ForecastSection = lazy(() => import('../components/ForecastSection'));
 const CollectedCard = lazy(() =>
   import('../components/AdminCharts').then((module) => ({ default: module.CollectedCard })),
 );
@@ -336,22 +335,6 @@ export default function DashboardPage() {
         <Suspense fallback={<ChartsFallback count={isAdmin ? 7 : 5} />}>
           {isAdmin ? <AdminCharts query={adminQuery} /> : <StaffCharts query={staffQuery} />}
         </Suspense>
-      </section>
-
-      <section aria-labelledby="forecast-heading" className="mb-8">
-        <div className="mb-4">
-          <h2 id="forecast-heading" className="text-xl font-extrabold tracking-[-0.01em]">
-            Demand forecast
-          </h2>
-          <p className="text-sm text-muted">
-            What the next 7 days will likely bring, learned from the last 8 weeks
-          </p>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-12">
-          <Suspense fallback={<ChartsFallback count={2} />}>
-            <ForecastSection />
-          </Suspense>
-        </div>
       </section>
 
       <section aria-labelledby="today-heading">

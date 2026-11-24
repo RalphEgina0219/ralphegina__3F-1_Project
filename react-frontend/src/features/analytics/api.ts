@@ -5,6 +5,7 @@ import type {
   ReportResponse,
   StaffDashboardSeries,
 } from '@/lib/analytics/build';
+import type { ForecastResponse } from '@/lib/analytics/forecast';
 import type { DateRange } from '@/lib/analytics/time';
 import type { AnalyticsEnvelope } from '@/lib/analytics/types';
 import { api, cleanParams } from '@/lib/api';
@@ -22,6 +23,19 @@ export function useDashboardAnalytics(range: DateRange, compare: boolean) {
       const { data } = await api.get<DashboardAnalytics>('/analytics/dashboard', {
         params: { ...range, compare: compare ? 'previous' : 'none' },
       });
+      return data;
+    },
+  });
+}
+
+/** GET /analytics/forecast: the next 7 days, from the regression trained on the last 8 weeks. */
+export function useForecast() {
+  return useQuery({
+    queryKey: ['analytics', 'forecast'],
+    // The model only learns from finished days: once every few minutes is plenty.
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data } = await api.get<ForecastResponse>('/analytics/forecast');
       return data;
     },
   });

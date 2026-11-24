@@ -1,0 +1,825 @@
+{
+  "_comment": "One set of cases for the demand forecast (ridge linear regression). Read by laravel-backend/tests/Unit/ForecastTest.php and react-frontend/src/lib/analytics/forecast.test.ts, so both sides give the same numbers. \"exact\" is checkable by hand: with no penalty the model must recover the formula that made the data. The ridge cases were produced by the TypeScript and pin the PHP port to it.",
+  "solve": [
+    {
+      "name": "needs a row swap (zero pivot)",
+      "a": [
+        [
+          0,
+          2,
+          1
+        ],
+        [
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          1,
+          3
+        ]
+      ],
+      "b": [
+        5,
+        6,
+        13
+      ],
+      "expected": [
+        2.333333333333333,
+        1.3333333333333333,
+        2.3333333333333335
+      ]
+    }
+  ],
+  "exact": {
+    "name": "recovers 10 + 3 per week + weekday effects [0,1,2,3,4,8,6] with no penalty",
+    "lambda": 0,
+    "points": [
+      {
+        "date": "2026-09-07",
+        "value": 10
+      },
+      {
+        "date": "2026-09-08",
+        "value": 11.428571428571429
+      },
+      {
+        "date": "2026-09-09",
+        "value": 12.857142857142858
+      },
+      {
+        "date": "2026-09-10",
+        "value": 14.285714285714285
+      },
+      {
+        "date": "2026-09-11",
+        "value": 15.714285714285714
+      },
+      {
+        "date": "2026-09-12",
+        "value": 20.142857142857142
+      },
+      {
+        "date": "2026-09-13",
+        "value": 18.57142857142857
+      },
+      {
+        "date": "2026-09-14",
+        "value": 13
+      },
+      {
+        "date": "2026-09-15",
+        "value": 14.428571428571429
+      },
+      {
+        "date": "2026-09-16",
+        "value": 15.857142857142858
+      },
+      {
+        "date": "2026-09-17",
+        "value": 17.285714285714285
+      },
+      {
+        "date": "2026-09-18",
+        "value": 18.714285714285715
+      },
+      {
+        "date": "2026-09-19",
+        "value": 23.142857142857142
+      },
+      {
+        "date": "2026-09-20",
+        "value": 21.57142857142857
+      },
+      {
+        "date": "2026-09-21",
+        "value": 16
+      },
+      {
+        "date": "2026-09-22",
+        "value": 17.42857142857143
+      },
+      {
+        "date": "2026-09-23",
+        "value": 18.857142857142858
+      },
+      {
+        "date": "2026-09-24",
+        "value": 20.285714285714285
+      },
+      {
+        "date": "2026-09-25",
+        "value": 21.714285714285715
+      },
+      {
+        "date": "2026-09-26",
+        "value": 26.142857142857142
+      },
+      {
+        "date": "2026-09-27",
+        "value": 24.57142857142857
+      },
+      {
+        "date": "2026-09-28",
+        "value": 19
+      },
+      {
+        "date": "2026-09-29",
+        "value": 20.42857142857143
+      },
+      {
+        "date": "2026-09-30",
+        "value": 21.857142857142858
+      },
+      {
+        "date": "2026-10-01",
+        "value": 23.285714285714285
+      },
+      {
+        "date": "2026-10-02",
+        "value": 24.714285714285715
+      },
+      {
+        "date": "2026-10-03",
+        "value": 29.142857142857142
+      },
+      {
+        "date": "2026-10-04",
+        "value": 27.57142857142857
+      }
+    ],
+    "expected": {
+      "intercept": 10,
+      "trend_per_week": 3,
+      "weekday": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        8,
+        6
+      ],
+      "residual_sd": 0,
+      "r2": 1
+    },
+    "predict": [
+      {
+        "date": "2026-10-05",
+        "expected": 22
+      },
+      {
+        "date": "2026-10-10",
+        "expected": 32.14285714285714
+      }
+    ]
+  },
+  "ridge": {
+    "name": "noisy weekend-heavy history, default penalty",
+    "lambda": 0.5,
+    "points": [
+      {
+        "date": "2026-09-07",
+        "value": 12
+      },
+      {
+        "date": "2026-09-08",
+        "value": 11
+      },
+      {
+        "date": "2026-09-09",
+        "value": 13
+      },
+      {
+        "date": "2026-09-10",
+        "value": 12
+      },
+      {
+        "date": "2026-09-11",
+        "value": 15
+      },
+      {
+        "date": "2026-09-12",
+        "value": 21
+      },
+      {
+        "date": "2026-09-13",
+        "value": 18
+      },
+      {
+        "date": "2026-09-14",
+        "value": 13
+      },
+      {
+        "date": "2026-09-15",
+        "value": 12
+      },
+      {
+        "date": "2026-09-16",
+        "value": 14
+      },
+      {
+        "date": "2026-09-17",
+        "value": 13
+      },
+      {
+        "date": "2026-09-18",
+        "value": 17
+      },
+      {
+        "date": "2026-09-19",
+        "value": 23
+      },
+      {
+        "date": "2026-09-20",
+        "value": 19
+      },
+      {
+        "date": "2026-09-21",
+        "value": 14
+      },
+      {
+        "date": "2026-09-22",
+        "value": 13
+      },
+      {
+        "date": "2026-09-23",
+        "value": 15
+      },
+      {
+        "date": "2026-09-24",
+        "value": 14
+      },
+      {
+        "date": "2026-09-25",
+        "value": 18
+      },
+      {
+        "date": "2026-09-26",
+        "value": 24
+      },
+      {
+        "date": "2026-09-27",
+        "value": 21
+      },
+      {
+        "date": "2026-09-28",
+        "value": 15
+      },
+      {
+        "date": "2026-09-29",
+        "value": 14
+      },
+      {
+        "date": "2026-09-30",
+        "value": 16
+      },
+      {
+        "date": "2026-10-01",
+        "value": 16
+      },
+      {
+        "date": "2026-10-02",
+        "value": 19
+      },
+      {
+        "date": "2026-10-03",
+        "value": 26
+      },
+      {
+        "date": "2026-10-04",
+        "value": 22
+      }
+    ],
+    "expected": {
+      "start": "2026-09-07",
+      "intercept": 12.608780502120293,
+      "trend_per_week": 1.3281683320861024,
+      "weekday": [
+        0,
+        -2.036241185248538,
+        -0.42711970360867724,
+        -1.262442666413262,
+        1.6800121485599309,
+        7.066911407977568,
+        3.7871440007285404
+      ],
+      "residual_sd": 0.7884159837520082,
+      "r2": 0.9723030022657573,
+      "n": 28
+    },
+    "predict": [
+      {
+        "date": "2026-10-05",
+        "expected": 17.921453830464703
+      },
+      {
+        "date": "2026-10-06",
+        "expected": 16.074950978371323
+      },
+      {
+        "date": "2026-10-07",
+        "expected": 17.87381079316634
+      },
+      {
+        "date": "2026-10-08",
+        "expected": 17.228226163516915
+      },
+      {
+        "date": "2026-10-09",
+        "expected": 20.360419311645266
+      },
+      {
+        "date": "2026-10-10",
+        "expected": 25.937056904218057
+      },
+      {
+        "date": "2026-10-11",
+        "expected": 22.84702783012419
+      }
+    ],
+    "evaluation": {
+      "mae": 0.9205272743278644,
+      "baseline_mae": 1.2857142857142858,
+      "days": 7
+    }
+  },
+  "short": {
+    "name": "16 days: fits, but too short to hold 7 days back",
+    "lambda": 0.5,
+    "points": [
+      {
+        "date": "2026-09-07",
+        "value": 12
+      },
+      {
+        "date": "2026-09-08",
+        "value": 11
+      },
+      {
+        "date": "2026-09-09",
+        "value": 13
+      },
+      {
+        "date": "2026-09-10",
+        "value": 12
+      },
+      {
+        "date": "2026-09-11",
+        "value": 15
+      },
+      {
+        "date": "2026-09-12",
+        "value": 21
+      },
+      {
+        "date": "2026-09-13",
+        "value": 18
+      },
+      {
+        "date": "2026-09-14",
+        "value": 13
+      },
+      {
+        "date": "2026-09-15",
+        "value": 12
+      },
+      {
+        "date": "2026-09-16",
+        "value": 14
+      },
+      {
+        "date": "2026-09-17",
+        "value": 13
+      },
+      {
+        "date": "2026-09-18",
+        "value": 17
+      },
+      {
+        "date": "2026-09-19",
+        "value": 23
+      },
+      {
+        "date": "2026-09-20",
+        "value": 19
+      },
+      {
+        "date": "2026-09-21",
+        "value": 14
+      },
+      {
+        "date": "2026-09-22",
+        "value": 13
+      }
+    ],
+    "expected": {
+      "start": "2026-09-07",
+      "intercept": 12.92232906791854,
+      "trend_per_week": 1.2415234345422783,
+      "weekday": [
+        0,
+        -2.0067539940940424,
+        -0.318249413189978,
+        -1.2601378057090964,
+        1.3979738017717869,
+        6.056085409252669,
+        3.114197016733551
+      ],
+      "residual_sd": 1.2014372655673853,
+      "r2": 0.9392230946065669,
+      "n": 16
+    },
+    "evaluation": null
+  },
+  "target": {
+    "name": "the rounded response for the noisy history, 3 forecast days",
+    "key": "orders",
+    "points": [
+      {
+        "date": "2026-09-07",
+        "value": 12
+      },
+      {
+        "date": "2026-09-08",
+        "value": 11
+      },
+      {
+        "date": "2026-09-09",
+        "value": 13
+      },
+      {
+        "date": "2026-09-10",
+        "value": 12
+      },
+      {
+        "date": "2026-09-11",
+        "value": 15
+      },
+      {
+        "date": "2026-09-12",
+        "value": 21
+      },
+      {
+        "date": "2026-09-13",
+        "value": 18
+      },
+      {
+        "date": "2026-09-14",
+        "value": 13
+      },
+      {
+        "date": "2026-09-15",
+        "value": 12
+      },
+      {
+        "date": "2026-09-16",
+        "value": 14
+      },
+      {
+        "date": "2026-09-17",
+        "value": 13
+      },
+      {
+        "date": "2026-09-18",
+        "value": 17
+      },
+      {
+        "date": "2026-09-19",
+        "value": 23
+      },
+      {
+        "date": "2026-09-20",
+        "value": 19
+      },
+      {
+        "date": "2026-09-21",
+        "value": 14
+      },
+      {
+        "date": "2026-09-22",
+        "value": 13
+      },
+      {
+        "date": "2026-09-23",
+        "value": 15
+      },
+      {
+        "date": "2026-09-24",
+        "value": 14
+      },
+      {
+        "date": "2026-09-25",
+        "value": 18
+      },
+      {
+        "date": "2026-09-26",
+        "value": 24
+      },
+      {
+        "date": "2026-09-27",
+        "value": 21
+      },
+      {
+        "date": "2026-09-28",
+        "value": 15
+      },
+      {
+        "date": "2026-09-29",
+        "value": 14
+      },
+      {
+        "date": "2026-09-30",
+        "value": 16
+      },
+      {
+        "date": "2026-10-01",
+        "value": 16
+      },
+      {
+        "date": "2026-10-02",
+        "value": 19
+      },
+      {
+        "date": "2026-10-03",
+        "value": 26
+      },
+      {
+        "date": "2026-10-04",
+        "value": 22
+      }
+    ],
+    "horizon": [
+      "2026-10-05",
+      "2026-10-06",
+      "2026-10-07"
+    ],
+    "expected": {
+      "key": "orders",
+      "label": "Orders",
+      "format": "count",
+      "coefficients": [
+        {
+          "name": "intercept",
+          "value": 12.61
+        },
+        {
+          "name": "trend (per week)",
+          "value": 1.33
+        },
+        {
+          "name": "Tuesday",
+          "value": -2.04
+        },
+        {
+          "name": "Wednesday",
+          "value": -0.43
+        },
+        {
+          "name": "Thursday",
+          "value": -1.26
+        },
+        {
+          "name": "Friday",
+          "value": 1.68
+        },
+        {
+          "name": "Saturday",
+          "value": 7.07
+        },
+        {
+          "name": "Sunday",
+          "value": 3.79
+        }
+      ],
+      "r2": 0.972,
+      "residual_sd": 0.79,
+      "evaluation": {
+        "mae": 0.92,
+        "baseline_mae": 1.29,
+        "days": 7
+      },
+      "points": [
+        {
+          "date": "2026-09-07",
+          "actual": 12,
+          "predicted": 12.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-08",
+          "actual": 11,
+          "predicted": 10.8,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-09",
+          "actual": 13,
+          "predicted": 12.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-10",
+          "actual": 12,
+          "predicted": 11.9,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-11",
+          "actual": 15,
+          "predicted": 15,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-12",
+          "actual": 21,
+          "predicted": 20.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-13",
+          "actual": 18,
+          "predicted": 17.5,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-14",
+          "actual": 13,
+          "predicted": 13.9,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-15",
+          "actual": 12,
+          "predicted": 12.1,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-16",
+          "actual": 14,
+          "predicted": 13.9,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-17",
+          "actual": 13,
+          "predicted": 13.2,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-18",
+          "actual": 17,
+          "predicted": 16.4,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-19",
+          "actual": 23,
+          "predicted": 22,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-20",
+          "actual": 19,
+          "predicted": 18.9,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-21",
+          "actual": 14,
+          "predicted": 15.3,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-22",
+          "actual": 13,
+          "predicted": 13.4,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-23",
+          "actual": 15,
+          "predicted": 15.2,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-24",
+          "actual": 14,
+          "predicted": 14.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-25",
+          "actual": 18,
+          "predicted": 17.7,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-26",
+          "actual": 24,
+          "predicted": 23.3,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-27",
+          "actual": 21,
+          "predicted": 20.2,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-28",
+          "actual": 15,
+          "predicted": 16.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-29",
+          "actual": 14,
+          "predicted": 14.7,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-09-30",
+          "actual": 16,
+          "predicted": 16.5,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-10-01",
+          "actual": 16,
+          "predicted": 15.9,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-10-02",
+          "actual": 19,
+          "predicted": 19,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-10-03",
+          "actual": 26,
+          "predicted": 24.6,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-10-04",
+          "actual": 22,
+          "predicted": 21.5,
+          "low": null,
+          "high": null
+        },
+        {
+          "date": "2026-10-05",
+          "actual": null,
+          "predicted": 17.9,
+          "low": 16.9,
+          "high": 18.9
+        },
+        {
+          "date": "2026-10-06",
+          "actual": null,
+          "predicted": 16.1,
+          "low": 15.1,
+          "high": 17.1
+        },
+        {
+          "date": "2026-10-07",
+          "actual": null,
+          "predicted": 17.9,
+          "low": 16.9,
+          "high": 18.9
+        }
+      ],
+      "forecast_total": 51.9
+    }
+  }
+}

@@ -306,6 +306,25 @@ test('permissions: staff stay out of admin pages, a revoked permission stops at 
   }
 });
 
+test('dashboard: the demand forecast renders from the Laravel model', async ({ page }) => {
+  const problems = watch(page);
+  await asOwner(page);
+  await page.goto('/');
+  const section = page.locator('section[aria-labelledby="forecast-heading"]');
+  for (const title of ['Orders forecast', 'Kilos forecast']) {
+    const card = section
+      .locator('.chart-card')
+      .filter({ has: page.getByRole('heading', { name: title, exact: true }) });
+    await expect(card).toContainText('expected');
+    await expect(card.locator('.recharts-surface')).toBeVisible();
+  }
+  await expect(section).toContainText('same day last week');
+  await expect(section).toContainText('Soap for the next 7 days');
+  await section.getByText('What the model learned').click();
+  await expect(section.getByRole('row', { name: /Saturday vs Monday/ })).toBeVisible();
+  expect(problems).toEqual([]);
+});
+
 test('admin: every dashboard preset with and without compare, every report exported and printed', async ({
   page,
 }) => {
@@ -320,7 +339,10 @@ test('admin: every dashboard preset with and without compare, every report expor
     for (const on of [true, false]) {
       if ((await compare.getAttribute('aria-checked')) !== String(on)) await compare.click();
       await page.waitForLoadState('networkidle');
-      await expect(page.locator('.chart-card'), `${preset}, compare ${on}`).toHaveCount(7);
+      await expect(
+        page.locator('section[aria-label="Charts"] .chart-card'),
+        `${preset}, compare ${on}`,
+      ).toHaveCount(7);
       await expect(page.getByText('This could not be loaded')).toHaveCount(0);
     }
   }

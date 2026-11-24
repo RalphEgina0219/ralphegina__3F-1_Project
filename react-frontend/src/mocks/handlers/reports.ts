@@ -6,6 +6,7 @@ import {
   type ReportFilters,
   type ReportKind,
 } from '@/lib/analytics/build';
+import { buildForecast } from '@/lib/analytics/forecast';
 import { parseRange, presetRange } from '@/lib/analytics/time';
 import { can } from '@/lib/permissions';
 import { STATUS_ORDER } from '@/lib/status';
@@ -60,6 +61,11 @@ export const reportHandlers = [
         : buildStaffDashboard(facts, options),
     );
   }),
+
+  // No peso fields: staff and admins get the same forecast.
+  route('get', '/analytics/forecast', 'dashboard.view', () =>
+    ok(buildForecast(analyticsFacts(), Date.now())),
+  ),
 
   route('get', '/reports/:kind', 'reports.view', ({ params, query }) => {
     const kind = params.kind as ReportKind;

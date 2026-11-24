@@ -20,7 +20,7 @@ test.describe('admin dashboard', () => {
 
   test('shows 5 KPIs and 7 charts, and every one follows the date range', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.chart-card')).toHaveCount(7);
+    await expect(page.locator('section[aria-label="Charts"] .chart-card')).toHaveCount(7);
     const kpis = page
       .getByRole('region', { name: 'Key figures' })
       .or(page.locator('section[aria-label="Key figures"]'));
@@ -99,7 +99,7 @@ test.describe('admin dashboard', () => {
     await settle(page);
     await context.setOffline(true);
     await expect(page.getByTestId('offline-banner')).toBeVisible();
-    await expect(page.locator('.chart-card')).toHaveCount(7);
+    await expect(page.locator('section[aria-label="Charts"] .chart-card')).toHaveCount(7);
     await expect(card(page, 'Sales trend').locator('.recharts-surface')).toBeVisible();
     await context.setOffline(false);
   });
@@ -108,7 +108,7 @@ test.describe('admin dashboard', () => {
 test('staff see five work charts and no peso amounts', async ({ page }) => {
   await asStaffMember(page);
   await page.goto('/');
-  await expect(page.locator('.chart-card')).toHaveCount(5);
+  await expect(page.locator('section[aria-label="Charts"] .chart-card')).toHaveCount(5);
   await settle(page);
   const charts = page.locator('section[aria-label="Charts"]');
   const kpis = page.locator('section[aria-label="Key figures"]');
@@ -205,4 +205,22 @@ test.describe('reports', () => {
     await expect(page.getByRole('heading', { name: 'Sales report' })).toBeVisible();
     await expect(page.getByText(/^By Liza Ramos on /)).toBeVisible();
   });
+});
+
+test('the demand forecast shows both models, how accurate they are and the soap to buy', async ({
+  page,
+}) => {
+  await asOwner(page);
+  await page.goto('/');
+  const section = page.locator('section[aria-labelledby="forecast-heading"]');
+  await expect(section.getByRole('heading', { name: 'Demand forecast' })).toBeVisible();
+  await expect(card(page, 'Orders forecast')).toContainText('expected');
+  await expect(card(page, 'Kilos forecast')).toContainText('expected');
+  await expect(section).toContainText('How the forecast works');
+  await expect(section).toContainText('same day last week');
+  await expect(section).toContainText('Soap for the next 7 days');
+  await section.getByText('What the model learned').click();
+  await expect(section.getByRole('row', { name: /Saturday vs Monday/ })).toBeVisible();
+  await settle(page);
+  if (process.env.FORECAST_SHOT) await section.screenshot({ path: process.env.FORECAST_SHOT });
 });

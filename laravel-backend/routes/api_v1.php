@@ -81,6 +81,7 @@ Route::middleware(['auth:api', 'account.usable:api'])->group(function () {
     // Dashboard and analytics
     Route::get('dashboard/summary', [DashboardController::class, 'summary'])->name('dashboard.summary');
     Route::get('analytics/dashboard', [AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('analytics/forecast', [AnalyticsController::class, 'forecast'])->name('analytics.forecast');
     Route::get('reports/{kind}', [ReportController::class, 'show'])->name('reports.show');
 
     // Customers and their accounts

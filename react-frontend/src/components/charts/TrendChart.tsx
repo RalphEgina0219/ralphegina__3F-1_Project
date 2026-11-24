@@ -33,6 +33,8 @@ export interface TrendSeries {
   color: string;
   /** Area fill under the line (the main measure); plain line otherwise. */
   area?: boolean;
+  /** A dashed line, for values that are predicted rather than recorded. */
+  dashed?: boolean;
 }
 
 export type TrendDatum = { date: string } & Record<string, string | number | null | undefined>;
@@ -48,6 +50,8 @@ interface TrendChartProps {
   reference?: { value: number; label: string };
   /** Label the latest value at the end of the main line. */
   labelLast?: boolean;
+  /** A vertical line at one day, such as where the history ends and the forecast begins. */
+  marker?: { date: string; label: string };
 }
 
 /**
@@ -61,6 +65,7 @@ export default function TrendChart({
   previousKey,
   reference,
   labelLast = true,
+  marker,
 }: TrendChartProps) {
   const animation = useChartAnimation();
   const main = series[0];
@@ -133,6 +138,13 @@ export default function TrendChart({
         {reference && (
           <ReferenceLine y={reference.value} {...REFERENCE_LINE} ifOverflow="extendDomain" />
         )}
+        {marker && (
+          <ReferenceLine
+            x={marker.date}
+            {...REFERENCE_LINE}
+            label={{ value: marker.label, position: 'insideTopLeft', fill: UI.muted, fontSize: 12 }}
+          />
+        )}
         {previousKey && (
           <Line
             dataKey={previousKey}
@@ -176,6 +188,7 @@ export default function TrendChart({
               type="monotone"
               stroke={s.color}
               {...LINE}
+              strokeDasharray={s.dashed ? PREVIOUS_LINE.strokeDasharray : undefined}
               dot={false}
               activeDot={{ ...ACTIVE_DOT, fill: s.color }}
               connectNulls={false}

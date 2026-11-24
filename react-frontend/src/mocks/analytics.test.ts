@@ -120,3 +120,20 @@ describe('analytics endpoints', () => {
     expect(item.series.levels).toHaveLength(1);
   });
 });
+
+describe('demand forecast', () => {
+  it('trains on 8 weeks of the demo seed and forecasts 7 days, for staff too', async () => {
+    await login('kevin.m');
+    const data = (await http.get('/analytics/forecast')).data;
+    expect(data.status).toBe('ready');
+    expect(data.training.days).toBe(56);
+    expect(data.targets.map((t: { key: string }) => t.key)).toEqual(['orders', 'kilos']);
+    for (const target of data.targets) {
+      expect(target.points).toHaveLength(63);
+      const saturday = target.coefficients.find((c: { name: string }) => c.name === 'Saturday');
+      expect(saturday.value).toBeGreaterThan(0);
+    }
+    expect(data.soap.length).toBeGreaterThan(0);
+    expect(JSON.stringify(data)).not.toContain('cents');
+  });
+});
